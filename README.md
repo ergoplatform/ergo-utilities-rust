@@ -31,6 +31,18 @@ let my_scan = Scan::new("My Scan", "21", &node_interface);
 my_scan.get_boxes();
 ```
 
+### encoding
+This module provides an interface for serializing, deserializing, hashing, and converting various values which are useful for writing off-chain code for a dApp.
+
+Example basic usage:
+
+```rust
+use ergo_utilities::encoding;
+
+// Serializes a `i32` Int value into a hex-encoded string to be used inside of a register for a box
+let encoded_int = encoding::serialize_int(25);
+```
+
 
 
 ## Documentation

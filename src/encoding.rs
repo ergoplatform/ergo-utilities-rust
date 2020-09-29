@@ -158,7 +158,6 @@ mod tests {
     #[test]
     fn string_serialization_test() {
         let s: String = "Oracle Pools".to_string();
-        let ser_s: String = serialize_string(&s);
         let a = s.clone().into_bytes();
         let b: Vec<i8> = a.iter().map(|c| c.clone() as i8).collect();
         let constant: Constant = b.into();
