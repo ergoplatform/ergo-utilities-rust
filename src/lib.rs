@@ -1,10 +1,11 @@
+/// General utilities to make writing off-chain Ergo code in Rust simpler.
 #[macro_use]
 extern crate json;
 pub mod node_interface;
-pub mod scans;
+pub mod scanning;
 
 pub use node_interface::NodeInterface;
-pub use scans::Scan;
+pub use scanning::Scan;
 
 /// A Base58 encoded String of a Ergo P2PK address. Using this type def until sigma-rust matures further with the actual Address type.
 pub type P2PKAddress = String;
@@ -22,11 +23,3 @@ pub type BlockDuration = u64;
 pub type TokenID = String;
 /// Integer which is provided by the Ergo node to reference a given scan.
 pub type ScanID = String;
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
-}
