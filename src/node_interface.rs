@@ -60,6 +60,30 @@ impl NodeInterface {
         }
     }
 
+    /// Using the `scan_id` of a registered scan, acquires unspent boxes which have been found by said scan
+    pub fn get_scan_boxes(&self, scan_id: &ScanID) -> Result<Vec<ErgoBox>> {
+        let endpoint = "/scan/unspentBoxes/".to_string() + scan_id;
+        let res = self.send_get_req(&endpoint);
+        let res_json = self.parse_response_to_json(res)?;
+
+        let mut box_list = vec![];
+        for i in 0.. {
+            let box_json = &res_json[i]["box"];
+            if box_json.is_null() {
+                break;
+            } else {
+                let res_ergo_box = from_str(&box_json.to_string());
+                if let Ok(ergo_box) = res_ergo_box {
+                    box_list.push(ergo_box);
+                } else if let Err(e) = res_ergo_box {
+                    let mess = format!("Box Json: {}\nError: {:?}", box_json.to_string(), e);
+                    return Err(NodeError::FailedParsingBox(mess));
+                }
+            }
+        }
+        Ok(box_list)
+    }
+
     /// Acquires unspent boxes from the node wallet
     pub fn get_unspent_wallet_boxes(&self) -> Result<Vec<ErgoBox>> {
         let endpoint = "/wallet/boxes/unspent?minConfirmations=0&minInclusionHeight=0";
@@ -108,30 +132,6 @@ impl NodeInterface {
     pub fn get_serialized_highest_value_unspent_box(&self) -> Result<String> {
         let ergs_box_id: String = self.get_highest_value_unspent_box()?.box_id().into();
         self.serialized_box_from_id(&ergs_box_id)
-    }
-
-    /// Using the `scan_id` of a registered scan, acquires unspent boxes which have been found by said scan
-    pub fn get_scan_boxes(&self, scan_id: &String) -> Result<Vec<ErgoBox>> {
-        let endpoint = "/scan/unspentBoxes/".to_string() + scan_id;
-        let res = self.send_get_req(&endpoint);
-        let res_json = self.parse_response_to_json(res)?;
-
-        let mut box_list = vec![];
-        for i in 0.. {
-            let box_json = &res_json[i]["box"];
-            if box_json.is_null() {
-                break;
-            } else {
-                let res_ergo_box = from_str(&box_json.to_string());
-                if let Ok(ergo_box) = res_ergo_box {
-                    box_list.push(ergo_box);
-                } else if let Err(e) = res_ergo_box {
-                    let mess = format!("Box Json: {}\nError: {:?}", box_json.to_string(), e);
-                    return Err(NodeError::FailedParsingBox(mess));
-                }
-            }
-        }
-        Ok(box_list)
     }
 
     /// Generates (and sends) a tx using the node endpoints.
