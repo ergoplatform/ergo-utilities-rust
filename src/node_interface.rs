@@ -28,6 +28,7 @@ pub enum NodeError {
 
 /// The `NodeInterface` struct which holds the relevant Ergo node data
 /// and has methods implemented to interact with the node.
+#[derive(Debug, Clone)]
 pub struct NodeInterface {
     pub api_key: String,
     pub ip: String,
@@ -291,7 +292,7 @@ impl NodeInterface {
     }
 
     /// Parses response from node into JSON
-    fn parse_response_to_json(self, resp: Result<Response>) -> Result<JsonValue> {
+    fn parse_response_to_json(&self, resp: Result<Response>) -> Result<JsonValue> {
         let text = resp?.text().map_err(|_| {
             NodeError::FailedParsingNodeResponse(
                 "Node Response Not Parseable into Text.".to_string(),
