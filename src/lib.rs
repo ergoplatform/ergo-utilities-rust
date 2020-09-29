@@ -1,7 +1,10 @@
 #[macro_use]
 extern crate json;
 pub mod node_interface;
+pub mod scans;
+
 pub use node_interface::NodeInterface;
+pub use scans::Scan;
 
 /// A Base58 encoded String of a Ergo P2PK address. Using this type def until sigma-rust matures further with the actual Address type.
 pub type P2PKAddress = String;

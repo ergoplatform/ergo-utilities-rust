@@ -1,3 +1,5 @@
+/// The `NodeInterface` struct is defined which allows for interacting with an
+/// Ergo Node via Rust.
 use crate::ScanID;
 use crate::{BlockHeight, P2PKAddress, P2SAddress, TxId};
 use json::JsonValue;
