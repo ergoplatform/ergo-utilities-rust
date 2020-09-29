@@ -3,7 +3,6 @@
 use crate::ScanID;
 use crate::{BlockHeight, P2PKAddress, P2SAddress, TxId};
 use json::JsonValue;
-use log::info;
 use reqwest::blocking::{RequestBuilder, Response};
 use reqwest::header::{HeaderValue, CONTENT_TYPE};
 use serde_json::from_str;
@@ -58,11 +57,6 @@ impl NodeInterface {
         let body = scan_json.clone().to_string();
         let res = self.send_post_req(endpoint, body);
         let res_json = self.parse_response_to_json(res)?;
-
-        info!(
-            "Node Register Scan Response Json: {}",
-            &res_json.pretty(2).to_string()
-        );
 
         if res_json["error"].is_null() {
             return Ok(res_json["scanId"].to_string().clone());
@@ -153,8 +147,6 @@ impl NodeInterface {
         let endpoint = "/wallet/transaction/send";
         let body = json::stringify(tx_request_json.clone());
         let res = self.send_post_req(endpoint, body);
-
-        info!("{:?}", tx_request_json.dump());
 
         let res_json = self.parse_response_to_json(res)?;
         let error_details = res_json["detail"].to_string().clone();
