@@ -9,7 +9,7 @@ This library was born from abstracting out reusable components from the [Oracle 
 This module defines a `NodeInterface` struct which allows you to interface with an Ergo
 Node via Rust.
 
-Example basic usage:
+Example basic usage with a node api key of `hello`, and ip of `0.0.0.0` and a port of `9053`:
 
 ```rust
 use ergo_utilities::NodeInterface;
@@ -19,10 +19,10 @@ node_interface.current_block_height();
 ```
 
 ### scanning
-This module defines a `Scan` struct which allows you to easily register and interact
+This module defines a `Scan` struct which allows you to easily register, manually add, and interact
 with UTXO-set scans with an Ergo Node.
 
-Example basic usage:
+Example basic usage with an already registered scan with an id of `21` and a name `My Scan`:
 
 ```rust
 use ergo_utilities::Scan;
@@ -41,6 +41,8 @@ use ergo_utilities::encoding;
 
 // Serializes a `i32` Int value into a hex-encoded string to be used inside of a register for a box
 let encoded_int = encoding::serialize_int(25);
+
+let nano_ergs = encoding::erg_to_nanoerg(102.732);
 ```
 
 
