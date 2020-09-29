@@ -19,10 +19,10 @@ impl Scan {
     /// a scan with the given `id` has already been registered
     /// with the Ergo Node and the developer is simply creating
     /// a struct for the given scan.
-    pub fn new(name: &String, scan_id: &String, node_interface: &NodeInterface) -> Scan {
+    pub fn new(name: &str, scan_id: &str, node_interface: &NodeInterface) -> Scan {
         Scan {
-            name: name.clone(),
-            id: scan_id.clone(),
+            name: name.to_string(),
+            id: scan_id.to_string(),
             node_interface: node_interface.clone(),
         }
     }
