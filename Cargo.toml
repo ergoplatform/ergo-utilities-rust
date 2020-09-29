@@ -7,3 +7,10 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+json                = "0.12.4"
+reqwest             = { version = "0.10.8", features = ["blocking"] }
+serde_json          = "1.0.57"
+sigma-tree          = { git = "https://github.com/ergoplatform/sigma-rust", branch = "develop",  features = ["with-serde"]  }
+thiserror           = "1.0.20"
+log                 = "0.4.11"
+simple-logging      = "2.0.2"
