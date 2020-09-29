@@ -14,3 +14,5 @@ sigma-tree          = { git = "https://github.com/ergoplatform/sigma-rust", bran
 thiserror           = "1.0.20"
 log                 = "0.4.11"
 simple-logging      = "2.0.2"
+blake2b_simd        = "0.5.10"
+base16              = "0.2.1"

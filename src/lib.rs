@@ -1,6 +1,7 @@
 /// General utilities to make writing off-chain Ergo code in Rust simpler.
 #[macro_use]
 extern crate json;
+pub mod encoding;
 pub mod node_interface;
 pub mod scanning;
 
