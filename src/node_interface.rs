@@ -38,6 +38,15 @@ pub struct NodeInterface {
 }
 
 impl NodeInterface {
+    /// Create a new `NodeInterface` using details about the Node
+    pub fn new(api_key: &str, ip: &str, port: &str) -> NodeInterface {
+        NodeInterface {
+            api_key: api_key.to_string(),
+            ip: ip.to_string(),
+            port: port.to_string(),
+        }
+    }
+
     /// Returns `http://ip:port` using `ip` and `port` from self
     pub fn get_node_url(&self) -> String {
         "http://".to_string() + &self.ip + ":" + &self.port
