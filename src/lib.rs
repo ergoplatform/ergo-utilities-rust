@@ -17,6 +17,8 @@ pub type BlockHeight = u64;
 pub type BlockDuration = u64;
 /// A Base58 encoded String of a Token ID.
 pub type TokenID = String;
+/// Integer which is provided by the Ergo node to reference a given scan.
+pub type ScanID = String;
 
 #[cfg(test)]
 mod tests {
