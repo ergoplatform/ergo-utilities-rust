@@ -13,18 +13,31 @@ pub type Result<T> = std::result::Result<T, BoxVerificationError>;
 
 #[derive(Error, Debug)]
 pub enum BoxVerificationError {
-    #[error("The P2S address of the box does not match the `Stage` P2S address.")]
+    #[error("The P2S address of the box does not match the `StageChecker` P2S address.")]
     InvalidP2SAddress,
     #[error("The number of Ergs held within the box is outside of the valid range.")]
     InvalidErgsValue,
-    #[error("The number of token predicates defined for your `Stage` are greater than the number of unique tokens held in the box. In other words, the box holds an insufficient number of different types of tokens.")]
+    #[error("The number of token predicates defined for your `StageChecker` are greater than the number of unique tokens held in the box. In other words, the box holds an insufficient number of different types of tokens.")]
     LessTokensThanPredicates,
     #[error("One of the token predicates failed for the provided box.")]
     FailedTokenPredicate,
-    #[error("The number of register predicates defined for your `Stage` are greater than the number of registers used in the box.")]
+    #[error("The number of register predicates defined for your `StageChecker` are greater than the number of registers used in the box.")]
     LessRegistersThanPredicates,
     #[error("One of the register predicates failed for the provided box.")]
     FailedRegisterPredicate,
+}
+
+/// A trait for defining `Stage`s in your multi-stage smart contract protocol
+/// off-chain code.
+trait Stage {
+    fn new() -> Self;
+}
+
+/// A wrapper struct for `ErgoBox`es which have been verified to be at a
+/// given stage.
+struct StageCheckerBox<T: Stage> {
+    stage: T,
+    pub ergo_box: ErgoBox,
 }
 
 /// A predicate which takes a `Constant` value from an `ErgoBox` register and
@@ -44,7 +57,7 @@ impl RegisterPredicate {
 }
 
 /// A predicate which takes a `TokenAmount` value and
-/// evaluates the validity of said tokens. This predicae is a function which
+/// evaluates the validity of said tokens. This predicate is a function which
 /// is implemented by the developer to verify that a given token has the right
 /// token id + the correct amount.
 #[derive(Clone)]
@@ -59,14 +72,14 @@ impl TokenPredicate {
     }
 }
 
-/// A struct which represents a `Stage` in a multi-stage smart contract
-/// protocol. This struct defines all of the key essentials of a stage
-/// and thus provides an interface for importing boxes and thus performing
-/// a validation check that a given box is indeed a valid input to be
-/// used in any actions.
+/// A struct which represents a specification of a single stage in a
+/// multi-stage smart contract protocol. This struct defines all of the key
+/// essentials of a stage and thus provides an interface for performing
+/// validation checks that a given `ErgoBox` is indeed at said stage.
 #[derive(Clone)]
-struct Stage {
-    /// The P2S smart contract address of the Stage
+struct StageChecker<T: Stage> {
+    pub stage: T,
+    /// The P2S smart contract address of the StageChecker
     pub ergo_tree: ErgoTree,
     /// The allowed range of nanoErgs to be held in a box at the given stage
     pub value_range: Range<i64>,
@@ -82,13 +95,10 @@ struct Stage {
     /// Values which are hardcoded within the smart contract and need
     /// to be used when performing Actions in the protocol.
     pub hardcoded_values: HashMap<String, Constant>,
-    /// Boxes which have been imported into our `Stage` struct that
-    /// have passed all validation checks.
-    pub boxes: Vec<ErgoBox>,
 }
 
-impl Stage {
-    /// Using the `Stage`'s `ergo_tree` field, return the P2S address of the
+impl<T: Stage> StageChecker<T> {
+    /// Using the `StageChecker`'s `ergo_tree` field, return the P2S address of the
     /// stage as a Base58 string.
     pub fn get_p2s_address_string(&self) -> P2SAddressString {
         let address = Address::P2S(self.ergo_tree.sigma_serialise_bytes());
@@ -96,12 +106,12 @@ impl Stage {
         encoder.address_to_str(&address)
     }
 
-    /// Verify that a provided `ErgoBox` is indeed at the given `Stage`.
+    /// Verify that a provided `ErgoBox` is indeed at the given `StageChecker`.
     /// In other words, check that the box is at the right P2S address,
     /// holds Ergs within the correct range, hold tokens which succeed
     /// all provided predicates, and has values in its registers which
     /// pass all of the register predicates.
-    pub fn verify_box(&self, b: &ErgoBox) -> Result<bool> {
+    pub fn verify_box(&self, b: &ErgoBox) -> Result<StageCheckerBox<T>> {
         // Verify box P2S Address
         let address = Address::P2S(b.ergo_tree.sigma_serialise_bytes());
         let encoder = AddressEncoder::new(NetworkPrefix::Mainnet);
@@ -148,15 +158,11 @@ impl Stage {
             }
         }
 
-        Ok(true)
-    }
+        let stage_box = StageCheckerBox {
+            stage: T::new(),
+            ergo_box: b.clone(),
+        };
 
-    /// First verifies whether the provided box is indeed at the given `Stage`
-    /// using `verify_box()`, then if it succeeds, adds the box to the
-    /// `Stage`'s `boxes` field.
-    /// On success returns the number of boxes currently held by the struct.
-    pub fn import_box(ergo_box: &ErgoBox) {
-        // -> Result<u64> {
-        todo!();
+        Ok(stage_box)
     }
 }
