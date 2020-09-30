@@ -1,3 +1,9 @@
+// Intended use:
+// 1. Create a struct which represents your stage which implements the `Stage` trait.
+// 2. Create a `StageChecker`.
+// 3. Use `verify_box()` to create verified `StageBox<T>`s. These represent boxes that are guaranteed to be boxes at a given stage, and thus can be used for performing Actions without any further checks.
+// 4. Write functions that represent Actions in your protocol using `StageBox<t>`s for the inputs and output types to guarantee that your Action(state transition) logic is valid.
+
 use crate::P2SAddressString;
 pub use sigma_tree::ast::Constant;
 use sigma_tree::chain::address::{Address, AddressEncoder, NetworkPrefix};
@@ -31,6 +37,8 @@ pub enum BoxVerificationError {
 /// off-chain code.
 trait Stage {
     fn new() -> Self;
+    // Might be a good idea to do this?
+    // fn create_stage_checker() -> StageChecker<Self>;
 }
 
 /// A wrapper struct for `ErgoBox`es which have been verified to be at a
