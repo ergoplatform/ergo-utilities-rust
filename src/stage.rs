@@ -17,12 +17,17 @@ pub enum BoxVerificationError {
     InvalidP2SAddress,
     #[error("The number of Ergs held within the box is outside of the valid range.")]
     InvalidErgsValue,
+    #[error("The number of predicates defined for your `Stage` are greater than the number of unique tokens held in the box. In other words, the box holds an insufficient number of different types of tokens.")]
+    LessTokensThanPredicates,
+    #[error("One of the token predicates failed for the provided box.")]
+    FailedTokenPredicate,
 }
 
 /// A predicate which takes a `Constant` value from an `ErgoBox` register and
 /// evaluates the validity of said value. This is a function which is
 /// implemented by the developer to verify that a given register holds data
 /// which is allowed within the protocol.
+#[derive(Clone)]
 struct RegisterPredicate {
     predicate: fn(&Constant) -> bool,
 }
@@ -38,6 +43,7 @@ impl RegisterPredicate {
 /// evaluates the validity of said tokens. This predicae is a function which
 /// is implemented by the developer to verify that a given token has the right
 /// token id + the correct amount.
+#[derive(Clone)]
 struct TokenPredicate {
     predicate: fn(&TokenAmount) -> bool,
 }
@@ -54,6 +60,7 @@ impl TokenPredicate {
 /// and thus provides an interface for importing boxes and thus performing
 /// a validation check that a given box is indeed a valid input to be
 /// used in any actions.
+#[derive(Clone)]
 struct Stage {
     /// The P2S smart contract address of the Stage
     pub ergo_tree: ErgoTree,
@@ -67,7 +74,7 @@ struct Stage {
     /// evaluate `TokenAmount`s in an `ErgoBox`.
     /// First predicate will be used for the first `TokenAmount`, second for
     /// the second `TokenAmount`, and so on.
-    pub tokens_predicates: Vec<TokenPredicate>,
+    pub token_predicates: Vec<TokenPredicate>,
     /// Values which are hardcoded within the smart contract and need
     /// to be used when performing Actions in the protocol.
     pub hardcoded_values: HashMap<String, Constant>,
@@ -105,6 +112,21 @@ impl Stage {
             true => Ok(true),
             false => Err(BoxVerificationError::InvalidErgsValue),
         };
+
+        // Verify the number of unique tokens is at least equal to the number
+        // of token predicates.
+        if b.tokens.len() < self.token_predicates.len() {
+            return Err(BoxVerificationError::LessTokensThanPredicates);
+        }
+        // Verify tokens held in box pass all provided predicates
+        for i in 0..(self.token_predicates.len() - 1) {
+            let token = &b.tokens[i];
+            let p = &self.token_predicates[i];
+            match (p.predicate)(token) {
+                true => (),
+                false => return Err(BoxVerificationError::FailedTokenPredicate),
+            }
+        }
 
         Ok(address_check? && value_within_range?)
     }
