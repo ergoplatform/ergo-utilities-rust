@@ -1,6 +1,7 @@
 /// A struct `Scan` is defined here which wraps the concept of UTXO-set
 /// scanning in a Rust-based struct interface.
-use crate::node_interface::{NodeError, NodeInterface, Result};
+use crate::node_interface::NodeInterface;
+pub use crate::node_interface::{NodeError, Result};
 use crate::ScanID;
 use json;
 use json::JsonValue;
