@@ -92,9 +92,13 @@ impl Stage {
         // Verify box P2S Address
         let address = Address::P2S(b.ergo_tree.sigma_serialise_bytes());
         let encoder = AddressEncoder::new(NetworkPrefix::Mainnet);
-        let address_check = Ok(self.get_p2s_address_string() == encoder.address_to_str(&address));
+        let address_check = match self.get_p2s_address_string() == encoder.address_to_str(&address)
+        {
+            true => Ok(true),
+            false => Err(BoxVerifyError::InvalidP2SAddress),
+        };
 
-        address_check
+        Ok(address_check?)
     }
 
     /// First verifies whether the provided box is indeed at the given `Stage`
