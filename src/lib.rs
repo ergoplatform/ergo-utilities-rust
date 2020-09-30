@@ -9,10 +9,10 @@ pub mod stage;
 pub use node_interface::NodeInterface;
 pub use scanning::Scan;
 
-/// A Base58 encoded String of a Ergo P2PK address. Using this type def until sigma-rust matures further with the actual Address type.
-pub type P2PKAddress = String;
-/// A Base58 encoded String of a Ergo P2S address. Using this type def until sigma-rust matures further with the actual Address type.
-pub type P2SAddress = String;
+/// A Base58 encoded String of a Ergo P2PK address.
+pub type P2PKAddressString = String;
+/// A Base58 encoded String of a Ergo P2S address.
+pub type P2SAddressString = String;
 /// Transaction ID
 pub type TxId = String;
 /// The smallest unit of the Erg currency.

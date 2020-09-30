@@ -1,7 +1,10 @@
-use crate::P2SAddress;
+use crate::P2SAddressString;
 pub use sigma_tree::ast::Constant;
+use sigma_tree::chain::address::{Address, AddressEncoder, NetworkPrefix};
 pub use sigma_tree::chain::ergo_box::ErgoBox;
 pub use sigma_tree::chain::token::TokenAmount;
+use sigma_tree::serialization::serializable::SigmaSerializable;
+use sigma_tree::ErgoTree;
 use std::collections::HashMap;
 use std::ops::Range;
 
@@ -42,35 +45,47 @@ impl TokenPredicate {
 /// used in any actions.
 struct Stage {
     /// The P2S smart contract address of the Stage
-    p2s_address: P2SAddress,
+    pub ergo_tree: ErgoTree,
     /// The allowed range of nanoErgs to be held in a box at the given stage
-    nano_ergs_range: Range<i64>,
+    pub nano_ergs_range: Range<i64>,
     /// A sorted list of `RegisterPredicate`s which are used to
     /// evaluate values within registers of a box.
     /// First predicate will be used for R4, second for R5, and so on.
-    register_predicates: Vec<RegisterPredicate>,
+    pub register_predicates: Vec<RegisterPredicate>,
     /// A sorted list of `TokenPredicate`s which are used to
     /// evaluate `TokenAmount`s in an `ErgoBox`.
     /// First predicate will be used for the first `TokenAmount`, second for
     /// the second `TokenAmount`, and so on.
-    tokens_predicates: Vec<TokenPredicate>,
+    pub tokens_predicates: Vec<TokenPredicate>,
     /// Values which are hardcoded within the smart contract and need
     /// to be used when performing Actions in the protocol.
-    hardcoded_values: HashMap<String, Constant>,
+    pub hardcoded_values: HashMap<String, Constant>,
     /// Boxes which have been imported into our `Stage` struct that
     /// have passed all validation checks.
-    boxes: Vec<ErgoBox>,
+    pub boxes: Vec<ErgoBox>,
 }
 
 impl Stage {
+    /// Using the `Stage`'s `ergo_tree` field, return the P2S address of the
+    /// stage as a Base58 string.
+    pub fn get_p2s_address_string(&self) -> P2SAddressString {
+        let address = Address::P2S(self.ergo_tree.sigma_serialise_bytes());
+        let encoder = AddressEncoder::new(NetworkPrefix::Mainnet);
+        encoder.address_to_str(&address)
+    }
+
     /// Verify that a provided `ErgoBox` is indeed at the given `Stage`.
     /// In other words, check that the box is at the right P2S address,
     /// holds Ergs within the correct range, hold tokens which succeed
     /// all provided predicates, and has values in its registers which
     /// pass all of the register predicates.
-    pub fn verify_box(ergo_box: &ErgoBox) {
-        // -> Result<bool> {
-        todo!();
+    pub fn verify_box(&self, b: &ErgoBox) -> Result<bool> {
+        // Verify box P2S Address
+        let address = Address::P2S(b.ergo_tree.sigma_serialise_bytes());
+        let encoder = AddressEncoder::new(NetworkPrefix::Mainnet);
+        let address_check = Ok(self.get_p2s_address_string() == encoder.address_to_str(&address));
+
+        address_check
     }
 
     /// First verifies whether the provided box is indeed at the given `Stage`
