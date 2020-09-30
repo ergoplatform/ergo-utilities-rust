@@ -9,9 +9,9 @@ use sigma_tree::chain::ergo_box::ErgoBox;
 /// A `Scan` is a name + scan_id for a given scan with extra methods for acquiring boxes.
 #[derive(Debug, Clone)]
 pub struct Scan {
-    name: String,
-    id: ScanID,
-    node_interface: NodeInterface,
+    pub name: String,
+    pub id: ScanID,
+    pub node_interface: NodeInterface,
 }
 
 impl Scan {
