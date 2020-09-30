@@ -1,8 +1,9 @@
 // Intended use:
-// 1. Create a struct which represents your stage which implements the `Stage` trait.
-// 2. Create a `StageChecker`.
-// 3. Use `verify_box()` to create verified `StageBox<T>`s. These represent boxes that are guaranteed to be boxes at a given stage, and thus can be used for performing Actions without any further checks.
-// 4. Write functions that represent Actions in your protocol using `StageBox<t>`s for the inputs and output types to guarantee that your Action(state transition) logic is valid.
+// 1. Create an empty struct with the name of your Stage.
+// 2. Implement `StageType` trait on your struct.
+// 3. Create a `Stage` struct using Stage::new()
+// 4. Use `verify_box()` to create verified `StageBox<T:StageType>`s. These represent boxes that are guaranteed to valid boxes at a given stage, and thus can be used for performing Actions without any further checks.
+// 5. Write functions that represent Actions in your protocol using `StageBox<t>`s for the inputs and output types to guarantee that your Action(state transition) logic is valid.
 
 use crate::P2SAddressString;
 pub use sigma_tree::ast::Constant;
@@ -33,29 +34,11 @@ pub enum BoxVerificationError {
     FailedRegisterPredicate,
 }
 
-/// Maybe rename `Stage` trait to `StageType`
-/// And then create a `Stage` struct that wraps everything else as such
-// struct Stage<ST: StageType> {
-//     stage_type: ST,
-//     stage_checker: StageChecker<ST>,
-//     hardcoded_value: HashMap<String, Constant>,
-// }
-
-/// A trait for defining `Stage`s in your multi-stage smart contract protocol
-/// off-chain code.
-trait Stage {
-    /// Create a new `Stage`
+/// A trait for defining the datatype (effectively the name
+/// on the type level) of your `Stage` in your off-chain code.
+trait StageType {
+    /// Create a new `StageType`
     fn new() -> Self;
-    /// Create a new `StageChecker` for the given `Stage`
-    /// May either be a good idea to include, or may be worth throwing out depending on how usage will go.
-    fn create_stage_checker() -> StageChecker<Self>;
-}
-
-/// A wrapper struct for `ErgoBox`es which have been verified to be at a
-/// given stage.
-struct StageBox<T: Stage + ?Sized> {
-    pub ergo_box: ErgoBox,
-    stage: T,
 }
 
 /// A predicate which takes a `Constant` value from an `ErgoBox` register and
@@ -90,15 +73,24 @@ impl TokenPredicate {
     }
 }
 
-/// A struct which represents a specification of a single stage in a
-/// multi-stage smart contract protocol. This struct defines all of the key
-/// essentials of a stage and thus provides an interface for performing
-/// validation checks that a given `ErgoBox` is indeed at said stage.
-#[derive(Clone)]
-struct StageChecker<T: Stage + ?Sized> {
+/// A wrapper struct for `ErgoBox`es which have been verified to be at a
+/// given stage. A `StageBox<T:StageType>` provides a guarantee at the type
+/// level that said StageBox can be used as input safely in an Action.
+struct StageBox<T: StageType> {
+    pub ergo_box: ErgoBox,
+    stage: T,
+}
+
+// A struct which represents a `Stage` in a
+// multi-stage smart contract protocol. This struct defines all of the key
+// essentials and thus provides an interface for performing
+// validation checks that a given `ErgoBox` is indeed at said stage.
+struct Stage<ST: StageType> {
+    /// Hardcoded values within the `Stage` contract
+    pub hardcoded_values: HashMap<String, Constant>,
     /// The P2S smart contract address of the StageChecker
     pub ergo_tree: ErgoTree,
-    /// The allowed range of nanoErgs to be held in a box at the given stage
+    /// The allowed range of nanoErgs to be held in a box at this stage
     pub value_range: Range<i64>,
     /// A sorted list of `RegisterPredicate`s which are used to
     /// evaluate values within registers of a box.
@@ -112,10 +104,10 @@ struct StageChecker<T: Stage + ?Sized> {
     /// The `Stage` data type that this `StageChecker` is created for.
     /// Only used for carrying the type forward into this struct and
     /// for any `StageBox<T>`s created.
-    stage: T,
+    stage_type: ST,
 }
 
-impl<T: Stage> StageChecker<T> {
+impl<T: StageType> Stage<T> {
     /// Using the `StageChecker`'s `ergo_tree` field, return the P2S address of the
     /// stage as a Base58 string.
     pub fn get_p2s_address_string(&self) -> P2SAddressString {
