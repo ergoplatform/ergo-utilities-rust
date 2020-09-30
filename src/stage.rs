@@ -35,7 +35,7 @@ trait Stage {
 
 /// A wrapper struct for `ErgoBox`es which have been verified to be at a
 /// given stage.
-struct StageCheckerBox<T: Stage> {
+struct StageBox<T: Stage> {
     stage: T,
     pub ergo_box: ErgoBox,
 }
@@ -111,7 +111,7 @@ impl<T: Stage> StageChecker<T> {
     /// holds Ergs within the correct range, hold tokens which succeed
     /// all provided predicates, and has values in its registers which
     /// pass all of the register predicates.
-    pub fn verify_box(&self, b: &ErgoBox) -> Result<StageCheckerBox<T>> {
+    pub fn verify_box(&self, b: &ErgoBox) -> Result<StageBox<T>> {
         // Verify box P2S Address
         let address = Address::P2S(b.ergo_tree.sigma_serialise_bytes());
         let encoder = AddressEncoder::new(NetworkPrefix::Mainnet);
@@ -158,7 +158,7 @@ impl<T: Stage> StageChecker<T> {
             }
         }
 
-        let stage_box = StageCheckerBox {
+        let stage_box = StageBox {
             stage: T::new(),
             ergo_box: b.clone(),
         };
