@@ -9,12 +9,14 @@ use std::collections::HashMap;
 use std::ops::Range;
 use thiserror::Error;
 
-pub type Result<T> = std::result::Result<T, BoxVerifyError>;
+pub type Result<T> = std::result::Result<T, BoxVerificationError>;
 
 #[derive(Error, Debug)]
-pub enum BoxVerifyError {
+pub enum BoxVerificationError {
     #[error("The P2S address of the box does not match the `Stage` P2S address.")]
     InvalidP2SAddress,
+    #[error("The number of Ergs held within the box is outside of the valid range.")]
+    InvalidErgsValue,
 }
 
 /// A predicate which takes a `Constant` value from an `ErgoBox` register and
@@ -56,7 +58,7 @@ struct Stage {
     /// The P2S smart contract address of the Stage
     pub ergo_tree: ErgoTree,
     /// The allowed range of nanoErgs to be held in a box at the given stage
-    pub nano_ergs_range: Range<i64>,
+    pub value_range: Range<i64>,
     /// A sorted list of `RegisterPredicate`s which are used to
     /// evaluate values within registers of a box.
     /// First predicate will be used for R4, second for R5, and so on.
@@ -95,10 +97,16 @@ impl Stage {
         let address_check = match self.get_p2s_address_string() == encoder.address_to_str(&address)
         {
             true => Ok(true),
-            false => Err(BoxVerifyError::InvalidP2SAddress),
+            false => Err(BoxVerificationError::InvalidP2SAddress),
         };
 
-        Ok(address_check?)
+        // Verify value held in the box is within the valid range
+        let value_within_range = match self.value_range.contains(b.value.as_i64()) {
+            true => Ok(true),
+            false => Err(BoxVerificationError::InvalidErgsValue),
+        };
+
+        Ok(address_check? && value_within_range?)
     }
 
     /// First verifies whether the provided box is indeed at the given `Stage`
