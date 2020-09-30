@@ -7,6 +7,15 @@ use sigma_tree::serialization::serializable::SigmaSerializable;
 use sigma_tree::ErgoTree;
 use std::collections::HashMap;
 use std::ops::Range;
+use thiserror::Error;
+
+pub type Result<T> = std::result::Result<T, BoxVerifyError>;
+
+#[derive(Error, Debug)]
+pub enum BoxVerifyError {
+    #[error("The P2S address of the box does not match the `Stage` P2S address.")]
+    InvalidP2SAddress,
+}
 
 /// A predicate which takes a `Constant` value from an `ErgoBox` register and
 /// evaluates the validity of said value. This is a function which is
