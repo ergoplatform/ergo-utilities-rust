@@ -17,10 +17,14 @@ pub enum BoxVerificationError {
     InvalidP2SAddress,
     #[error("The number of Ergs held within the box is outside of the valid range.")]
     InvalidErgsValue,
-    #[error("The number of predicates defined for your `Stage` are greater than the number of unique tokens held in the box. In other words, the box holds an insufficient number of different types of tokens.")]
+    #[error("The number of token predicates defined for your `Stage` are greater than the number of unique tokens held in the box. In other words, the box holds an insufficient number of different types of tokens.")]
     LessTokensThanPredicates,
     #[error("One of the token predicates failed for the provided box.")]
     FailedTokenPredicate,
+    #[error("The number of register predicates defined for your `Stage` are greater than the number of registers used in the box.")]
+    LessRegistersThanPredicates,
+    #[error("One of the register predicates failed for the provided box.")]
+    FailedRegisterPredicate,
 }
 
 /// A predicate which takes a `Constant` value from an `ErgoBox` register and
@@ -105,13 +109,13 @@ impl Stage {
         {
             true => Ok(true),
             false => Err(BoxVerificationError::InvalidP2SAddress),
-        };
+        }?;
 
         // Verify value held in the box is within the valid range
         let value_within_range = match self.value_range.contains(b.value.as_i64()) {
             true => Ok(true),
             false => Err(BoxVerificationError::InvalidErgsValue),
-        };
+        }?;
 
         // Verify the number of unique tokens is at least equal to the number
         // of token predicates.
@@ -128,7 +132,23 @@ impl Stage {
             }
         }
 
-        Ok(address_check? && value_within_range?)
+        // Verify the number of used registers is at least equal to the number
+        // of register predicates.
+        let registers = b.additional_registers.get_ordered_values();
+        if registers.len() < self.register_predicates.len() {
+            return Err(BoxVerificationError::LessRegistersThanPredicates);
+        }
+        // Verify registers in box pass all provided predicates
+        for i in 0..(self.register_predicates.len() - 1) {
+            let register = &registers[i];
+            let p = &self.register_predicates[i];
+            match (p.predicate)(register) {
+                true => (),
+                false => return Err(BoxVerificationError::FailedRegisterPredicate),
+            }
+        }
+
+        Ok(true)
     }
 
     /// First verifies whether the provided box is indeed at the given `Stage`
