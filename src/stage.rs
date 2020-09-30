@@ -33,19 +33,29 @@ pub enum BoxVerificationError {
     FailedRegisterPredicate,
 }
 
+/// Maybe rename `Stage` trait to `StageType`
+/// And then create a `Stage` struct that wraps everything else as such
+// struct Stage<ST: StageType> {
+//     stage_type: ST,
+//     stage_checker: StageChecker<ST>,
+//     hardcoded_value: HashMap<String, Constant>,
+// }
+
 /// A trait for defining `Stage`s in your multi-stage smart contract protocol
 /// off-chain code.
 trait Stage {
+    /// Create a new `Stage`
     fn new() -> Self;
-    // Might be a good idea to do this?
-    // fn create_stage_checker() -> StageChecker<Self>;
+    /// Create a new `StageChecker` for the given `Stage`
+    /// May either be a good idea to include, or may be worth throwing out depending on how usage will go.
+    fn create_stage_checker() -> StageChecker<Self>;
 }
 
 /// A wrapper struct for `ErgoBox`es which have been verified to be at a
 /// given stage.
-struct StageBox<T: Stage> {
-    stage: T,
+struct StageBox<T: Stage + ?Sized> {
     pub ergo_box: ErgoBox,
+    stage: T,
 }
 
 /// A predicate which takes a `Constant` value from an `ErgoBox` register and
@@ -85,8 +95,7 @@ impl TokenPredicate {
 /// essentials of a stage and thus provides an interface for performing
 /// validation checks that a given `ErgoBox` is indeed at said stage.
 #[derive(Clone)]
-struct StageChecker<T: Stage> {
-    pub stage: T,
+struct StageChecker<T: Stage + ?Sized> {
     /// The P2S smart contract address of the StageChecker
     pub ergo_tree: ErgoTree,
     /// The allowed range of nanoErgs to be held in a box at the given stage
@@ -100,9 +109,10 @@ struct StageChecker<T: Stage> {
     /// First predicate will be used for the first `TokenAmount`, second for
     /// the second `TokenAmount`, and so on.
     pub token_predicates: Vec<TokenPredicate>,
-    /// Values which are hardcoded within the smart contract and need
-    /// to be used when performing Actions in the protocol.
-    pub hardcoded_values: HashMap<String, Constant>,
+    /// The `Stage` data type that this `StageChecker` is created for.
+    /// Only used for carrying the type forward into this struct and
+    /// for any `StageBox<T>`s created.
+    stage: T,
 }
 
 impl<T: Stage> StageChecker<T> {
