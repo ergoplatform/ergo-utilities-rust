@@ -1,16 +1,6 @@
-[package]
-name = "ergo-utilities"
-version = "0.1.0"
-authors = ["Robert Kornacki <11645932+robkorn@users.noreply.github.com>"]
-edition = "2018"
+[workspace]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-json                = "0.12.4"
-reqwest             = { version = "0.10.8", features = ["blocking"] }
-serde_json          = "1.0.57"
-sigma-tree          = { git = "https://github.com/ergoplatform/sigma-rust", branch = "develop",  features = ["with-serde"]  }
-thiserror           = "1.0.20"
-blake2b_simd        = "0.5.10"
-base16              = "0.2.1"
+members = [
+    "ergo-offchain-utilities",
+    "ergo-protocol-framework"
+]
