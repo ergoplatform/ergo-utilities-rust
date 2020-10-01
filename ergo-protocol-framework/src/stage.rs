@@ -22,16 +22,14 @@ pub type Result<T> = std::result::Result<T, BoxVerificationError>;
 pub enum BoxVerificationError {
     #[error("The P2S address of the box does not match the `StageChecker` P2S address.")]
     InvalidP2SAddress,
-    #[error("The number of Ergs held within the box is outside of the valid range.")]
-    InvalidErgsValue,
-    #[error("The number of token predicates defined for your `StageChecker` are greater than the number of unique tokens held in the box. In other words, the box holds an insufficient number of different types of tokens.")]
-    LessTokensThanPredicates,
-    #[error("One of the token predicates failed for the provided box.")]
-    FailedTokenPredicate,
-    #[error("The number of register predicates defined for your `StageChecker` are greater than the number of registers used in the box.")]
-    LessRegistersThanPredicates,
-    #[error("One of the register predicates failed for the provided box.")]
-    FailedRegisterPredicate,
+    #[error("The number of Ergs held within the box is invalid: {0}")]
+    InvalidErgsValue(String),
+    #[error("The provided `ErgoBox` did not pass the verification predicate because of a problem with the tokens held in the box: {0}")]
+    InvalidTokens(String),
+    #[error("The provided `ErgoBox` did not pass the verification predicate because of a problem with the values within the registers of the box: {0}")]
+    InvalidRegisters(String),
+    #[error("{0}")]
+    OtherError(String),
 }
 
 /// A trait for defining the datatype (effectively the name
