@@ -41,38 +41,6 @@ pub trait StageType {
     fn new() -> Self;
 }
 
-/// A predicate which takes a `Constant` value from an `ErgoBox` register and
-/// evaluates the validity of said value. This is a function which is
-/// implemented by the developer to verify that a given register holds data
-/// which is allowed within the protocol.
-#[derive(Clone)]
-pub struct RegisterPredicate {
-    predicate: fn(&Constant) -> bool,
-}
-impl RegisterPredicate {
-    pub fn new(predicate: fn(&Constant) -> bool) -> Self {
-        RegisterPredicate {
-            predicate: predicate,
-        }
-    }
-}
-
-/// A predicate which takes a `TokenAmount` value and
-/// evaluates the validity of said tokens. This predicate is a function which
-/// is implemented by the developer to verify that a given token has the right
-/// token id + the correct amount.
-#[derive(Clone)]
-pub struct TokenPredicate {
-    predicate: fn(&TokenAmount) -> bool,
-}
-impl TokenPredicate {
-    pub fn new(predicate: fn(&TokenAmount) -> bool) -> Self {
-        TokenPredicate {
-            predicate: predicate,
-        }
-    }
-}
-
 /// A wrapper struct for `ErgoBox`es which have been verified to be at a
 /// given stage. A `StageBox<T:StageType>` provides a guarantee at the type
 /// level that said StageBox can be used as input safely in an Action.
@@ -88,19 +56,12 @@ pub struct StageBox<ST: StageType> {
 pub struct Stage<ST: StageType> {
     /// Hardcoded values within the `Stage` contract
     pub hardcoded_values: HashMap<String, Constant>,
-    /// The P2S smart contract address of the StageChecker
+    /// The `ErgoTree` (smart contract) of the `Stage`
     pub ergo_tree: ErgoTree,
-    /// The allowed range of nanoErgs to be held in a box at this stage
-    pub value_range: Range<i64>,
-    /// A sorted list of `RegisterPredicate`s which are used to
-    /// evaluate values within registers of a box.
-    /// First predicate will be used for R4, second for R5, and so on.
-    pub register_predicates: Vec<RegisterPredicate>,
-    /// A sorted list of `TokenPredicate`s which are used to
-    /// evaluate `TokenAmount`s in an `ErgoBox`.
-    /// First predicate will be used for the first `TokenAmount`, second for
-    /// the second `TokenAmount`, and so on.
-    pub token_predicates: Vec<TokenPredicate>,
+    /// A predicate that an `ErgoBox` must pass in order to be classified
+    /// as being at the current `Stage`. This predicate can check
+    /// any
+    pub verification_predicate: fn(&ErgoBox) -> Result<()>,
     /// The `Stage` data type that this `StageChecker` is created for.
     /// Only used for carrying the type forward into this struct and
     /// for any `StageBox<T>`s created.
@@ -125,49 +86,14 @@ impl<T: StageType> Stage<T> {
         // Verify box P2S Address
         let address = Address::P2S(b.ergo_tree.sigma_serialise_bytes());
         let encoder = AddressEncoder::new(NetworkPrefix::Mainnet);
-        let address_check = match self.get_p2s_address_string() == encoder.address_to_str(&address)
-        {
-            true => Ok(true),
+        match self.get_p2s_address_string() == encoder.address_to_str(&address) {
+            true => Ok(()),
             false => Err(BoxVerificationError::InvalidP2SAddress),
         }?;
 
-        // Verify value held in the box is within the valid range
-        let value_within_range = match self.value_range.contains(b.value.as_i64()) {
-            true => Ok(true),
-            false => Err(BoxVerificationError::InvalidErgsValue),
-        }?;
-
-        // Verify the number of unique tokens is at least equal to the number
-        // of token predicates.
-        if b.tokens.len() < self.token_predicates.len() {
-            return Err(BoxVerificationError::LessTokensThanPredicates);
-        }
-        // Verify tokens held in box pass all provided predicates
-        for i in 0..(self.token_predicates.len() - 1) {
-            let token = &b.tokens[i];
-            let p = &self.token_predicates[i];
-            match (p.predicate)(token) {
-                true => (),
-                false => return Err(BoxVerificationError::FailedTokenPredicate),
-            }
-        }
-
-        // Verify the number of used registers is at least equal to the number
-        // of register predicates.
-        let registers = b.additional_registers.get_ordered_values();
-        if registers.len() < self.register_predicates.len() {
-            return Err(BoxVerificationError::LessRegistersThanPredicates);
-        }
-        // Verify registers in box pass all provided predicates
-        for i in 0..(self.register_predicates.len() - 1) {
-            let register = &registers[i];
-            let p = &self.register_predicates[i];
-            match (p.predicate)(register) {
-                true => (),
-                false => return Err(BoxVerificationError::FailedRegisterPredicate),
-            }
-        }
-
+        // Apply verification predicate to the `ErgoBox`. If it returns
+        // an error, then the `?` will prevent the function from proceeding
+        (self.verification_predicate)(b)?;
         let stage_box = StageBox {
             stage: T::new(),
             ergo_box: b.clone(),
