@@ -9,4 +9,4 @@ edition = "2018"
 [dependencies]
 sigma-tree          = { git = "https://github.com/ergoplatform/sigma-rust", branch = "develop",  features = ["with-serde"]  }
 thiserror           = "1.0.20"
-ergo-utilities          = { git = "https://github.com/robkorn/ergo-utilities-rust" }
+ergo-offchain-utilities          = { git = "https://github.com/robkorn/ergo-utilities-rust" }

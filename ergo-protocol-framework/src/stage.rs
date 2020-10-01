@@ -5,7 +5,7 @@
 // 4. Use `verify_box()` to create verified `StageBox<T:StageType>`s. These represent boxes that are guaranteed to valid boxes at a given stage, and thus can be used for performing Actions without any further checks.
 // 5. Write functions that represent Actions in your protocol using `StageBox<t>`s for the inputs and output types to guarantee that your Action(state transition) logic is valid.
 
-use ergo_utilities::P2SAddressString;
+use ergo_offchain_utilities::P2SAddressString;
 pub use sigma_tree::ast::Constant;
 use sigma_tree::chain::address::{Address, AddressEncoder, NetworkPrefix};
 pub use sigma_tree::chain::ergo_box::ErgoBox;
