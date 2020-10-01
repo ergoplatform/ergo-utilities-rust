@@ -36,7 +36,7 @@ pub enum BoxVerificationError {
 
 /// A trait for defining the datatype (effectively the name
 /// on the type level) of your `Stage` in your off-chain code.
-trait StageType {
+pub trait StageType {
     /// Create a new `StageType`
     fn new() -> Self;
 }
@@ -46,7 +46,7 @@ trait StageType {
 /// implemented by the developer to verify that a given register holds data
 /// which is allowed within the protocol.
 #[derive(Clone)]
-struct RegisterPredicate {
+pub struct RegisterPredicate {
     predicate: fn(&Constant) -> bool,
 }
 impl RegisterPredicate {
@@ -62,7 +62,7 @@ impl RegisterPredicate {
 /// is implemented by the developer to verify that a given token has the right
 /// token id + the correct amount.
 #[derive(Clone)]
-struct TokenPredicate {
+pub struct TokenPredicate {
     predicate: fn(&TokenAmount) -> bool,
 }
 impl TokenPredicate {
@@ -76,16 +76,16 @@ impl TokenPredicate {
 /// A wrapper struct for `ErgoBox`es which have been verified to be at a
 /// given stage. A `StageBox<T:StageType>` provides a guarantee at the type
 /// level that said StageBox can be used as input safely in an Action.
-struct StageBox<T: StageType> {
+pub struct StageBox<ST: StageType> {
     pub ergo_box: ErgoBox,
-    stage: T,
+    stage: ST,
 }
 
 // A struct which represents a `Stage` in a
 // multi-stage smart contract protocol. This struct defines all of the key
 // essentials and thus provides an interface for performing
 // validation checks that a given `ErgoBox` is indeed at said stage.
-struct Stage<ST: StageType> {
+pub struct Stage<ST: StageType> {
     /// Hardcoded values within the `Stage` contract
     pub hardcoded_values: HashMap<String, Constant>,
     /// The P2S smart contract address of the StageChecker
