@@ -5,6 +5,7 @@
 // 4. Use `verify_box()` to create verified `StageBox<T:StageType>`s. These represent boxes that are guaranteed to valid boxes at a given stage, and thus can be used for performing Actions without any further checks.
 // 5. Write functions that represent Actions in your protocol using `StageBox<t>`s for the inputs and output types to guarantee that your Action(state transition) logic is valid.
 
+use crate::predicated_boxes::StageBox;
 use ergo_offchain_utilities::P2SAddressString;
 pub use sigma_tree::ast::Constant;
 use sigma_tree::chain::address::{Address, AddressEncoder, NetworkPrefix};
@@ -13,7 +14,6 @@ pub use sigma_tree::chain::token::TokenAmount;
 use sigma_tree::serialization::serializable::SigmaSerializable;
 use sigma_tree::ErgoTree;
 use std::collections::HashMap;
-use std::ops::Range;
 use thiserror::Error;
 
 pub type Result<T> = std::result::Result<T, BoxVerificationError>;
@@ -39,18 +39,11 @@ pub trait StageType {
     fn new() -> Self;
 }
 
-/// A wrapper struct for `ErgoBox`es which have been verified to be at a
-/// given stage. A `StageBox<T:StageType>` provides a guarantee at the type
-/// level that said StageBox can be used as input safely in an Action.
-pub struct StageBox<ST: StageType> {
-    pub ergo_box: ErgoBox,
-    stage: ST,
-}
-
 // A struct which represents a `Stage` in a
 // multi-stage smart contract protocol. This struct defines all of the key
 // essentials and thus provides an interface for performing
 // validation checks that a given `ErgoBox` is indeed at said stage.
+#[derive(Clone)]
 pub struct Stage<ST: StageType> {
     /// Hardcoded values within the `Stage` contract
     pub hardcoded_values: HashMap<String, Constant>,
@@ -94,6 +87,7 @@ impl<T: StageType> Stage<T> {
         (self.verification_predicate)(b)?;
         let stage_box = StageBox {
             stage: T::new(),
+            predicate: self.verification_predicate,
             ergo_box: b.clone(),
         };
 
