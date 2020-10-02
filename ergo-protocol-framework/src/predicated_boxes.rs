@@ -1,6 +1,6 @@
 use crate::stage::Result;
 use crate::stage::StageType;
-pub use ergo-lib::chain::ergo_box::ErgoBox;
+pub use ergo_lib::chain::ergo_box::ErgoBox;
 
 pub trait PredicatedBox {
     fn predicate(&self) -> fn(&ErgoBox) -> Result<()>;
