@@ -51,7 +51,7 @@ pub struct Stage<ST: StageType> {
     pub ergo_tree: ErgoTree,
     /// A predicate that an `ErgoBox` must pass in order to be classified
     /// as being at the current `Stage`. This predicate can check
-    /// any
+    /// any data within the ErgoBox matches given requirements.
     pub verification_predicate: fn(&ErgoBox) -> Result<()>,
     /// The `Stage` data type that this `StageChecker` is created for.
     /// Only used for carrying the type forward into this struct and
