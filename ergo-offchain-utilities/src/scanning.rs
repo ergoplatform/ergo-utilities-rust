@@ -3,9 +3,9 @@
 use crate::node_interface::NodeInterface;
 pub use crate::node_interface::{NodeError, Result};
 use crate::ScanID;
+use ergo_lib::chain::ergo_box::ErgoBox;
 use json;
 use json::JsonValue;
-use sigma_tree::chain::ergo_box::ErgoBox;
 
 /// A `Scan` is a name + scan_id for a given scan with extra methods for acquiring boxes.
 #[derive(Debug, Clone)]

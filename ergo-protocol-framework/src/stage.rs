@@ -6,13 +6,13 @@
 // 5. Write functions that represent Actions in your protocol using `StageBox<t>`s for the inputs and output types to guarantee that your Action(state transition) logic is valid.
 
 use crate::predicated_boxes::StageBox;
+pub use ergo_lib::ast::Constant;
+use ergo_lib::chain::address::{Address, AddressEncoder, NetworkPrefix};
+pub use ergo_lib::chain::ergo_box::ErgoBox;
+pub use ergo_lib::chain::token::TokenAmount;
+use ergo_lib::serialization::serializable::SigmaSerializable;
+use ergo_lib::ErgoTree;
 use ergo_offchain_utilities::P2SAddressString;
-pub use sigma_tree::ast::Constant;
-use sigma_tree::chain::address::{Address, AddressEncoder, NetworkPrefix};
-pub use sigma_tree::chain::ergo_box::ErgoBox;
-pub use sigma_tree::chain::token::TokenAmount;
-use sigma_tree::serialization::serializable::SigmaSerializable;
-use sigma_tree::ErgoTree;
 use std::collections::HashMap;
 use thiserror::Error;
 

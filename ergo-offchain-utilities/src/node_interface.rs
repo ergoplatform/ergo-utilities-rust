@@ -2,11 +2,11 @@
 /// Ergo Node via Rust.
 use crate::ScanID;
 use crate::{BlockHeight, P2PKAddressString, P2SAddressString, TxId};
+use ergo_lib::chain::ergo_box::ErgoBox;
 use json::JsonValue;
 use reqwest::blocking::{RequestBuilder, Response};
 use reqwest::header::{HeaderValue, CONTENT_TYPE};
 use serde_json::from_str;
-use sigma_tree::chain::ergo_box::ErgoBox;
 use thiserror::Error;
 
 pub type Result<T> = std::result::Result<T, NodeError>;
