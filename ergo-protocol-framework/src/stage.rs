@@ -11,7 +11,6 @@ use ergo_lib::chain::address::{Address, AddressEncoder, NetworkPrefix};
 pub use ergo_lib::chain::ergo_box::ErgoBox;
 pub use ergo_lib::chain::token::TokenAmount;
 use ergo_lib::serialization::serializable::SigmaSerializable;
-use ergo_lib::ErgoTree;
 use ergo_offchain_utilities::P2SAddressString;
 use std::collections::HashMap;
 use thiserror::Error;
@@ -47,8 +46,8 @@ pub trait StageType {
 pub struct Stage<ST: StageType> {
     /// Hardcoded values within the `Stage` contract
     pub hardcoded_values: HashMap<String, Constant>,
-    /// The `ErgoTree` (smart contract) of the `Stage`
-    pub ergo_tree: ErgoTree,
+    /// The P2S Address of the `Stage` as a base58 `String`
+    pub p2s_address: P2SAddressString,
     /// A predicate that an `ErgoBox` must pass in order to be classified
     /// as being at the current `Stage`. This predicate can check
     /// any data within the ErgoBox matches given requirements.
@@ -59,13 +58,19 @@ pub struct Stage<ST: StageType> {
     stage_type: ST,
 }
 
-impl<T: StageType> Stage<T> {
-    /// Using the `StageChecker`'s `ergo_tree` field, return the P2S address of the
-    /// stage as a Base58 string.
-    pub fn get_p2s_address_string(&self) -> P2SAddressString {
-        let address = Address::P2S(self.ergo_tree.sigma_serialise_bytes());
-        let encoder = AddressEncoder::new(NetworkPrefix::Mainnet);
-        encoder.address_to_str(&address)
+impl<ST: StageType> Stage<ST> {
+    /// Create a new Stage<ST>
+    pub fn new(
+        hardcoded_values: HashMap<String, Constant>,
+        p2s_address: &P2SAddressString,
+        verification_predicate: fn(&ErgoBox) -> Result<()>)
+        -> Stage<ST> {
+            Stage {
+                hardcoded_values: hardcoded_values,
+                p2s_address: p2s_address.clone(),
+                verification_predicate: verification_predicate,
+                stage_type: ST::new(),
+            }
     }
 
     /// Verify that a provided `ErgoBox` is indeed at the given `StageChecker`.
@@ -73,11 +78,11 @@ impl<T: StageType> Stage<T> {
     /// holds Ergs within the correct range, hold tokens which succeed
     /// all provided predicates, and has values in its registers which
     /// pass all of the register predicates.
-    pub fn verify_box(&self, b: &ErgoBox) -> Result<StageBox<T>> {
+    pub fn verify_box(&self, b: &ErgoBox) -> Result<StageBox<ST>> {
         // Verify box P2S Address
         let address = Address::P2S(b.ergo_tree.sigma_serialise_bytes());
         let encoder = AddressEncoder::new(NetworkPrefix::Mainnet);
-        match self.get_p2s_address_string() == encoder.address_to_str(&address) {
+        match self.p2s_address == encoder.address_to_str(&address) {
             true => Ok(()),
             false => Err(BoxVerificationError::InvalidP2SAddress),
         }?;
@@ -86,7 +91,7 @@ impl<T: StageType> Stage<T> {
         // an error, then the `?` will prevent the function from proceeding
         (self.verification_predicate)(b)?;
         let stage_box = StageBox {
-            stage: T::new(),
+            stage: ST::new(),
             predicate: self.verification_predicate,
             ergo_box: b.clone(),
         };
