@@ -1,3 +1,10 @@
+/// This file holds a number of default "Predicated Boxes".
+/// These are wrapper structs for `ErgoBox`es which have predicates
+/// applied to them on creation of said struct.
+/// The name of the struct provides a more concrete development
+/// experience when writing `Actions` with very specific input types
+/// which are enforced by the predicates inside of each predicated
+/// box.
 use crate::stage::{BoxVerificationError, Result, StageType};
 pub use ergo_lib::chain::ergo_box::ErgoBox;
 
@@ -6,7 +13,7 @@ pub trait PredicatedBox {
     fn get_box(&self) -> ErgoBox;
 }
 
-/// A wrapper struct for `ErgoBox`es which have been verified to be at a
+/// A predicated box which has been verified to be at a
 /// given stage. A `StageBox<T:StageType>` provides a guarantee at the type
 /// level that said StageBox can be used as input safely in an Action.
 /// The only creation method is provided on the `Stage` struct.
@@ -25,9 +32,9 @@ impl<ST: StageType> PredicatedBox for StageBox<ST> {
     }
 }
 
-/// A wrapper struct for `ErgoBox`es which are intended to be used
-/// for the Ergs inside of them. Requires the box to simply have more
-/// than `1000000` nanoErgs inside.
+/// A predicated box which is is intended to be spent for the Ergs inside
+/// The predicate simply requires the box to simply have more than `1000000`
+/// nanoErgs inside.
 pub struct ErgsBox {
     pub ergo_box: ErgoBox,
     pub predicate: fn(&ErgoBox) -> Result<()>,
