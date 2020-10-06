@@ -73,12 +73,7 @@ impl<ST: StageType> Stage<ST> {
 
         // Apply verification predicate to the `ErgoBox`. If it returns
         // an error, then the `?` will prevent the function from proceeding
-        (self.verification_predicate)(b)?;
-        let stage_box = StageBox {
-            stage: ST::new(),
-            predicate: self.verification_predicate,
-            ergo_box: b.clone(),
-        };
+        let stage_box = StageBox::new(b, self.verification_predicate, ST::new())?;
 
         Ok(stage_box)
     }

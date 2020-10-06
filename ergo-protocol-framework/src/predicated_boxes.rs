@@ -51,6 +51,17 @@ impl<ST: StageType> PredicatedBox for StageBox<ST> {
         self.ergo_box.clone()
     }
 }
+impl<ST: StageType> StageBox<ST> {
+    // Create a new `StageBox<ST>`
+    pub fn new(b: &ErgoBox, predicate: fn(&ErgoBox) -> Result<()>, _: ST) -> Result<StageBox<ST>> {
+        (predicate)(b)?;
+        Ok(StageBox {
+            stage: ST::new(),
+            predicate: predicate,
+            ergo_box: b.clone(),
+        })
+    }
+}
 
 /// A predicated box which is is intended to be spent for the Ergs inside
 /// The predicate simply requires the box to simply have more than `1000000`
