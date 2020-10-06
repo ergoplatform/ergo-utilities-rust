@@ -39,7 +39,7 @@ pub trait PredicatedBox {
 /// The only creation method is provided on the `Stage` struct.
 #[derive(Clone)]
 pub struct StageBox<ST: StageType> {
-    pub ergo_box: ErgoBox,
+    ergo_box: ErgoBox,
     pub predicate: fn(&ErgoBox) -> Result<()>,
     pub stage: ST,
 }
@@ -56,7 +56,7 @@ impl<ST: StageType> PredicatedBox for StageBox<ST> {
 /// The predicate simply requires the box to simply have more than `1000000`
 /// nanoErgs inside.
 pub struct ErgsBox {
-    pub ergo_box: ErgoBox,
+    ergo_box: ErgoBox,
     pub predicate: fn(&ErgoBox) -> Result<()>,
 }
 /// Predicate to check that a box has more than `1000000` nanoErgs
@@ -95,7 +95,7 @@ impl ErgsBox {
 /// This predicated box automatically extracts the long datapoint from the
 /// box and exposes it as a public field to be easily used.
 pub struct OracleBoxLong {
-    pub ergo_box: ErgoBox,
+    ergo_box: ErgoBox,
     pub predicate: fn(&ErgoBox) -> Result<()>,
     pub datapoint: i64,
 }
