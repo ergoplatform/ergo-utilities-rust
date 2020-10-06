@@ -6,6 +6,7 @@
 // 5. Write functions that represent Actions in your protocol using `StageBox<t>`s for the inputs and output types to guarantee that your Action(state transition) logic is valid.
 
 use crate::predicated_boxes::StageBox;
+use crate::predicated_boxes::{BoxVerificationError, Result};
 pub use ergo_lib::ast::Constant;
 use ergo_lib::chain::address::{Address, AddressEncoder, NetworkPrefix};
 pub use ergo_lib::chain::ergo_box::ErgoBox;
@@ -13,23 +14,6 @@ pub use ergo_lib::chain::token::TokenAmount;
 use ergo_lib::serialization::serializable::SigmaSerializable;
 use ergo_offchain_utilities::P2SAddressString;
 use std::collections::HashMap;
-use thiserror::Error;
-
-pub type Result<T> = std::result::Result<T, BoxVerificationError>;
-
-#[derive(Error, Debug)]
-pub enum BoxVerificationError {
-    #[error("The P2S address of the box does not match the `StageChecker` P2S address.")]
-    InvalidP2SAddress,
-    #[error("The number of Ergs held within the box is invalid: {0}")]
-    InvalidErgsValue(String),
-    #[error("The provided `ErgoBox` did not pass the verification predicate because of a problem with the tokens held in the box: {0}")]
-    InvalidTokens(String),
-    #[error("The provided `ErgoBox` did not pass the verification predicate because of a problem with the values within the registers of the box: {0}")]
-    InvalidRegisters(String),
-    #[error("{0}")]
-    OtherError(String),
-}
 
 /// A trait for defining the datatype (effectively the name
 /// on the type level) of your `Stage` in your off-chain code.
@@ -63,14 +47,14 @@ impl<ST: StageType> Stage<ST> {
     pub fn new(
         hardcoded_values: HashMap<String, Constant>,
         p2s_address: &P2SAddressString,
-        verification_predicate: fn(&ErgoBox) -> Result<()>)
-        -> Stage<ST> {
-            Stage {
-                hardcoded_values: hardcoded_values,
-                p2s_address: p2s_address.clone(),
-                verification_predicate: verification_predicate,
-                stage_type: ST::new(),
-            }
+        verification_predicate: fn(&ErgoBox) -> Result<()>,
+    ) -> Stage<ST> {
+        Stage {
+            hardcoded_values: hardcoded_values,
+            p2s_address: p2s_address.clone(),
+            verification_predicate: verification_predicate,
+            stage_type: ST::new(),
+        }
     }
 
     /// Verify that a provided `ErgoBox` is indeed at the given `StageChecker`.

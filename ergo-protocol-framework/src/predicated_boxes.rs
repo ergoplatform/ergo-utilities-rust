@@ -5,8 +5,25 @@
 /// experience when writing `Actions` with very specific input types
 /// which are enforced by the predicates inside of each predicated
 /// box.
-use crate::stage::{BoxVerificationError, Result, StageType};
-pub use ergo_lib::chain::ergo_box::ErgoBox;
+use crate::stage::StageType;
+use ergo_lib::chain::ergo_box::ErgoBox;
+use thiserror::Error;
+
+pub type Result<T> = std::result::Result<T, BoxVerificationError>;
+
+#[derive(Error, Debug)]
+pub enum BoxVerificationError {
+    #[error("The P2S address of the box does not match the `StageChecker` P2S address.")]
+    InvalidP2SAddress,
+    #[error("The number of Ergs held within the box is invalid: {0}")]
+    InvalidErgsValue(String),
+    #[error("The provided `ErgoBox` did not pass the verification predicate because of a problem with the tokens held in the box: {0}")]
+    InvalidTokens(String),
+    #[error("The provided `ErgoBox` did not pass the verification predicate because of a problem with the values within the registers of the box: {0}")]
+    InvalidRegisters(String),
+    #[error("{0}")]
+    OtherError(String),
+}
 
 pub trait PredicatedBox {
     fn predicate(&self) -> fn(&ErgoBox) -> Result<()>;
