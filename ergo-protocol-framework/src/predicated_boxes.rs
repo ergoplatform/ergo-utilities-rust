@@ -28,7 +28,7 @@ impl<ST: StageType> PredicatedBox for StageBox<ST> {
 /// A wrapper struct for `ErgoBox`es which are intended to be used
 /// for the Ergs inside of them. Requires the box to simply have more
 /// than `1000000` nanoErgs inside.
-pub struct BoxWithErgs {
+pub struct ErgsBox {
     pub ergo_box: ErgoBox,
     pub predicate: fn(&ErgoBox) -> Result<()>,
 }
@@ -42,7 +42,7 @@ fn box_with_ergs_predicate(b: &ErgoBox) -> Result<()> {
         ))
     }
 }
-impl PredicatedBox for BoxWithErgs {
+impl PredicatedBox for ErgsBox {
     /// Empty predicate that always passes.
     fn predicate(&self) -> fn(&ErgoBox) -> Result<()> {
         box_with_ergs_predicate
@@ -51,11 +51,11 @@ impl PredicatedBox for BoxWithErgs {
         self.ergo_box.clone()
     }
 }
-impl BoxWithErgs {
+impl ErgsBox {
     /// Create a new `NoPredicateBox`
-    pub fn new(b: &ErgoBox) -> Result<BoxWithErgs> {
+    pub fn new(b: &ErgoBox) -> Result<ErgsBox> {
         box_with_ergs_predicate(b)?;
-        return Ok(BoxWithErgs {
+        return Ok(ErgsBox {
             ergo_box: b.clone(),
             predicate: box_with_ergs_predicate,
         });
