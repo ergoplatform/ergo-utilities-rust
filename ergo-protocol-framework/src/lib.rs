@@ -4,7 +4,7 @@ pub mod stage;
 
 pub use ergo_lib::ast::Constant;
 pub use ergo_lib::chain::ergo_box::ErgoBox;
-pub use ergo_offchain_utilities::P2SAddressString;
+pub use ergo_offchain_utilities::{NanoErg, P2SAddressString};
 pub use predicated_boxes::{BoxWithErgs, StageBox};
 pub use protocol::Protocol;
 pub use stage::{BoxVerificationError, Result, Stage, StageType};
