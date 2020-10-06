@@ -1,5 +1,4 @@
-use crate::stage::Result;
-use crate::stage::StageType;
+use crate::stage::{BoxVerificationError, Result, StageType};
 pub use ergo_lib::chain::ergo_box::ErgoBox;
 
 pub trait PredicatedBox {
@@ -26,27 +25,39 @@ impl<ST: StageType> PredicatedBox for StageBox<ST> {
     }
 }
 
-/// A wrapper struct for `ErgoBox`es which have no predicate. In other
-/// words, these are boxes which have not undergone any validity checks
-/// and may or may not be valid for your given use case.
-#[derive(Debug, Clone)]
-pub struct NoPredicateBox {
-    ergo_box: ErgoBox,
+/// A wrapper struct for `ErgoBox`es which are intended to be used
+/// for the Ergs inside of them. Requires the box to simply have more
+/// than `1000000` nanoErgs inside.
+pub struct BoxWithErgs {
+    pub ergo_box: ErgoBox,
+    pub predicate: fn(&ErgoBox) -> Result<()>,
 }
-impl PredicatedBox for NoPredicateBox {
+/// Predicate to check that a box has more than `1000000` nanoErgs
+fn box_with_ergs_predicate(b: &ErgoBox) -> Result<()> {
+    if b.value.as_u64() > 1000000 {
+        Ok(())
+    } else {
+        Err(BoxVerificationError::InvalidErgsValue(
+            "ErgoBox did not have more than 999999 nanoErgs inside.".to_string(),
+        ))
+    }
+}
+impl PredicatedBox for BoxWithErgs {
     /// Empty predicate that always passes.
     fn predicate(&self) -> fn(&ErgoBox) -> Result<()> {
-        |_: &ErgoBox| Ok(())
+        box_with_ergs_predicate
     }
     fn get_box(&self) -> ErgoBox {
         self.ergo_box.clone()
     }
 }
-impl NoPredicateBox {
+impl BoxWithErgs {
     /// Create a new `NoPredicateBox`
-    pub fn new(b: &ErgoBox) -> NoPredicateBox {
-        NoPredicateBox {
+    pub fn new(b: &ErgoBox) -> Result<BoxWithErgs> {
+        box_with_ergs_predicate(b)?;
+        return Ok(BoxWithErgs {
             ergo_box: b.clone(),
-        }
+            predicate: box_with_ergs_predicate,
+        });
     }
 }

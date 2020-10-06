@@ -26,9 +26,8 @@ pub struct OraclePoolProtocol {
     pub live_epoch_stage: Stage<LiveEpoch>,
 }
 ```
-4. Create a `Stage` struct for each of your stages using `Stage::new()`.
 
-5. Implement a `new` method on your Protocol:
+4. Implement a `new` method on your Protocol:
 ```rust
 impl OraclePoolProtocol {
     /// Create a new StableCoinProtocol
@@ -39,5 +38,26 @@ impl OraclePoolProtocol {
     }
 }
 ```
-6. Use `verify_box()` method on your `Stage<T>` to create verified `StageBox<T:StageType>`s. These represent boxes that are guaranteed to valid boxes at a given stage, and thus can be used for performing Actions without any further checks.
-7. Write methods for your protocol that represent Actions in your protocol using `StageBox<t>`s for the inputs to guarantee that your Action(state transition) logic is valid.
+
+5. Create a `Stage` struct for each of your stages using `Stage::new()` in your application logic.
+```rust
+let live_epoch_stage = Stage::new(...)
+```
+
+6. Create a `Protocol` struct:
+```rust
+let protocol = OraclePoolProtocol::new(live_epoch_stage);
+```
+
+7. Use `verify_box()` method on your `Stage<T>` to create verified `StageBox<T:StageType>`s. These represent boxes that are guaranteed to valid boxes at a given stage, and thus can be used for performing Actions without any further checks.
+
+```rust
+let stage_box = protocol.live_epoch_stage.verify_box(&ergo_box);
+```
+
+
+8. Write methods for your protocol that represent Actions in your protocol using `StageBox<T>`s for the inputs to guarantee that your Action(state transition) logic is valid.
+
+
+9. Write any other useful functions on your `Protocol` struct related to overall protocol state (ex. printing current protocol state in a human-readable form) 
+
