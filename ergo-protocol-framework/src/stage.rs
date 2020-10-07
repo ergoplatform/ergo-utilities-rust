@@ -7,11 +7,11 @@
 
 use crate::predicated_boxes::StageBox;
 use crate::predicated_boxes::{BoxVerificationError, Result};
-pub use ergo_lib::ast::Constant;
+use ergo_lib::ast::Constant;
 use ergo_lib::chain::address::{Address, AddressEncoder, NetworkPrefix};
 pub use ergo_lib::chain::ergo_box::ErgoBox;
-pub use ergo_lib::chain::token::TokenAmount;
 use ergo_lib::serialization::serializable::SigmaSerializable;
+use ergo_lib::ErgoTree;
 use ergo_offchain_utilities::P2SAddressString;
 use std::collections::HashMap;
 
@@ -55,6 +55,14 @@ impl<ST: StageType> Stage<ST> {
             verification_predicate: verification_predicate,
             stage_type: ST::new(),
         }
+    }
+
+    /// Acquire the `ErgoTree` of the P2S address of the stage.
+    /// Returns `None` if the P2S address is invalid.
+    pub fn get_ergo_tree(&self) -> Option<ErgoTree> {
+        let encoder = AddressEncoder::new(NetworkPrefix::Mainnet);
+        let address = encoder.parse_address_from_str(&self.p2s_address).ok()?;
+        ErgoTree::sigma_parse_bytes(address.content_bytes()).ok()
     }
 
     /// Verify that a provided `ErgoBox` is indeed at the given `StageChecker`.
