@@ -14,8 +14,10 @@ pub type Result<T> = std::result::Result<T, BoxVerificationError>;
 
 #[derive(Error, Debug)]
 pub enum BoxVerificationError {
-    #[error("The P2S address of the box does not match the `StageChecker` P2S address.")]
+    #[error("The P2S address is invalid.")]
     InvalidP2SAddress,
+    #[error("The ErgoTree is invalid.")]
+    InvalidErgoTree,
     #[error("The number of Ergs held within the box is invalid: {0}")]
     InvalidErgsValue(String),
     #[error("The provided `ErgoBox` did not pass the verification predicate because of a problem with the tokens held in the box: {0}")]
