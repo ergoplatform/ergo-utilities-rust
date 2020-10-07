@@ -100,6 +100,13 @@ impl ErgsBox {
     }
 }
 
+/// Sums the nanoErg value of a list of `ErgsBox`es
+pub fn sum_ergs_boxes_value(boxes: Vec<ErgsBox>) -> u64 {
+    boxes
+        .into_iter()
+        .fold(0, |acc, pb| pb.get_box().value.as_u64() + acc)
+}
+
 /// A predicated box which indicates it is an
 /// oracle box which stores a `Long` integer datapoint inside of R4.
 /// This may be an Oracle Pool box, or any other kind of oracle box.
