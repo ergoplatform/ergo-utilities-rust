@@ -99,7 +99,6 @@ impl ErgsBox {
         });
     }
 }
-
 /// Sums the nanoErg value of a list of `ErgsBox`es
 pub fn sum_ergs_boxes_value(boxes: Vec<ErgsBox>) -> u64 {
     boxes
