@@ -131,6 +131,8 @@ pub struct OracleBoxLong {
     ergo_box: ErgoBox,
     pub predicate: fn(&ErgoBox) -> Result<()>,
     pub datapoint: i64,
+    /// The token id of the oracle's NFT
+    pub nft_id: String,
 }
 /// Extracts a Long out of register R4 of the provided `ErgoBox`.
 /// Does error-checking along the way.
@@ -191,6 +193,7 @@ impl OracleBoxLong {
             ergo_box: b.clone(),
             predicate: oracle_box_predicate,
             datapoint: datapoint,
+            nft_id: b.tokens[0].token_id.0.clone().into(),
         });
     }
 }
