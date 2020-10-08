@@ -8,6 +8,7 @@
 use crate::stage::StageType;
 pub use ergo_lib::ast::ConstantVal;
 use ergo_lib::chain::ergo_box::ErgoBox;
+use ergo_lib::chain::input::UnsignedInput;
 use thiserror::Error;
 
 pub type Result<T> = std::result::Result<T, BoxVerificationError>;
@@ -112,6 +113,11 @@ pub fn sum_ergs_boxes_value(boxes: Vec<ErgsBox>) -> u64 {
 /// Unwraps a list of `ErgsBox`es into `Vec<ErgoBox>`
 pub fn unwrap_ergs_boxes(boxes: Vec<ErgsBox>) -> Vec<ErgoBox> {
     boxes.into_iter().map(|pb| pb.get_box()).collect()
+}
+
+/// Converts a list of `ErgsBox`es into `Vec<UnsignedInput>`
+pub fn ergs_boxes_to_inputs(boxes: Vec<ErgsBox>) -> Vec<UnsignedInput> {
+    boxes.into_iter().map(|pb| pb.get_box().into()).collect()
 }
 
 /// A predicated box which indicates it is an
