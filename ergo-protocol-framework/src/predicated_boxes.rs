@@ -125,6 +125,8 @@ pub fn ergs_boxes_to_inputs(boxes: &Vec<ErgsBox>) -> Vec<UnsignedInput> {
 /// This may be an Oracle Pool box, or any other kind of oracle box.
 /// This predicated box automatically extracts the long datapoint from the
 /// box and exposes it as a public field to be easily used.
+/// The predicate also checks that the box has a single type of Token
+/// and said token has a value of 1. (Checking that it has an NFT)
 pub struct OracleBoxLong {
     ergo_box: ErgoBox,
     pub predicate: fn(&ErgoBox) -> Result<()>,
@@ -155,6 +157,19 @@ fn oracle_box_predicate(b: &ErgoBox) -> Result<()> {
     // Using `?` to verify that a valid Long datapoint was extracted.
     // If it failed, it will push the error upwards.
     extract_long_datapoint(b)?;
+
+    // Check only a single token type is held in the box
+    if b.tokens.len() != 1 {
+        return Err(BoxVerificationError::InvalidTokens(
+            "The oracle box is required to only hold a single NFT token.".to_string(),
+        ));
+    }
+    // Check that said single type of token is value == 1. (Aka is an NFT)
+    if b.tokens[0].amount != 1 {
+        return Err(BoxVerificationError::InvalidTokens(
+            "The oracle box is required to only hold a single NFT token.".to_string(),
+        ));
+    }
     Ok(())
 }
 impl PredicatedBox for OracleBoxLong {
@@ -169,7 +184,8 @@ impl PredicatedBox for OracleBoxLong {
 impl OracleBoxLong {
     /// Create a new `NoPredicateBox`
     pub fn new(b: &ErgoBox) -> Result<OracleBoxLong> {
-        // This automatically does error/predicate checking while extracting.
+        // Error Checking
+        oracle_box_predicate(b)?;
         let datapoint = extract_long_datapoint(b)?;
         return Ok(OracleBoxLong {
             ergo_box: b.clone(),
