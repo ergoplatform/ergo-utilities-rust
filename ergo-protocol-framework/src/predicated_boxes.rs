@@ -104,19 +104,19 @@ impl ErgsBox {
 }
 
 /// Sums the nanoErg value of a list of `ErgsBox`es
-pub fn sum_ergs_boxes_value(boxes: Vec<ErgsBox>) -> u64 {
+pub fn sum_ergs_boxes_value(boxes: &Vec<ErgsBox>) -> u64 {
     boxes
         .into_iter()
         .fold(0, |acc, pb| pb.get_box().value.as_u64() + acc)
 }
 
 /// Unwraps a list of `ErgsBox`es into `Vec<ErgoBox>`
-pub fn unwrap_ergs_boxes(boxes: Vec<ErgsBox>) -> Vec<ErgoBox> {
+pub fn unwrap_ergs_boxes(boxes: &Vec<ErgsBox>) -> Vec<ErgoBox> {
     boxes.into_iter().map(|pb| pb.get_box()).collect()
 }
 
 /// Converts a list of `ErgsBox`es into `Vec<UnsignedInput>`
-pub fn ergs_boxes_to_inputs(boxes: Vec<ErgsBox>) -> Vec<UnsignedInput> {
+pub fn ergs_boxes_to_inputs(boxes: &Vec<ErgsBox>) -> Vec<UnsignedInput> {
     boxes.into_iter().map(|pb| pb.get_box().into()).collect()
 }
 
