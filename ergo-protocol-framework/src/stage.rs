@@ -9,7 +9,8 @@ use crate::predicated_boxes::StageBox;
 use crate::predicated_boxes::{BoxVerificationError, Result};
 use ergo_lib::ast::Constant;
 use ergo_lib::chain::address::{Address, AddressEncoder, NetworkPrefix};
-pub use ergo_lib::chain::ergo_box::ErgoBox;
+pub use ergo_lib::chain::ergo_box::{ErgoBox, ErgoBoxCandidate};
+use ergo_lib::chain::transaction::TxId;
 use ergo_lib::serialization::serializable::SigmaSerializable;
 use ergo_lib::ErgoTree;
 use ergo_offchain_utilities::P2SAddressString;
@@ -70,7 +71,7 @@ impl<ST: StageType> Stage<ST> {
         encoder.address_to_str(&address)
     }
 
-    /// Verify that a provided `ErgoBox` is indeed at the given `StageChecker`.
+    /// Verify that a provided `ErgoBox` is indeed at the given `Stage`.
     /// In other words, check that the box is at the right P2S address,
     /// holds Ergs within the correct range, hold tokens which succeed
     /// all provided predicates, and has values in its registers which
@@ -87,5 +88,14 @@ impl<ST: StageType> Stage<ST> {
         let stage_box = StageBox::new(b, self.verification_predicate, ST::new())?;
 
         Ok(stage_box)
+    }
+
+    /// Verify that a provided `ErgoBoxCandidate` passes the verification
+    /// predicate. This is primarily used within `Actions` defined as methods
+    /// which create new `ErgoBoxCandidate`s which need to be checked to be
+    /// valid boxes at a given `Stage<ST>`.
+    pub fn verify_box_candidate(&self, bc: &ErgoBoxCandidate) -> Result<StageBox<ST>> {
+        let processed_box = &ErgoBox::from_box_candidate(bc, TxId::zero(), 0);
+        self.verify_box(processed_box)
     }
 }
