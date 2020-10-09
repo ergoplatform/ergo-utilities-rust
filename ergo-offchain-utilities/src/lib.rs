@@ -1,6 +1,4 @@
 /// General utilities to make writing off-chain Ergo code in Rust simpler.
-#[macro_use]
-extern crate json;
 pub mod encoding;
 
 /// A Base58 encoded String of a Ergo P2PK address.
