@@ -1,10 +1,12 @@
 /// This file holds various functions related to encoding/serialization of values that are relevant
 /// to the oracle core.
-use crate::P2SAddressString;
+use crate::{ErgoAddressString, P2PKAddressString, P2SAddressString};
 use base16;
 use blake2b_simd::Params;
 use ergo_lib::ast::{CollPrim, Constant, ConstantColl, ConstantVal};
 use ergo_lib::chain::address::{Address, AddressEncoder, NetworkPrefix};
+use ergo_lib::serialization::SigmaSerializable;
+use ergo_lib::ErgoTree;
 use std::fmt::{Debug, Display};
 use std::str;
 use thiserror::Error;
@@ -118,6 +120,18 @@ fn convert_to_signed_bytes(bytes: &Vec<u8>) -> Vec<i8> {
     bytes.iter().map(|x| x.clone() as i8).collect()
 }
 
+/// Takes an Ergo address (either P2PK or P2S) as a Base58 String and returns
+/// the `ErgoTree` if it is a valid address.
+pub fn address_string_to_ergo_tree(address_str: &ErgoAddressString) -> Result<ErgoTree> {
+    let encoder = AddressEncoder::new(NetworkPrefix::Mainnet);
+    let address = encoder
+        .parse_address_from_str(address_str)
+        .map_err(|_| EncodingError::FailedToSerialize(address_str.to_string()))?;
+    let ergo_tree = ErgoTree::sigma_parse_bytes(address.content_bytes())
+        .map_err(|_| EncodingError::FailedToSerialize(address_str.to_string()))?;
+    Ok(ergo_tree)
+}
+
 /// Decodes a hex-encoded string into bytes
 fn decode_hex(s: &String) -> Result<Vec<u8>> {
     if let Ok(b) = base16::decode(s) {
@@ -182,16 +196,3 @@ mod tests {
         assert_eq!(erg_to_nanoerg(0.000000001), 1);
     }
 }
-
-// use crate::{P2PKAddressString, P2SAddressString};
-// use ergo_lib::chain::address::{Address, AddressEncoder, NetworkPrefix};
-// use ergo_lib::ErgoTree;
-
-// pub fn p2s_string_to_ergo_tree() -> ErgoTree {
-//     let encoder = AddressEncoder::new(NetworkPrefix::Mainnet);
-//     let address = encoder
-//         .parse_address_from_str(&p2s_address)
-//         .map_err(|_| BoxVerificationError::InvalidP2SAddress)?;
-//     let ergo_tree = ErgoTree::sigma_parse_bytes(address.content_bytes())
-//         .map_err(|_| BoxVerificationError::InvalidP2SAddress)?;
-// }

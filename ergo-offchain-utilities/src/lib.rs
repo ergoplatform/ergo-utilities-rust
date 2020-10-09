@@ -1,6 +1,8 @@
 /// General utilities to make writing off-chain Ergo code in Rust simpler.
 pub mod encoding;
 
+/// A Base58 encoded String of an Ergo address. Can be either P2PK or P2S.
+pub type ErgoAddressString = String;
 /// A Base58 encoded String of a Ergo P2PK address.
 pub type P2PKAddressString = String;
 /// A Base58 encoded String of a Ergo P2S address.
