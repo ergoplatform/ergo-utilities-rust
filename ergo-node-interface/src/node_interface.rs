@@ -1,8 +1,7 @@
 /// The `NodeInterface` struct is defined which allows for interacting with an
 /// Ergo Node via Rust.
-use crate::ScanID;
-use crate::{BlockHeight, P2PKAddressString, P2SAddressString, TxId};
 use ergo_lib::chain::ergo_box::ErgoBox;
+use ergo_offchain_utilities::{BlockHeight, P2PKAddressString, P2SAddressString, ScanID, TxId};
 use json::JsonValue;
 use reqwest::blocking::{RequestBuilder, Response};
 use reqwest::header::{HeaderValue, CONTENT_TYPE};

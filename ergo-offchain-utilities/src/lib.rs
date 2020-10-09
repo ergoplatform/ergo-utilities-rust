@@ -2,11 +2,6 @@
 #[macro_use]
 extern crate json;
 pub mod encoding;
-pub mod node_interface;
-pub mod scanning;
-
-pub use node_interface::NodeInterface;
-pub use scanning::Scan;
 
 /// A Base58 encoded String of a Ergo P2PK address.
 pub type P2PKAddressString = String;

@@ -2,8 +2,8 @@
 /// scanning in a Rust-based struct interface.
 use crate::node_interface::NodeInterface;
 pub use crate::node_interface::{NodeError, Result};
-use crate::ScanID;
 use ergo_lib::chain::ergo_box::ErgoBox;
+use ergo_offchain_utilities::ScanID;
 use json;
 use json::JsonValue;
 
