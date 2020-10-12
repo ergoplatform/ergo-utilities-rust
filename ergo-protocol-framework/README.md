@@ -1,10 +1,10 @@
-# Ergo Protocol Framework
+# Ergo Protocol Framework v0.1
 
 A framework which attempts to provide a guided approach to developing the off-chain portion of multi-stage smart contract protocols.
 
 The goal here is to provide developers with an easy experience to go from [Ergo dApp informal specifications](https://github.com/ergoplatform/eips/blob/master/eip-0006.md) to off-chain code with greater assurance and a straightforward path of implementation.
 
-
+This is version 0.1 which uses a lot of higher-level type functionality. Unfortunately this is not supported for WASM compilation/for use in JavaScript, and so this will have to be deprecated.
 
 ## Current Workflow
 1. For each stage create an empty struct with the name of your Stage.

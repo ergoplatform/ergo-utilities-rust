@@ -65,6 +65,7 @@ pub fn deserialize_int(c: &Constant) -> Result<i32> {
 
 /// Deserialize a hex-encoded `i64` Long inside of a `Constant` acquired from a register of an `ErgoBox`
 pub fn deserialize_long(c: &Constant) -> Result<i64> {
+    // Eventually use &c.v.try_extract_from()
     match &c.v {
         ConstantVal::Long(i) => return Ok(i.clone()),
         _ => return Err(EncodingError::FailedToDeserialize(c.base16_str())),
