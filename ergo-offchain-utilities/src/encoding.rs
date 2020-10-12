@@ -97,17 +97,17 @@ pub fn deserialize_hex_encoded_string(c: &Constant) -> Result<String> {
 }
 
 /// Acquire the `ErgoTree` of the P2S Base58 String.
-pub fn serialize_p2s_to_ergo_tree(p2s_address: P2SAddressString) -> Result<ErgoTree> {
+pub fn deserialize_p2s_to_ergo_tree(p2s_address: P2SAddressString) -> Result<ErgoTree> {
     let encoder = AddressEncoder::new(NetworkPrefix::Mainnet);
     let address = encoder
         .parse_address_from_str(&p2s_address)
-        .map_err(|_| EncodingError::FailedToSerialize(p2s_address.clone()))?;
+        .map_err(|_| EncodingError::FailedToDeserialize(p2s_address.clone()))?;
     ErgoTree::sigma_parse_bytes(address.content_bytes())
-        .map_err(|_| EncodingError::FailedToSerialize(p2s_address.clone()))
+        .map_err(|_| EncodingError::FailedToDeserialize(p2s_address.clone()))
 }
 
 /// Acquire the Base58 encoded P2S Address from a `ErgoTree`
-pub fn deserialize_p2s_from_ergo_tree(ergo_tree: ErgoTree) -> P2SAddressString {
+pub fn serialize_p2s_from_ergo_tree(ergo_tree: ErgoTree) -> P2SAddressString {
     let address = Address::P2S(ergo_tree.sigma_serialise_bytes());
     let encoder = AddressEncoder::new(NetworkPrefix::Mainnet);
     encoder.address_to_str(&address)
