@@ -34,7 +34,6 @@ pub enum BoxVerificationError {
 /// A predicated box which is is intended to be spent for the Ergs inside
 /// The predicate simply requires the box to simply have more than `1000000`
 /// nanoErgs inside.
-// #[wasm_bindgen]
 #[wasm_bindgen]
 pub struct ErgsBox {
     ergo_box: ErgoBox,

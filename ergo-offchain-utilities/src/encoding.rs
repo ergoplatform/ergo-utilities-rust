@@ -96,8 +96,25 @@ pub fn deserialize_hex_encoded_string(c: &Constant) -> Result<String> {
     Ok(base16::encode_lower(&byte_array?))
 }
 
+/// Acquire the `ErgoTree` of the P2S Base58 String.
+pub fn serialize_to_ergo_tree(p2s_address: P2SAddressString) -> Result<ErgoTree> {
+    let encoder = AddressEncoder::new(NetworkPrefix::Mainnet);
+    let address = encoder
+        .parse_address_from_str(&p2s_address)
+        .map_err(|_| EncodingError::FailedToSerialize(p2s_address.clone()))?;
+    ErgoTree::sigma_parse_bytes(address.content_bytes())
+        .map_err(|_| EncodingError::FailedToSerialize(p2s_address.clone()))
+}
+
+/// Acquire the Base58 encoded P2S Address from a `ErgoTree`
+pub fn deserialize_from_ergo_tree(ergo_tree: ErgoTree) -> P2SAddressString {
+    let address = Address::P2S(ergo_tree.sigma_serialise_bytes());
+    let encoder = AddressEncoder::new(NetworkPrefix::Mainnet);
+    encoder.address_to_str(&address)
+}
+
 /// Deserialize ErgoTree inside of a `Constant` acquired from a register of an `ErgoBox` into a P2S Base58 String.
-pub fn deserialize_ergo_tree(c: &Constant) -> Result<P2SAddressString> {
+pub fn deserialize_ergo_tree_constant(c: &Constant) -> Result<P2SAddressString> {
     let byte_array: Result<Vec<u8>> = match &c.v {
         ConstantVal::Coll(ConstantColl::Primitive(CollPrim::CollByte(ba))) => {
             Ok(convert_to_unsigned_bytes(ba))
