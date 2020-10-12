@@ -1,5 +1,3 @@
-use crate::stage::{Stage, StageType};
-
 pub trait Protocol {
     // fn list_stages() -> Vec<Box<dyn StageType>>;
 }
