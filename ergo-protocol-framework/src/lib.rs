@@ -1,5 +1,4 @@
 pub mod predicated_boxes;
-pub mod protocol;
 // pub mod stage;
 
 // pub use ergo_lib::ast::Constant;
