@@ -13,8 +13,6 @@ pub use std::result::Result;
 use thiserror::Error;
 use wasm_bindgen::prelude::*;
 
-// pub type Result<T> = std::result::Result<T, BoxVerificationError>;
-
 #[derive(Error, Debug)]
 pub enum BoxVerificationError {
     #[error("The P2S address is invalid.")]
@@ -32,34 +30,49 @@ pub enum BoxVerificationError {
     #[error("{0}")]
     OtherError(String),
 }
+
 /// A predicated box which is is intended to be spent for the Ergs inside
 /// The predicate simply requires the box to simply have more than `1000000`
 /// nanoErgs inside.
 // #[wasm_bindgen]
+#[wasm_bindgen]
 pub struct ErgsBox {
     ergo_box: ErgoBox,
 }
+
+/// WASM OracleBoxLong Methods
+#[wasm_bindgen]
+impl ErgsBox {
+    /// Create a new `NoPredicateBox`
+    #[wasm_bindgen]
+    pub fn w_new(wb: WErgoBox) -> Result<ErgsBox, JsValue> {
+        let b: ErgoBox = wb.into();
+        ErgsBox::new(&b).map_err(|e| JsValue::from_str(&format! {"{:?}", e}))
+    }
+}
+
+/// Rust OracleBoxLong Methods
+impl ErgsBox {
+    /// Create a new `NoPredicateBox`
+    pub fn new(b: &ErgoBox) -> Result<ErgsBox, BoxVerificationError> {
+        box_with_ergs_predicate(b)?;
+        return Ok(ErgsBox {
+            ergo_box: b.clone(),
+        });
+    }
+    pub fn get_box(&self) -> ErgoBox {
+        self.ergo_box.clone()
+    }
+}
+
 /// Predicate to check that a box has more than `1000000` nanoErgs
-fn box_with_ergs_predicate(b: ErgoBox) -> Result<(), BoxVerificationError> {
+fn box_with_ergs_predicate(b: &ErgoBox) -> Result<(), BoxVerificationError> {
     if b.value.as_u64() >= 1000000 {
         Ok(())
     } else {
         Err(BoxVerificationError::InvalidErgsValue(
             "ErgoBox did not have more than 999999 nanoErgs inside.".to_string(),
         ))
-    }
-}
-impl ErgsBox {
-    /// Create a new `NoPredicateBox`
-    pub fn new(wb: WErgoBox) -> Result<ErgsBox, BoxVerificationError> {
-        let b: ErgoBox = wb.into();
-        box_with_ergs_predicate(b.clone())?;
-        return Ok(ErgsBox {
-            ergo_box: b.clone(),
-        });
-    }
-    fn get_box(&self) -> ErgoBox {
-        self.ergo_box.clone()
     }
 }
 
