@@ -5,13 +5,13 @@
 /// experience when writing `Actions` with very specific input types
 /// which are enforced by the predicates inside of each predicated
 /// box.
+use crate::stage::StageType;
 pub use ergo_lib::ast::ConstantVal;
 use ergo_lib::chain::ergo_box::ErgoBox;
 use ergo_lib::chain::input::UnsignedInput;
-use ergo_lib_wasm::ergo_box::ErgoBox as WErgoBox;
-pub use std::result::Result;
 use thiserror::Error;
-use wasm_bindgen::prelude::*;
+
+pub type Result<T> = std::result::Result<T, BoxVerificationError>;
 
 #[derive(Error, Debug)]
 pub enum BoxVerificationError {
@@ -31,47 +31,75 @@ pub enum BoxVerificationError {
     OtherError(String),
 }
 
-/// A predicated box which is is intended to be spent for the Ergs inside
-/// The predicate simply requires the box to simply have more than `1000000`
-/// nanoErgs inside.
-#[wasm_bindgen]
-pub struct ErgsBox {
+pub trait PredicatedBox {
+    fn predicate(&self) -> fn(&ErgoBox) -> Result<()>;
+    fn get_box(&self) -> ErgoBox;
+}
+
+/// A predicated box which has been verified to be at a
+/// given stage. A `StageBox<T:StageType>` provides a guarantee at the type
+/// level that said StageBox can be used as input safely in an Action.
+/// The only creation method is provided on the `Stage` struct.
+#[derive(Clone)]
+pub struct StageBox<ST: StageType> {
     ergo_box: ErgoBox,
+    pub predicate: fn(&ErgoBox) -> Result<()>,
+    pub stage: ST,
 }
-
-/// WASM OracleBoxLong Methods
-#[wasm_bindgen]
-impl ErgsBox {
-    /// Create a new `NoPredicateBox`
-    #[wasm_bindgen]
-    pub fn w_new(wb: WErgoBox) -> Result<ErgsBox, JsValue> {
-        let b: ErgoBox = wb.into();
-        ErgsBox::new(&b).map_err(|e| JsValue::from_str(&format! {"{:?}", e}))
+impl<ST: StageType> PredicatedBox for StageBox<ST> {
+    fn predicate(&self) -> fn(&ErgoBox) -> Result<()> {
+        self.predicate
     }
-}
-
-/// Rust OracleBoxLong Methods
-impl ErgsBox {
-    /// Create a new `NoPredicateBox`
-    pub fn new(b: &ErgoBox) -> Result<ErgsBox, BoxVerificationError> {
-        box_with_ergs_predicate(b)?;
-        return Ok(ErgsBox {
-            ergo_box: b.clone(),
-        });
-    }
-    pub fn get_box(&self) -> ErgoBox {
+    fn get_box(&self) -> ErgoBox {
         self.ergo_box.clone()
     }
 }
+impl<ST: StageType> StageBox<ST> {
+    // Create a new `StageBox<ST>`
+    pub fn new(b: &ErgoBox, predicate: fn(&ErgoBox) -> Result<()>, _: ST) -> Result<StageBox<ST>> {
+        (predicate)(b)?;
+        Ok(StageBox {
+            stage: ST::new(),
+            predicate: predicate,
+            ergo_box: b.clone(),
+        })
+    }
+}
 
+/// A predicated box which is is intended to be spent for the Ergs inside
+/// The predicate simply requires the box to simply have more than `1000000`
+/// nanoErgs inside.
+pub struct ErgsBox {
+    ergo_box: ErgoBox,
+    pub predicate: fn(&ErgoBox) -> Result<()>,
+}
 /// Predicate to check that a box has more than `1000000` nanoErgs
-fn box_with_ergs_predicate(b: &ErgoBox) -> Result<(), BoxVerificationError> {
-    if b.value.as_u64() >= 1000000 {
+fn box_with_ergs_predicate(b: &ErgoBox) -> Result<()> {
+    if b.value.as_u64() > 1000000 {
         Ok(())
     } else {
         Err(BoxVerificationError::InvalidErgsValue(
             "ErgoBox did not have more than 999999 nanoErgs inside.".to_string(),
         ))
+    }
+}
+impl PredicatedBox for ErgsBox {
+    /// Empty predicate that always passes.
+    fn predicate(&self) -> fn(&ErgoBox) -> Result<()> {
+        box_with_ergs_predicate
+    }
+    fn get_box(&self) -> ErgoBox {
+        self.ergo_box.clone()
+    }
+}
+impl ErgsBox {
+    /// Create a new `NoPredicateBox`
+    pub fn new(b: &ErgoBox) -> Result<ErgsBox> {
+        box_with_ergs_predicate(b)?;
+        return Ok(ErgsBox {
+            ergo_box: b.clone(),
+            predicate: box_with_ergs_predicate,
+        });
     }
 }
 
@@ -99,56 +127,16 @@ pub fn ergs_boxes_to_inputs(boxes: &Vec<ErgsBox>) -> Vec<UnsignedInput> {
 /// box and exposes it as a public field to be easily used.
 /// The predicate also checks that the box has a single type of Token
 /// and said token has a value of 1. (Checking that it has an NFT)
-#[wasm_bindgen]
 pub struct OracleBoxLong {
     ergo_box: ErgoBox,
+    pub predicate: fn(&ErgoBox) -> Result<()>,
     pub datapoint: i64,
     /// The token id of the oracle's NFT
-    nft_id: String,
+    pub nft_id: String,
 }
-
-/// WASM OracleBoxLong Methods
-#[wasm_bindgen]
-impl OracleBoxLong {
-    #[wasm_bindgen(constructor)]
-    pub fn w_new(wb: WErgoBox) -> Result<OracleBoxLong, JsValue> {
-        let b: ErgoBox = wb.into();
-        OracleBoxLong::new(&b).map_err(|e| JsValue::from_str(&format! {"{:?}", e}))
-    }
-
-    #[wasm_bindgen(getter)]
-    pub fn nft_id(&self) -> String {
-        self.nft_id.clone()
-    }
-
-    #[wasm_bindgen(setter)]
-    pub fn set_nft_id(&mut self, nft_id: String) {
-        self.nft_id = nft_id.clone();
-    }
-}
-
-/// Rust OracleBoxLong Methods
-impl OracleBoxLong {
-    // Create a new `OracleBoxLong`
-    pub fn new(b: &ErgoBox) -> Result<OracleBoxLong, BoxVerificationError> {
-        // Error Checking
-        oracle_box_predicate(&b)?;
-        let datapoint = extract_long_datapoint(&b)?;
-        return Ok(OracleBoxLong {
-            ergo_box: b.clone(),
-            datapoint: datapoint,
-            nft_id: b.tokens[0].token_id.0.clone().into(),
-        });
-    }
-
-    pub fn get_box(&self) -> ErgoBox {
-        self.ergo_box.clone()
-    }
-}
-
 /// Extracts a Long out of register R4 of the provided `ErgoBox`.
 /// Does error-checking along the way.
-fn extract_long_datapoint(b: &ErgoBox) -> Result<i64, BoxVerificationError> {
+fn extract_long_datapoint(b: &ErgoBox) -> Result<i64> {
     let registers = b.additional_registers.get_ordered_values();
     if registers.len() < 1 {
         return Err(BoxVerificationError::InvalidOracleBox(
@@ -167,7 +155,7 @@ fn extract_long_datapoint(b: &ErgoBox) -> Result<i64, BoxVerificationError> {
     }
 }
 /// Predicate to check that a box has a valid Long datapoint in R4.
-fn oracle_box_predicate(b: &ErgoBox) -> Result<(), BoxVerificationError> {
+fn oracle_box_predicate(b: &ErgoBox) -> Result<()> {
     // Using `?` to verify that a valid Long datapoint was extracted.
     // If it failed, it will push the error upwards.
     extract_long_datapoint(b)?;
@@ -185,4 +173,27 @@ fn oracle_box_predicate(b: &ErgoBox) -> Result<(), BoxVerificationError> {
         ));
     }
     Ok(())
+}
+impl PredicatedBox for OracleBoxLong {
+    /// Empty predicate that always passes.
+    fn predicate(&self) -> fn(&ErgoBox) -> Result<()> {
+        oracle_box_predicate
+    }
+    fn get_box(&self) -> ErgoBox {
+        self.ergo_box.clone()
+    }
+}
+impl OracleBoxLong {
+    /// Create a new `NoPredicateBox`
+    pub fn new(b: &ErgoBox) -> Result<OracleBoxLong> {
+        // Error Checking
+        oracle_box_predicate(b)?;
+        let datapoint = extract_long_datapoint(b)?;
+        return Ok(OracleBoxLong {
+            ergo_box: b.clone(),
+            predicate: oracle_box_predicate,
+            datapoint: datapoint,
+            nft_id: b.tokens[0].token_id.0.clone().into(),
+        });
+    }
 }
