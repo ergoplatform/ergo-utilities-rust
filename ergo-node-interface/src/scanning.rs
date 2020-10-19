@@ -71,4 +71,19 @@ impl Scan {
         let ser_box = self.node_interface.serialize_box(&self.get_box()?)?;
         Ok(ser_box)
     }
+
+    /// Saves UTXO-set scans (specifically id) to local scanIDs.json
+    pub fn save_scan_ids_locally(scans: Vec<Scan>) -> Result<bool> {
+        let mut id_json = object! {};
+        for scan in scans {
+            if &scan.id == "null" {
+                return Err(NodeError::FailedRegisteringScan(scan.name));
+            }
+            id_json[scan.name] = scan.id.into();
+        }
+        std::fs::write("scanIDs.json", json::stringify_pretty(id_json, 4)).map_err(|_| {
+            NodeError::Other("Failed to save scans to local scanIDs.json".to_string())
+        })?;
+        Ok(true)
+    }
 }

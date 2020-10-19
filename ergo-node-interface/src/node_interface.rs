@@ -20,10 +20,14 @@ pub enum NodeError {
     FailedParsingBox(String),
     #[error("No Boxes Were Found.")]
     NoBoxesFound,
+    #[error("Failed registering UTXO-set scan with the node: {0}")]
+    FailedRegisteringScan(String),
     #[error("The node rejected the request you provided.\nNode Response: {0}")]
     BadRequest(String),
     #[error("The node is still syncing.")]
     NodeSyncing,
+    #[error("{0}")]
+    Other(String),
 }
 
 /// The `NodeInterface` struct which holds the relevant Ergo node data
