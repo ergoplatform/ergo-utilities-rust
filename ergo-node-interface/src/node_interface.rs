@@ -95,7 +95,7 @@ impl NodeInterface {
     }
 
     /// Get all addresses from the node wallet
-    pub fn get_addresses(&self) -> Result<Vec<P2PKAddressString>> {
+    pub fn get_wallet_addresses(&self) -> Result<Vec<P2PKAddressString>> {
         let endpoint = "/wallet/addresses";
         let res = self.send_get_req(endpoint)?;
 
@@ -114,6 +114,32 @@ impl NodeInterface {
             return Err(NodeError::NoAddressesInWallet);
         }
         Ok(addresses)
+    }
+
+    /// A CLI interactive interface for prompting a user to select an address
+    pub fn select_wallet_address(&self) -> Result<P2PKAddressString> {
+        let address_list = self.get_wallet_addresses()?;
+        if address_list.len() == 1 {
+            return Ok(address_list[0].clone());
+        }
+
+        let mut n = 0;
+        for address in &address_list {
+            n += 1;
+            println!("{}. {}", n, address);
+        }
+        println!("Which address would you like to select?");
+        let mut input = String::new();
+        if let Ok(_) = std::io::stdin().read_line(&mut input) {
+            if let Ok(input_n) = input.trim().parse::<usize>() {
+                if input_n > address_list.len() || input_n < 1 {
+                    println!("Please select an address within the range.");
+                    return self.select_wallet_address();
+                }
+                return Ok(address_list[input_n - 1].clone());
+            }
+        }
+        return self.select_wallet_address();
     }
 
     /// Acquires unspent boxes from the node wallet
