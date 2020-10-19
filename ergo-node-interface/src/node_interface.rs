@@ -24,6 +24,8 @@ pub enum NodeError {
     FailedRegisteringScan(String),
     #[error("The node rejected the request you provided.\nNode Response: {0}")]
     BadRequest(String),
+    #[error("The node wallet has no addresses.")]
+    NoAddressesInWallet,
     #[error("The node is still syncing.")]
     NodeSyncing,
     #[error("{0}")]
@@ -90,6 +92,28 @@ impl NodeInterface {
             }
         }
         Ok(box_list)
+    }
+
+    /// Get all addresses from the node wallet
+    pub fn get_addresses(&self) -> Result<Vec<P2PKAddressString>> {
+        let endpoint = "/wallet/addresses";
+        let res = self.send_get_req(endpoint)?;
+
+        let mut addresses: Vec<String> = vec![];
+        for segment in res
+            .text()
+            .expect("Failed to get addresses from wallet.")
+            .split("\"")
+        {
+            let seg = segment.trim();
+            if seg.chars().next().unwrap() == '9' {
+                addresses.push(seg.to_string());
+            }
+        }
+        if addresses.len() == 0 {
+            return Err(NodeError::NoAddressesInWallet);
+        }
+        Ok(addresses)
     }
 
     /// Acquires unspent boxes from the node wallet
