@@ -20,10 +20,16 @@ pub enum NodeError {
     FailedParsingBox(String),
     #[error("No Boxes Were Found.")]
     NoBoxesFound,
+    #[error("Failed registering UTXO-set scan with the node: {0}")]
+    FailedRegisteringScan(String),
     #[error("The node rejected the request you provided.\nNode Response: {0}")]
     BadRequest(String),
+    #[error("The node wallet has no addresses.")]
+    NoAddressesInWallet,
     #[error("The node is still syncing.")]
     NodeSyncing,
+    #[error("{0}")]
+    Other(String),
 }
 
 /// The `NodeInterface` struct which holds the relevant Ergo node data
@@ -86,6 +92,54 @@ impl NodeInterface {
             }
         }
         Ok(box_list)
+    }
+
+    /// Get all addresses from the node wallet
+    pub fn get_wallet_addresses(&self) -> Result<Vec<P2PKAddressString>> {
+        let endpoint = "/wallet/addresses";
+        let res = self.send_get_req(endpoint)?;
+
+        let mut addresses: Vec<String> = vec![];
+        for segment in res
+            .text()
+            .expect("Failed to get addresses from wallet.")
+            .split("\"")
+        {
+            let seg = segment.trim();
+            if seg.chars().next().unwrap() == '9' {
+                addresses.push(seg.to_string());
+            }
+        }
+        if addresses.len() == 0 {
+            return Err(NodeError::NoAddressesInWallet);
+        }
+        Ok(addresses)
+    }
+
+    /// A CLI interactive interface for prompting a user to select an address
+    pub fn select_wallet_address(&self) -> Result<P2PKAddressString> {
+        let address_list = self.get_wallet_addresses()?;
+        if address_list.len() == 1 {
+            return Ok(address_list[0].clone());
+        }
+
+        let mut n = 0;
+        for address in &address_list {
+            n += 1;
+            println!("{}. {}", n, address);
+        }
+        println!("Which address would you like to select?");
+        let mut input = String::new();
+        if let Ok(_) = std::io::stdin().read_line(&mut input) {
+            if let Ok(input_n) = input.trim().parse::<usize>() {
+                if input_n > address_list.len() || input_n < 1 {
+                    println!("Please select an address within the range.");
+                    return self.select_wallet_address();
+                }
+                return Ok(address_list[input_n - 1].clone());
+            }
+        }
+        return self.select_wallet_address();
     }
 
     /// Acquires unspent boxes from the node wallet
