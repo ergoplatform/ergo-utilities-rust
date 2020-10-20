@@ -17,7 +17,7 @@ static BAREBONES_CONFIG_YAML: &str = r#"
 
 /// Basic function to check if a local config currently exists
 pub fn does_local_config_exist() -> bool {
-    let metadata = std::fs::metadata("node-config.yaml");
+    let metadata = std::fs::metadata("node-interface.yaml");
     if let Ok(_) = metadata {
         return true;
     }
