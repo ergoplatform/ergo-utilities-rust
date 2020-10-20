@@ -227,7 +227,7 @@ impl NodeInterface {
     }
 
     /// Given a P2S Ergo address, convert it to a hex-encoded Sigma byte array constant
-    pub fn address_to_bytes(&self, address: &P2SAddressString) -> Result<String> {
+    pub fn p2s_to_bytes(&self, address: &P2SAddressString) -> Result<String> {
         let endpoint = "/script/addressToBytes/".to_string() + address;
         let res = self.send_get_req(&endpoint);
         let res_json = self.parse_response_to_json(res)?;
@@ -236,7 +236,7 @@ impl NodeInterface {
     }
 
     /// Given an Ergo P2PK Address, convert it to a raw hex-encoded EC point
-    pub fn address_to_raw(&self, address: &P2PKAddressString) -> Result<String> {
+    pub fn p2pk_to_raw(&self, address: &P2PKAddressString) -> Result<String> {
         let endpoint = "/utils/addressToRaw/".to_string() + address;
         let res = self.send_get_req(&endpoint);
         let res_json = self.parse_response_to_json(res)?;
@@ -247,13 +247,13 @@ impl NodeInterface {
     /// Given an Ergo P2PK Address, convert it to a raw hex-encoded EC point
     /// and prepend the type bytes so it is encoded and ready
     /// to be used in a register.
-    pub fn address_to_raw_for_register(&self, address: &P2PKAddressString) -> Result<String> {
-        let add = self.address_to_raw(address)?;
+    pub fn p2pk_to_raw_for_register(&self, address: &P2PKAddressString) -> Result<String> {
+        let add = self.p2pk_to_raw(address)?;
         Ok("07".to_string() + &add)
     }
 
     /// Given a raw hex-encoded EC point, convert it to a P2PK address
-    pub fn raw_to_address(&self, raw: &String) -> Result<P2PKAddressString> {
+    pub fn raw_to_p2pk(&self, raw: &String) -> Result<P2PKAddressString> {
         let endpoint = "/utils/rawToAddress/".to_string() + raw;
         let res = self.send_get_req(&endpoint);
         let res_json = self.parse_response_to_json(res)?;
@@ -264,7 +264,7 @@ impl NodeInterface {
     /// Given a raw hex-encoded EC point from a register (thus with type encoded characters in front),
     /// convert it to a P2PK address
     pub fn raw_from_register_to_address(&self, typed_raw: &String) -> Result<P2PKAddressString> {
-        Ok(self.raw_to_address(&typed_raw[2..].to_string())?)
+        Ok(self.raw_to_p2pk(&typed_raw[2..].to_string())?)
     }
 
     /// Given a `Vec<ErgoBox>` return the given boxes (which must be part of the UTXO-set) as
