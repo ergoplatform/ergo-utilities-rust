@@ -17,11 +17,7 @@ node_api_key: "hello"
 
 /// Basic function to check if a local config currently exists
 pub fn does_local_config_exist() -> bool {
-    let metadata = std::fs::metadata("node-interface.yaml");
-    if let Ok(_) = metadata {
-        return true;
-    }
-    false
+    Path::new("node-interface.yaml").exists()
 }
 
 /// Create a new `node-interface.config` with the barebones yaml inside
