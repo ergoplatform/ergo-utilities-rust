@@ -1,5 +1,6 @@
 #[macro_use]
 extern crate json;
+pub mod local_config;
 pub mod node_interface;
 pub mod scanning;
 

@@ -28,6 +28,8 @@ pub enum NodeError {
     NoAddressesInWallet,
     #[error("The node is still syncing.")]
     NodeSyncing,
+    #[error("Error while processing Node Interface Config Yaml: {0}")]
+    YamlError(String),
     #[error("{0}")]
     Other(String),
 }
