@@ -15,6 +15,15 @@ static BAREBONES_CONFIG_YAML: &str = r#"
         node_api_key: "hello"
     "#;
 
+/// Basic function to check if a local config currently exists
+pub fn does_local_config_exist() -> bool {
+    let metadata = std::fs::metadata("node-config.yaml");
+    if let Ok(_) = metadata {
+        return true;
+    }
+    false
+}
+
 /// Create a new `node-interface.config` with the barebones yaml inside
 pub fn create_new_local_config_file() -> Result<()> {
     let file_path = Path::new("node-interface.yaml");
@@ -51,7 +60,7 @@ pub fn new_interface_from_yaml(config: Yaml) -> Result<NodeInterface> {
 /// Opens a local `node-interface.yaml` file and uses the
 /// data inside to create a `NodeInterface`
 pub fn new_interface_from_local_config() -> Result<NodeInterface> {
-    let yaml_str = std::fs::read_to_string("oracle-config.yaml").map_err(|_| {
+    let yaml_str = std::fs::read_to_string("node-interface.yaml").map_err(|_| {
         NodeError::YamlError("Failed to read local `node-interface.yaml` file".to_string())
     })?;
     let yaml = YamlLoader::load_from_str(&yaml_str).unwrap()[0].clone();
