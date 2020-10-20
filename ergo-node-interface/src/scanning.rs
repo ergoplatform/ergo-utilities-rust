@@ -76,16 +76,38 @@ impl Scan {
     /// Saves UTXO-set scans (specifically id) to local scanIDs.json
     pub fn save_scan_ids_locally(scans: Vec<Scan>) -> Result<bool> {
         let mut id_json = object! {};
+        let mut json_list: Vec<JsonValue> = vec![];
         for scan in scans {
             if &scan.id == "null" {
                 return Err(NodeError::FailedRegisteringScan(scan.name));
             }
-            id_json[scan.name] = scan.id.into();
+            let mut sub_json = object! {name: scan.name, id: scan.id};
         }
+        id_json["scans"] = json_list.into();
         std::fs::write("scanIDs.json", json::stringify_pretty(id_json, 4)).map_err(|_| {
             NodeError::Other("Failed to save scans to local scanIDs.json".to_string())
         })?;
         Ok(true)
+    }
+
+    /// Read UTXO-set scan ids from local scanIDs.json
+    pub fn read_local_scan_ids(scans: Vec<Scan>) -> Result<bool> {
+        let file_string = &std::fs::read_to_string("scanIDs.json")
+            .map_err(|_| NodeError::Other("Unable to read scanIDs.json".to_string()))?;
+        let scan_json = json::parse(file_string)
+            .map_err(|_| NodeError::Other("Failed to parse scanIDs.json".to_string()))?;
+
+        // for scan in scans {
+        //     if &scan.id == "null" {
+        //         return Err(NodeError::FailedRegisteringScan(scan.name));
+        //     }
+        //     id_json[scan.name] = scan.id.into();
+        // }
+        // std::fs::write("scanIDs.json", json::stringify_pretty(id_json, 4)).map_err(|_| {
+        //     NodeError::Other("Failed to save scans to local scanIDs.json".to_string())
+        // })?;
+        // Ok(true)
+        todo!()
     }
 
     /// Serialize a "P2PKAddressString" to be used within a scan tracking rule
