@@ -7,13 +7,13 @@ use std::path::Path;
 use yaml_rust::{Yaml, YamlLoader};
 
 static BAREBONES_CONFIG_YAML: &str = r#"
-        # IP Address of the node (default is local, edit if yours is different)
-        node_ip: "0.0.0.0"
-        # Port that the node is on (default is 9053, edit if yours is different)
-        node_port: "9053"
-        # API key for the node (edit if yours is different)
-        node_api_key: "hello"
-    "#;
+# IP Address of the node (default is local, edit if yours is different)
+node_ip: "0.0.0.0"
+# Port that the node is on (default is 9053, edit if yours is different)
+node_port: "9053"
+# API key for the node (edit if yours is different)
+node_api_key: "hello"
+"#;
 
 /// Basic function to check if a local config currently exists
 pub fn does_local_config_exist() -> bool {
