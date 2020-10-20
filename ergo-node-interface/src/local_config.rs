@@ -4,7 +4,7 @@ use crate::node_interface::{NodeError, NodeInterface, Result};
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
-use yaml_rust::{Yaml, YamlEmitter, YamlLoader};
+use yaml_rust::{Yaml, YamlLoader};
 
 static BAREBONES_CONFIG_YAML: &str = r#"
         # IP Address of the node (default is local, edit if yours is different)
@@ -14,11 +14,6 @@ static BAREBONES_CONFIG_YAML: &str = r#"
         # API key for the node (edit if yours is different)
         node_api_key: "hello"
     "#;
-
-/// The basic yaml of a `node-interface.yaml`.
-fn barebones_yaml() -> Yaml {
-    YamlLoader::load_from_str(BAREBONES_CONFIG_YAML).unwrap()[0].clone()
-}
 
 /// Create a new `node-interface.config` with the barebones yaml inside
 pub fn create_new_local_config_file() -> Result<()> {
@@ -56,5 +51,9 @@ pub fn new_interface_from_yaml(config: Yaml) -> Result<NodeInterface> {
 /// Opens a local `node-interface.yaml` file and uses the
 /// data inside to create a `NodeInterface`
 pub fn new_interface_from_local_config() -> Result<NodeInterface> {
-    todo!()
+    let yaml_str = std::fs::read_to_string("oracle-config.yaml").map_err(|_| {
+        NodeError::YamlError("Failed to read local `node-interface.yaml` file".to_string())
+    })?;
+    let yaml = YamlLoader::load_from_str(&yaml_str).unwrap()[0].clone();
+    new_interface_from_yaml(yaml)
 }
