@@ -91,7 +91,7 @@ impl Scan {
     /// Serialize a "P2PKAddressString" to be used within a scan tracking rule
     pub fn serialize_p2pk_for_tracking(
         node: &NodeInterface,
-        address: P2PKAddressString,
+        address: &P2PKAddressString,
     ) -> Result<String> {
         let raw = node.p2pk_to_raw(&address)?;
         Ok("0e240008cd".to_string() + &raw)
