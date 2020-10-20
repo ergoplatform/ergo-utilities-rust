@@ -218,7 +218,7 @@ impl NodeInterface {
     }
 
     /// Given a P2S Ergo address, extract the hex-encoded serialized ErgoTree (script)
-    pub fn address_to_tree(&self, address: &P2SAddressString) -> Result<String> {
+    pub fn p2s_to_tree(&self, address: &P2SAddressString) -> Result<String> {
         let endpoint = "/script/addressToTree/".to_string() + address;
         let res = self.send_get_req(&endpoint);
         let res_json = self.parse_response_to_json(res)?;
@@ -263,7 +263,7 @@ impl NodeInterface {
 
     /// Given a raw hex-encoded EC point from a register (thus with type encoded characters in front),
     /// convert it to a P2PK address
-    pub fn raw_from_register_to_address(&self, typed_raw: &String) -> Result<P2PKAddressString> {
+    pub fn raw_from_register_to_p2pk(&self, typed_raw: &String) -> Result<P2PKAddressString> {
         Ok(self.raw_to_p2pk(&typed_raw[2..].to_string())?)
     }
 

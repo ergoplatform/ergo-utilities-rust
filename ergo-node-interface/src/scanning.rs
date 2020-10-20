@@ -4,6 +4,7 @@ use crate::node_interface::NodeInterface;
 pub use crate::node_interface::{NodeError, Result};
 use ergo_lib::chain::ergo_box::ErgoBox;
 use ergo_offchain_utilities::ScanID;
+use ergo_offchain_utilities::{P2PKAddressString, P2SAddressString};
 use json;
 use json::JsonValue;
 
@@ -85,5 +86,12 @@ impl Scan {
             NodeError::Other("Failed to save scans to local scanIDs.json".to_string())
         })?;
         Ok(true)
+    }
+
+    pub fn serialize_p2pk_for_predicate(
+        node_interface: &NodeInterface,
+        address: P2PKAddressString,
+    ) -> String {
+        todo!()
     }
 }
