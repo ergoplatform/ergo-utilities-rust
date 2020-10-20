@@ -81,7 +81,8 @@ impl Scan {
             if &scan.id == "null" {
                 return Err(NodeError::FailedRegisteringScan(scan.name));
             }
-            let mut sub_json = object! {name: scan.name, id: scan.id};
+            let sub_json = object! {name: scan.name, id: scan.id};
+            json_list.push(sub_json);
         }
         id_json["scans"] = json_list.into();
         std::fs::write("scanIDs.json", json::stringify_pretty(id_json, 4)).map_err(|_| {
