@@ -1,11 +1,12 @@
 /// This file holds functions related to saving/accessing local data
 /// related to interacting with an ergo node. (Ip/Port/Api Key)
 use crate::node_interface::{NodeError, NodeInterface, Result};
+use std::fs::File;
+use std::io::prelude::*;
+use std::path::Path;
 use yaml_rust::{Yaml, YamlEmitter, YamlLoader};
 
-/// The basic yaml of a `node_interface.config`.
-fn barebones_yaml() -> Yaml {
-    let s = r#"
+static BAREBONES_CONFIG_YAML: &str = r#"
         # IP Address of the node (default is local, edit if yours is different)
         node_ip: "0.0.0.0"
         # Port that the node is on (default is 9053, edit if yours is different)
@@ -14,7 +15,28 @@ fn barebones_yaml() -> Yaml {
         node_api_key: "hello"
     "#;
 
-    YamlLoader::load_from_str(&s).unwrap()[0].clone()
+/// The basic yaml of a `node-interface.yaml`.
+fn barebones_yaml() -> Yaml {
+    YamlLoader::load_from_str(BAREBONES_CONFIG_YAML).unwrap()[0].clone()
+}
+
+/// Create a new `node-interface.config` with the barebones yaml inside
+pub fn create_new_local_config_file() -> Result<()> {
+    let file_path = Path::new("node-interface.yaml");
+    if file_path.exists() == false {
+        let mut file = File::create(file_path).map_err(|_| {
+            NodeError::YamlError("Failed to create `node-interface.yaml` file".to_string())
+        })?;
+        file.write_all(&BAREBONES_CONFIG_YAML.to_string().into_bytes())
+            .map_err(|_| {
+                NodeError::YamlError(
+                    "Failed to write to local `node-interface.yaml` file".to_string(),
+                )
+            })?;
+    }
+    Err(NodeError::YamlError(
+        "Local `node-interface.yaml` already exists.".to_string(),
+    ))
 }
 
 /// Uses the config yaml provided to create a new `NodeInterface`
@@ -31,7 +53,7 @@ pub fn new_interface_from_yaml(config: Yaml) -> Result<NodeInterface> {
     Ok(NodeInterface::new(api_key, ip, port))
 }
 
-/// Opens a local `node_interface.config` file and uses the
+/// Opens a local `node-interface.yaml` file and uses the
 /// data inside to create a `NodeInterface`
 pub fn new_interface_from_local_config() -> Result<NodeInterface> {
     todo!()
