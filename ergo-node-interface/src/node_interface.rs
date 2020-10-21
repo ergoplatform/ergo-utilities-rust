@@ -147,7 +147,7 @@ impl NodeInterface {
     }
 
     /// Acquires unspent boxes from the node wallet
-    pub fn get_unspent_wallet_boxes(&self) -> Result<Vec<ErgoBox>> {
+    pub fn unspent_boxes(&self) -> Result<Vec<ErgoBox>> {
         let endpoint = "/wallet/boxes/unspent?minConfirmations=0&minInclusionHeight=0";
         let res = self.send_get_req(endpoint);
         let res_json = self.parse_response_to_json(res)?;
@@ -169,8 +169,8 @@ impl NodeInterface {
 
     /// Returns unspent boxes from the node wallet ordered from highest to
     /// lowest nanoErgs value.
-    pub fn get_unspent_wallet_boxes_sorted(&self) -> Result<Vec<ErgoBox>> {
-        let mut boxes = self.get_unspent_wallet_boxes()?;
+    pub fn unspent_boxes_sorted(&self) -> Result<Vec<ErgoBox>> {
+        let mut boxes = self.unspent_boxes()?;
         boxes.sort_by(|a, b| b.value.as_u64().partial_cmp(&a.value.as_u64()).unwrap());
 
         Ok(boxes)
@@ -180,8 +180,8 @@ impl NodeInterface {
     /// provided value `total` of nanoErgs.
     /// Note: This box selection strategy simply uses the largest
     /// value holding boxes from the user's wallet first.
-    pub fn get_unspent_boxes_with_min_total(&self, total: NanoErg) -> Result<Vec<ErgoBox>> {
-        let all_boxes = self.get_unspent_wallet_boxes_sorted()?;
+    pub fn unspent_boxes_with_min_total(&self, total: NanoErg) -> Result<Vec<ErgoBox>> {
+        let all_boxes = self.unspent_boxes_sorted()?;
 
         let mut count = 0;
         let filtered_boxes = all_boxes.into_iter().fold(vec![], |mut acc, b| {
@@ -200,8 +200,8 @@ impl NodeInterface {
     /// provided value `total` of nanoErgs.
     /// Note: This box selection strategy simply uses the oldest unspent
     /// boxes from the user's full node wallet first.
-    pub fn get_unspent_boxes_with_min_total_by_age(&self, total: NanoErg) -> Result<Vec<ErgoBox>> {
-        let all_boxes = self.get_unspent_wallet_boxes()?;
+    pub fn unspent_boxes_with_min_total_by_age(&self, total: NanoErg) -> Result<Vec<ErgoBox>> {
+        let all_boxes = self.unspent_boxes()?;
 
         let mut count = 0;
         let filtered_boxes = all_boxes.into_iter().fold(vec![], |mut acc, b| {
@@ -218,8 +218,8 @@ impl NodeInterface {
 
     /// Acquires the unspent box with the highest value of Ergs inside
     /// from the wallet
-    pub fn get_highest_value_unspent_box(&self) -> Result<ErgoBox> {
-        let boxes = self.get_unspent_wallet_boxes()?;
+    pub fn highest_value_unspent_box(&self) -> Result<ErgoBox> {
+        let boxes = self.unspent_boxes()?;
 
         // Find the highest value amount held in a single box in the wallet
         let highest_value = boxes.iter().fold(0, |acc, b| {
@@ -240,8 +240,8 @@ impl NodeInterface {
 
     /// Acquires the unspent box with the highest value of Ergs inside
     /// from the wallet and serializes it
-    pub fn get_serialized_highest_value_unspent_box(&self) -> Result<String> {
-        let ergs_box_id: String = self.get_highest_value_unspent_box()?.box_id().into();
+    pub fn serialized_highest_value_unspent_box(&self) -> Result<String> {
+        let ergs_box_id: String = self.highest_value_unspent_box()?.box_id().into();
         self.serialized_box_from_id(&ergs_box_id)
     }
 
