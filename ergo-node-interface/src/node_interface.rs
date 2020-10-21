@@ -179,9 +179,29 @@ impl NodeInterface {
     /// Returns a sorted list of unspent boxes which cover at least the
     /// provided value `total` of nanoErgs.
     /// Note: This box selection strategy simply uses the largest
-    /// value holding boxes first.
+    /// value holding boxes from the user's wallet first.
     pub fn get_unspent_boxes_with_min_total(&self, total: NanoErg) -> Result<Vec<ErgoBox>> {
         let all_boxes = self.get_unspent_wallet_boxes_sorted()?;
+
+        let mut count = 0;
+        let filtered_boxes = all_boxes.into_iter().fold(vec![], |mut acc, b| {
+            if count >= total {
+                acc
+            } else {
+                count += b.value.as_u64();
+                acc.push(b);
+                acc
+            }
+        });
+        Ok(filtered_boxes)
+    }
+
+    /// Returns a list of unspent boxes which cover at least the
+    /// provided value `total` of nanoErgs.
+    /// Note: This box selection strategy simply uses the oldest unspent
+    /// boxes from the user's full node wallet first.
+    pub fn get_unspent_boxes_with_min_total_by_age(&self, total: NanoErg) -> Result<Vec<ErgoBox>> {
+        let all_boxes = self.get_unspent_wallet_boxes()?;
 
         let mut count = 0;
         let filtered_boxes = all_boxes.into_iter().fold(vec![], |mut acc, b| {
