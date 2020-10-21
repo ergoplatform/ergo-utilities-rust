@@ -174,7 +174,6 @@ impl NodeInterface {
         Ok(boxes)
     }
 
-
     /// Acquires the unspent box with the highest value of Ergs inside
     /// from the wallet
     pub fn get_highest_value_unspent_box(&self) -> Result<ErgoBox> {
@@ -196,9 +195,6 @@ impl NodeInterface {
         }
         Err(NodeError::NoBoxesFound)
     }
-
-
-    pub fn get
 
     /// Acquires the unspent box with the highest value of Ergs inside
     /// from the wallet and serializes it
