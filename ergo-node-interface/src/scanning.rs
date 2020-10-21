@@ -102,8 +102,8 @@ impl Scan {
             .members()
             .map(|scan| {
                 Scan::new(
-                    &scan["name"].to_string(),
-                    &scan_json["id"].to_string(),
+                    &scan["id"].to_string(),
+                    &scan_json["name"].to_string(),
                     node,
                 )
             })
