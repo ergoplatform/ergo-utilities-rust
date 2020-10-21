@@ -165,6 +165,16 @@ impl NodeInterface {
         Ok(box_list)
     }
 
+    /// Returns unspent boxes from the node wallet ordered from highest to
+    /// lowest nanoErgs value.
+    pub fn get_unspent_wallet_boxes_sorted(&self) -> Result<Vec<ErgoBox>> {
+        let mut boxes = self.get_unspent_wallet_boxes()?;
+        boxes.sort_by(|a, b| a.value.as_u64().partial_cmp(&b.value.as_u64()).unwrap());
+
+        Ok(boxes)
+    }
+
+
     /// Acquires the unspent box with the highest value of Ergs inside
     /// from the wallet
     pub fn get_highest_value_unspent_box(&self) -> Result<ErgoBox> {
@@ -186,6 +196,9 @@ impl NodeInterface {
         }
         Err(NodeError::NoBoxesFound)
     }
+
+
+    pub fn get
 
     /// Acquires the unspent box with the highest value of Ergs inside
     /// from the wallet and serializes it
