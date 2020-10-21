@@ -169,7 +169,7 @@ impl NodeInterface {
     /// lowest nanoErgs value.
     pub fn get_unspent_wallet_boxes_sorted(&self) -> Result<Vec<ErgoBox>> {
         let mut boxes = self.get_unspent_wallet_boxes()?;
-        boxes.sort_by(|a, b| a.value.as_u64().partial_cmp(&b.value.as_u64()).unwrap());
+        boxes.sort_by(|a, b| b.value.as_u64().partial_cmp(&a.value.as_u64()).unwrap());
 
         Ok(boxes)
     }
