@@ -1,7 +1,9 @@
 /// The `NodeInterface` struct is defined which allows for interacting with an
 /// Ergo Node via Rust.
 use ergo_lib::chain::ergo_box::ErgoBox;
-use ergo_offchain_utilities::{BlockHeight, P2PKAddressString, P2SAddressString, ScanID, TxId};
+use ergo_offchain_utilities::{
+    BlockHeight, NanoErg, P2PKAddressString, P2SAddressString, ScanID, TxId,
+};
 use json::JsonValue;
 use reqwest::blocking::{RequestBuilder, Response};
 use reqwest::header::{HeaderValue, CONTENT_TYPE};
@@ -172,6 +174,26 @@ impl NodeInterface {
         boxes.sort_by(|a, b| b.value.as_u64().partial_cmp(&a.value.as_u64()).unwrap());
 
         Ok(boxes)
+    }
+
+    /// Returns a sorted list of unspent boxes which cover at least the
+    /// provided value `total` of nanoErgs.
+    /// Note: This box selection strategy simply uses the largest
+    /// value holding boxes first.
+    pub fn get_unspent_boxes_with_min_total(&self, total: NanoErg) -> Result<Vec<ErgoBox>> {
+        let all_boxes = self.get_unspent_wallet_boxes_sorted()?;
+
+        let mut count = 0;
+        let filtered_boxes = all_boxes.into_iter().fold(vec![], |mut acc, b| {
+            if count >= total {
+                acc
+            } else {
+                count += b.value.as_u64();
+                acc.push(b);
+                acc
+            }
+        });
+        Ok(filtered_boxes)
     }
 
     /// Acquires the unspent box with the highest value of Ergs inside
