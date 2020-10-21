@@ -100,13 +100,7 @@ impl Scan {
 
         let scans: &Vec<Scan> = &scan_json["scans"]
             .members()
-            .map(|scan| {
-                Scan::new(
-                    &scan["id"].to_string(),
-                    &scan_json["name"].to_string(),
-                    node,
-                )
-            })
+            .map(|scan| Scan::new(&scan["name"].to_string(), &scan["id"].to_string(), node))
             .collect();
 
         Ok(scans.clone())
