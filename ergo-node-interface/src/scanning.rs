@@ -92,23 +92,24 @@ impl Scan {
     }
 
     /// Read UTXO-set scan ids from local scanIDs.json
-    pub fn read_local_scan_ids(scans: Vec<Scan>) -> Result<bool> {
+    pub fn read_local_scan_ids(node: &NodeInterface) -> Result<Vec<Scan>> {
         let file_string = &std::fs::read_to_string("scanIDs.json")
             .map_err(|_| NodeError::Other("Unable to read scanIDs.json".to_string()))?;
         let scan_json = json::parse(file_string)
             .map_err(|_| NodeError::Other("Failed to parse scanIDs.json".to_string()))?;
 
-        // for scan in scans {
-        //     if &scan.id == "null" {
-        //         return Err(NodeError::FailedRegisteringScan(scan.name));
-        //     }
-        //     id_json[scan.name] = scan.id.into();
-        // }
-        // std::fs::write("scanIDs.json", json::stringify_pretty(id_json, 4)).map_err(|_| {
-        //     NodeError::Other("Failed to save scans to local scanIDs.json".to_string())
-        // })?;
-        // Ok(true)
-        todo!()
+        let scans: &Vec<Scan> = &scan_json["scans"]
+            .members()
+            .map(|scan| {
+                Scan::new(
+                    &scan["name"].to_string(),
+                    &scan_json["id"].to_string(),
+                    node,
+                )
+            })
+            .collect();
+
+        Ok(scans.clone())
     }
 
     /// Serialize a "P2PKAddressString" to be used within a scan tracking rule
