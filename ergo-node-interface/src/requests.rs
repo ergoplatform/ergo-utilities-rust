@@ -1,4 +1,5 @@
 use crate::node_interface::{NodeError, NodeInterface, Result};
+use crate::JsonString;
 use json::JsonValue;
 use reqwest::blocking::{RequestBuilder, Response};
 use reqwest::header::{HeaderValue, CONTENT_TYPE};
@@ -49,15 +50,14 @@ impl NodeInterface {
         Ok(json)
     }
 
-    /// General function for submitting `JsonValue` a body to an endpoint
+    /// General function for submitting a Json String body to an endpoint
     /// which also returns a `JsonValue` response.
     pub fn use_json_endpoint_and_check_errors(
         &self,
         endpoint: &str,
-        body: &JsonValue,
+        json_body: &JsonString,
     ) -> Result<JsonValue> {
-        let body = json::stringify(body.clone());
-        let res = self.send_post_req(endpoint, body);
+        let res = self.send_post_req(endpoint, json_body.clone());
 
         let res_json = self.parse_response_to_json(res)?;
         let error_details = res_json["detail"].to_string().clone();

@@ -1,5 +1,6 @@
 /// The `NodeInterface` struct is defined which allows for interacting with an
 /// Ergo Node via Rust.
+use crate::JsonString;
 use ergo_lib::chain::ergo_box::ErgoBox;
 use ergo_offchain_utilities::{
     BlockHeight, NanoErg, P2PKAddressString, P2SAddressString, ScanID, TxId,
@@ -101,7 +102,7 @@ impl NodeInterface {
 
     /// Submits a Signed Transaction provided as input as JSON
     /// to the Ergo Blockchain mempool.
-    pub fn submit_transaction(&self, signed_tx_json: &JsonValue) -> Result<TxId> {
+    pub fn submit_transaction(&self, signed_tx_json: &JsonString) -> Result<TxId> {
         let endpoint = "/transactions";
         let res_json = self.use_json_endpoint_and_check_errors(endpoint, signed_tx_json)?;
 
@@ -113,7 +114,7 @@ impl NodeInterface {
     /// Generates Json of an Unsigned Transaction.
     /// Input must be a json formatted request with rawInputs (and rawDataInputs)
     /// manually selected or will be automatically selected by wallet.
-    pub fn generate_transaction(&self, tx_request_json: &JsonValue) -> Result<JsonValue> {
+    pub fn generate_transaction(&self, tx_request_json: &JsonString) -> Result<JsonValue> {
         let endpoint = "/wallet/transaction/generate";
         let res_json = self.use_json_endpoint_and_check_errors(endpoint, tx_request_json)?;
 
@@ -121,7 +122,7 @@ impl NodeInterface {
     }
 
     /// Sign an Unsigned Transaction which is formatted in JSON
-    pub fn sign_transaction(&self, unsigned_tx: &JsonValue) -> Result<JsonValue> {
+    pub fn sign_transaction(&self, unsigned_tx: &JsonString) -> Result<JsonValue> {
         let endpoint = "/wallet/transaction/sign";
         let res_json = self.use_json_endpoint_and_check_errors(endpoint, unsigned_tx)?;
 
@@ -132,7 +133,7 @@ impl NodeInterface {
     /// a json formatted request with rawInputs (and rawDataInputs)
     /// manually selected or inputs will be automatically selected by wallet.
     /// Returns the resulting `TxId`.
-    pub fn generate_and_submit_transaction(&self, tx_request_json: &JsonValue) -> Result<TxId> {
+    pub fn generate_and_submit_transaction(&self, tx_request_json: &JsonString) -> Result<TxId> {
         let endpoint = "/wallet/transaction/send";
         let res_json = self.use_json_endpoint_and_check_errors(endpoint, tx_request_json)?;
         // If tx is valid and is posted, return just the tx id
