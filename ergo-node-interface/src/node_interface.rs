@@ -22,6 +22,8 @@ pub enum NodeError {
     FailedParsingBox(String),
     #[error("No Boxes Were Found.")]
     NoBoxesFound,
+    #[error("An insufficient number of Ergs were found.")]
+    InsufficientErgsBalance(),
     #[error("Failed registering UTXO-set scan with the node: {0}")]
     FailedRegisteringScan(String),
     #[error("The node rejected the request you provided.\nNode Response: {0}")]
@@ -181,19 +183,7 @@ impl NodeInterface {
     /// Note: This box selection strategy simply uses the largest
     /// value holding boxes from the user's wallet first.
     pub fn unspent_boxes_with_min_total(&self, total: NanoErg) -> Result<Vec<ErgoBox>> {
-        let all_boxes = self.unspent_boxes_sorted()?;
-
-        let mut count = 0;
-        let filtered_boxes = all_boxes.into_iter().fold(vec![], |mut acc, b| {
-            if count >= total {
-                acc
-            } else {
-                count += b.value.as_u64();
-                acc.push(b);
-                acc
-            }
-        });
-        Ok(filtered_boxes)
+        self.consume_boxes_until_total(total, &self.unspent_boxes_sorted()?)
     }
 
     /// Returns a list of unspent boxes which cover at least the
@@ -201,18 +191,30 @@ impl NodeInterface {
     /// Note: This box selection strategy simply uses the oldest unspent
     /// boxes from the user's full node wallet first.
     pub fn unspent_boxes_with_min_total_by_age(&self, total: NanoErg) -> Result<Vec<ErgoBox>> {
-        let all_boxes = self.unspent_boxes()?;
+        self.consume_boxes_until_total(total, &self.unspent_boxes()?)
+    }
 
+    /// Given a `Vec<ErgoBox>`, consume each ErgoBox into a new list until
+    /// the `total` is reached. If there are an insufficient number of
+    /// nanoErgs in the provided `boxes` then it returns an error.
+    fn consume_boxes_until_total(
+        &self,
+        total: NanoErg,
+        boxes: &Vec<ErgoBox>,
+    ) -> Result<Vec<ErgoBox>> {
         let mut count = 0;
-        let filtered_boxes = all_boxes.into_iter().fold(vec![], |mut acc, b| {
+        let filtered_boxes = boxes.into_iter().fold(vec![], |mut acc, b| {
             if count >= total {
                 acc
             } else {
                 count += b.value.as_u64();
-                acc.push(b);
+                acc.push(b.clone());
                 acc
             }
         });
+        if count < total {
+            return Err(NodeError::InsufficientErgsBalance());
+        }
         Ok(filtered_boxes)
     }
 
