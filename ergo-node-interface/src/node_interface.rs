@@ -103,16 +103,7 @@ impl NodeInterface {
     /// manually selected or will be automatically selected by wallet.
     pub fn generate_transaction(&self, tx_request_json: &JsonValue) -> Result<JsonValue> {
         let endpoint = "/wallet/transaction/generate";
-        let body = json::stringify(tx_request_json.clone());
-        let res = self.send_post_req(endpoint, body);
-
-        let res_json = self.parse_response_to_json(res)?;
-        let error_details = res_json["detail"].to_string().clone();
-
-        // Check if send tx request failed and returned error json
-        if error_details != "null" {
-            return Err(NodeError::BadRequest(error_details));
-        }
+        let res_json = self.use_json_endpoint_and_check_errors(endpoint, tx_request_json)?;
 
         Ok(res_json)
     }
@@ -120,16 +111,7 @@ impl NodeInterface {
     /// Sign an Unsigned Transaction which is formatted in JSON
     pub fn sign_transaction(&self, unsigned_tx: &JsonValue) -> Result<JsonValue> {
         let endpoint = "/wallet/transaction/sign";
-        let body = json::stringify(unsigned_tx.clone());
-        let res = self.send_post_req(endpoint, body);
-
-        let res_json = self.parse_response_to_json(res)?;
-        let error_details = res_json["detail"].to_string().clone();
-
-        // Check if send tx request failed and returned error json
-        if error_details != "null" {
-            return Err(NodeError::BadRequest(error_details));
-        }
+        let res_json = self.use_json_endpoint_and_check_errors(endpoint, unsigned_tx)?;
 
         Ok(res_json)
     }
@@ -140,23 +122,10 @@ impl NodeInterface {
     /// Returns the resulting `TxId`.
     pub fn generate_and_send_transaction(&self, tx_request_json: &JsonValue) -> Result<TxId> {
         let endpoint = "/wallet/transaction/send";
-        let body = json::stringify(tx_request_json.clone());
-        let res = self.send_post_req(endpoint, body);
-
-        let res_json = self.parse_response_to_json(res)?;
-        let error_details = res_json["detail"].to_string().clone();
-
-        // Check if send tx request failed and returned error json
-        if error_details != "null" {
-            return Err(NodeError::BadRequest(error_details));
-        }
-        // Otherwise if tx is valid and is posted, return just the tx id
-        else {
-            // Clean string to be only the tx_id value
-            let tx_id = res_json.dump();
-
-            return Ok(tx_id);
-        }
+        let res_json = self.use_json_endpoint_and_check_errors(endpoint, tx_request_json)?;
+        // If tx is valid and is posted, return just the tx id
+        let tx_id = res_json.dump();
+        return Ok(tx_id);
     }
 
     /// Get all addresses from the node wallet
