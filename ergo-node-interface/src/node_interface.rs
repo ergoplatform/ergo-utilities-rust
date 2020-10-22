@@ -129,6 +129,15 @@ impl NodeInterface {
         Ok(res_json)
     }
 
+    /// Sign an Unsigned Transaction which is formatted in JSON
+    /// and then submit it to the mempool.
+    pub fn sign_and_submit_transaction(&self, unsigned_tx: &JsonString) -> Result<TxId> {
+        let signed_tx = self.sign_transaction(unsigned_tx)?;
+        let signed_tx_json = json::stringify(signed_tx);
+
+        self.submit_transaction(&signed_tx_json)
+    }
+
     /// Generates and submits a tx using the node endpoints. Input is
     /// a json formatted request with rawInputs (and rawDataInputs)
     /// manually selected or inputs will be automatically selected by wallet.
