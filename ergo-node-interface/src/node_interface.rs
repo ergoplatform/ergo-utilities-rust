@@ -5,8 +5,6 @@ use ergo_offchain_utilities::{
     BlockHeight, NanoErg, P2PKAddressString, P2SAddressString, ScanID, TxId,
 };
 use json::JsonValue;
-use reqwest::blocking::{RequestBuilder, Response};
-use reqwest::header::{HeaderValue, CONTENT_TYPE};
 use serde_json::from_str;
 use thiserror::Error;
 
@@ -58,7 +56,7 @@ impl NodeInterface {
     }
 
     /// Returns `http://ip:port` using `ip` and `port` from self
-    pub fn get_node_url(&self) -> String {
+    pub fn node_url(&self) -> String {
         "http://".to_string() + &self.ip + ":" + &self.port
     }
 
@@ -77,7 +75,7 @@ impl NodeInterface {
     }
 
     /// Using the `scan_id` of a registered scan, acquires unspent boxes which have been found by said scan
-    pub fn get_scan_boxes(&self, scan_id: &ScanID) -> Result<Vec<ErgoBox>> {
+    pub fn scan_boxes(&self, scan_id: &ScanID) -> Result<Vec<ErgoBox>> {
         let endpoint = "/scan/unspentBoxes/".to_string() + scan_id;
         let res = self.send_get_req(&endpoint);
         let res_json = self.parse_response_to_json(res)?;
@@ -101,7 +99,7 @@ impl NodeInterface {
     }
 
     /// Get all addresses from the node wallet
-    pub fn get_wallet_addresses(&self) -> Result<Vec<P2PKAddressString>> {
+    pub fn wallet_addresses(&self) -> Result<Vec<P2PKAddressString>> {
         let endpoint = "/wallet/addresses";
         let res = self.send_get_req(endpoint)?;
 
@@ -124,7 +122,7 @@ impl NodeInterface {
 
     /// A CLI interactive interface for prompting a user to select an address
     pub fn select_wallet_address(&self) -> Result<P2PKAddressString> {
-        let address_list = self.get_wallet_addresses()?;
+        let address_list = self.wallet_addresses()?;
         if address_list.len() == 1 {
             return Ok(address_list[0].clone());
         }
@@ -339,8 +337,8 @@ impl NodeInterface {
         self.serialized_box_from_id(&b.box_id().into())
     }
 
-    /// Given a box id return the given box (which must be part of the UTXO-set) as
-    /// a serialized string in Base16 encoding
+    /// Given a box id return the given box (which must be part of the
+    /// UTXO-set) as a serialized string in Base16 encoding
     pub fn serialized_box_from_id(&self, box_id: &String) -> Result<String> {
         let endpoint = "/utxo/byIdBinary/".to_string() + box_id;
         let res = self.send_get_req(&endpoint);
@@ -349,7 +347,7 @@ impl NodeInterface {
         Ok(res_json["bytes"].to_string().clone())
     }
 
-    /// Get the current block height of the chain
+    /// Get the current block height of the blockchain
     pub fn current_block_height(&self) -> Result<BlockHeight> {
         let endpoint = "/info";
         let res = self.send_get_req(&endpoint);
@@ -366,50 +364,5 @@ impl NodeInterface {
                 .parse()
                 .map_err(|_| NodeError::FailedParsingNodeResponse(res_json.to_string()));
         }
-    }
-
-    /// Builds a `HeaderValue` to use for requests with the api key specified
-    fn get_node_api_header(&self) -> HeaderValue {
-        match HeaderValue::from_str(&self.api_key) {
-            Ok(k) => k,
-            _ => HeaderValue::from_static("None"),
-        }
-    }
-
-    /// Sets required headers for a request
-    fn set_req_headers(&self, rb: RequestBuilder) -> RequestBuilder {
-        rb.header("accept", "application/json")
-            .header("api_key", self.get_node_api_header())
-            .header(CONTENT_TYPE, "application/json")
-    }
-
-    /// Sends a GET request to the Ergo node
-    fn send_get_req(&self, endpoint: &str) -> Result<Response> {
-        let url = self.get_node_url().to_owned() + endpoint;
-        let client = reqwest::blocking::Client::new().get(&url);
-        self.set_req_headers(client)
-            .send()
-            .map_err(|_| NodeError::NodeUnreachable)
-    }
-
-    /// Sends a POST request to the Ergo node
-    fn send_post_req(&self, endpoint: &str, body: String) -> Result<Response> {
-        let url = self.get_node_url().to_owned() + endpoint;
-        let client = reqwest::blocking::Client::new().post(&url);
-        self.set_req_headers(client)
-            .body(body)
-            .send()
-            .map_err(|_| NodeError::NodeUnreachable)
-    }
-
-    /// Parses response from node into JSON
-    fn parse_response_to_json(&self, resp: Result<Response>) -> Result<JsonValue> {
-        let text = resp?.text().map_err(|_| {
-            NodeError::FailedParsingNodeResponse(
-                "Node Response Not Parseable into Text.".to_string(),
-            )
-        })?;
-        let json = json::parse(&text).map_err(|_| NodeError::FailedParsingNodeResponse(text))?;
-        Ok(json)
     }
 }

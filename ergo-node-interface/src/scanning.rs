@@ -47,7 +47,7 @@ impl Scan {
 
     /// Returns all `ErgoBox`es found by the scan
     pub fn get_boxes(&self) -> Result<Vec<ErgoBox>> {
-        let boxes = self.node_interface.get_scan_boxes(&self.id)?;
+        let boxes = self.node_interface.scan_boxes(&self.id)?;
         Ok(boxes)
     }
 
