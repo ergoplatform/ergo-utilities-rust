@@ -98,6 +98,31 @@ impl NodeInterface {
         Ok(box_list)
     }
 
+    /// Generates (and sends) a tx using the node endpoints.
+    /// Input must be a json formatted request with rawInputs (and rawDataInputs)
+    /// manually selected or will be automatically selected by wallet.
+    /// Returns the resulting `TxId`.
+    pub fn generate_and_send_transaction(&self, tx_request_json: &JsonValue) -> Result<TxId> {
+        let endpoint = "/wallet/transaction/send";
+        let body = json::stringify(tx_request_json.clone());
+        let res = self.send_post_req(endpoint, body);
+
+        let res_json = self.parse_response_to_json(res)?;
+        let error_details = res_json["detail"].to_string().clone();
+
+        // Check if send tx request failed and returned error json
+        if error_details != "null" {
+            return Err(NodeError::BadRequest(error_details));
+        }
+        // Otherwise if tx is valid and is posted, return just the tx id
+        else {
+            // Clean string to be only the tx_id value
+            let tx_id = res_json.dump();
+
+            return Ok(tx_id);
+        }
+    }
+
     /// Get all addresses from the node wallet
     pub fn wallet_addresses(&self) -> Result<Vec<P2PKAddressString>> {
         let endpoint = "/wallet/addresses";
@@ -243,31 +268,6 @@ impl NodeInterface {
     pub fn serialized_highest_value_unspent_box(&self) -> Result<String> {
         let ergs_box_id: String = self.highest_value_unspent_box()?.box_id().into();
         self.serialized_box_from_id(&ergs_box_id)
-    }
-
-    /// Generates (and sends) a tx using the node endpoints.
-    /// Input must be a json formatted request with rawInputs (and rawDataInputs)
-    /// manually selected or will be automatically selected by wallet.
-    /// Returns the resulting `TxId`.
-    pub fn send_transaction(&self, tx_request_json: &JsonValue) -> Result<TxId> {
-        let endpoint = "/wallet/transaction/send";
-        let body = json::stringify(tx_request_json.clone());
-        let res = self.send_post_req(endpoint, body);
-
-        let res_json = self.parse_response_to_json(res)?;
-        let error_details = res_json["detail"].to_string().clone();
-
-        // Check if send tx request failed and returned error json
-        if error_details != "null" {
-            return Err(NodeError::BadRequest(error_details));
-        }
-        // Otherwise if tx is valid and is posted, return just the tx id
-        else {
-            // Clean string to be only the tx_id value
-            let tx_id = res_json.dump();
-
-            return Ok(tx_id);
-        }
     }
 
     /// Given a P2S Ergo address, extract the hex-encoded serialized ErgoTree (script)
