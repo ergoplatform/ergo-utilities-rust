@@ -98,6 +98,25 @@ impl NodeInterface {
         Ok(box_list)
     }
 
+    /// Generates Json of an Unsigned Transaction.
+    /// Input must be a json formatted request with rawInputs (and rawDataInputs)
+    /// manually selected or will be automatically selected by wallet.
+    pub fn generate_transaction(&self, tx_request_json: &JsonValue) -> Result<JsonValue> {
+        let endpoint = "/wallet/transaction/send";
+        let body = json::stringify(tx_request_json.clone());
+        let res = self.send_post_req(endpoint, body);
+
+        let res_json = self.parse_response_to_json(res)?;
+        let error_details = res_json["detail"].to_string().clone();
+
+        // Check if send tx request failed and returned error json
+        if error_details != "null" {
+            return Err(NodeError::BadRequest(error_details));
+        }
+
+        Ok(res_json)
+    }
+
     /// Generates (and sends) a tx using the node endpoints.
     /// Input must be a json formatted request with rawInputs (and rawDataInputs)
     /// manually selected or will be automatically selected by wallet.
