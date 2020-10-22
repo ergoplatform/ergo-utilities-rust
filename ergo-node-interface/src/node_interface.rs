@@ -101,11 +101,13 @@ impl NodeInterface {
 
     /// Submits a Signed Transaction provided as input as JSON
     /// to the Ergo Blockchain mempool.
-    pub fn submit_transaction(&self, signed_tx_json: &JsonValue) -> Result<JsonValue> {
+    pub fn submit_transaction(&self, signed_tx_json: &JsonValue) -> Result<TxId> {
         let endpoint = "/transactions";
         let res_json = self.use_json_endpoint_and_check_errors(endpoint, signed_tx_json)?;
 
-        Ok(res_json)
+        // If tx is valid and is posted, return just the tx id
+        let tx_id = res_json.dump();
+        return Ok(tx_id);
     }
 
     /// Generates Json of an Unsigned Transaction.
