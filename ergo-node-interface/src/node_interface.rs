@@ -60,7 +60,8 @@ impl NodeInterface {
         "http://".to_string() + &self.ip + ":" + &self.port
     }
 
-    /// Registers a scan with the node and either returns the `scan_id` or an error
+    /// Registers a scan with the node and either returns the `scan_id`
+    /// or an error
     pub fn register_scan(&self, scan_json: &JsonValue) -> Result<ScanID> {
         let endpoint = "/scan/register";
         let body = scan_json.clone().to_string();
@@ -96,6 +97,15 @@ impl NodeInterface {
             }
         }
         Ok(box_list)
+    }
+
+    /// Submits a Signed Transaction provided as input as JSON
+    /// to the Ergo Blockchain mempool.
+    pub fn submit_transaction(&self, signed_tx_json: &JsonValue) -> Result<JsonValue> {
+        let endpoint = "/transactions";
+        let res_json = self.use_json_endpoint_and_check_errors(endpoint, signed_tx_json)?;
+
+        Ok(res_json)
     }
 
     /// Generates Json of an Unsigned Transaction.
