@@ -126,11 +126,11 @@ impl NodeInterface {
         Ok(res_json)
     }
 
-    /// Generates (and sends) a tx using the node endpoints.
-    /// Input must be a json formatted request with rawInputs (and rawDataInputs)
-    /// manually selected or will be automatically selected by wallet.
+    /// Generates and submits a tx using the node endpoints. Input is
+    /// a json formatted request with rawInputs (and rawDataInputs)
+    /// manually selected or inputs will be automatically selected by wallet.
     /// Returns the resulting `TxId`.
-    pub fn generate_and_send_transaction(&self, tx_request_json: &JsonValue) -> Result<TxId> {
+    pub fn generate_and_submit_transaction(&self, tx_request_json: &JsonValue) -> Result<TxId> {
         let endpoint = "/wallet/transaction/send";
         let res_json = self.use_json_endpoint_and_check_errors(endpoint, tx_request_json)?;
         // If tx is valid and is posted, return just the tx id
