@@ -145,7 +145,8 @@ pub fn address_string_to_ergo_tree(address_str: &ErgoAddressString) -> Result<Er
     let address = encoder
         .parse_address_from_str(address_str)
         .map_err(|_| EncodingError::FailedToSerialize(address_str.to_string()))?;
-    let ergo_tree = ErgoTree::sigma_parse_bytes(address.content_bytes())
+    let ergo_tree = address
+        .script()
         .map_err(|_| EncodingError::FailedToSerialize(address_str.to_string()))?;
     Ok(ergo_tree)
 }
