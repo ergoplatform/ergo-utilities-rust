@@ -122,17 +122,24 @@ impl NodeInterface {
     }
 
     /// Sign an Unsigned Transaction which is formatted in JSON
-    pub fn sign_transaction(&self, unsigned_tx: &JsonString) -> Result<JsonValue> {
+    pub fn sign_transaction(&self, unsigned_tx_string: &JsonString) -> Result<JsonValue> {
         let endpoint = "/wallet/transaction/sign";
-        let res_json = self.use_json_endpoint_and_check_errors(endpoint, unsigned_tx)?;
+        let unsigned_tx_json = json::parse(&unsigned_tx_string)
+            .map_err(|_| NodeError::FailedParsingNodeResponse(unsigned_tx_string.to_string()))?;
+
+        let prepared_body = object! {
+            tx: unsigned_tx_json
+        };
+
+        let res_json = self.use_json_endpoint_and_check_errors(endpoint, &prepared_body.dump())?;
 
         Ok(res_json)
     }
 
     /// Sign an Unsigned Transaction which is formatted in JSON
     /// and then submit it to the mempool.
-    pub fn sign_and_submit_transaction(&self, unsigned_tx: &JsonString) -> Result<TxId> {
-        let signed_tx = self.sign_transaction(unsigned_tx)?;
+    pub fn sign_and_submit_transaction(&self, unsigned_tx_string: &JsonString) -> Result<TxId> {
+        let signed_tx = self.sign_transaction(unsigned_tx_string)?;
         let signed_tx_json = json::stringify(signed_tx);
 
         self.submit_transaction(&signed_tx_json)
