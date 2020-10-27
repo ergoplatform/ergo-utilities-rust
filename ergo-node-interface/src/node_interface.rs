@@ -383,13 +383,29 @@ impl NodeInterface {
         Ok(res_json["bytes"].to_string().clone())
     }
 
+    /// Get the current nanoErgs balance held in the Ergo Node wallet
+    pub fn wallet_nano_ergs_balance(&self) -> Result<NanoErg> {
+        let endpoint = "/wallet/balances";
+        let res = self.send_get_req(&endpoint);
+        let res_json = self.parse_response_to_json(res)?;
+
+        let balance = res_json["balance"].clone();
+
+        if balance.is_null() {
+            return Err(NodeError::NodeSyncing);
+        } else {
+            return balance
+                .as_u64()
+                .ok_or(NodeError::FailedParsingNodeResponse(res_json.to_string()));
+        }
+    }
+
     /// Get the current block height of the blockchain
     pub fn current_block_height(&self) -> Result<BlockHeight> {
         let endpoint = "/info";
         let res = self.send_get_req(&endpoint);
         let res_json = self.parse_response_to_json(res)?;
 
-        // Switched from fullHeight to height to prevent errors when node is syncing headers. Need to ensure this still works as expected.
         let height_json = res_json["fullHeight"].clone();
 
         if height_json.is_null() {
