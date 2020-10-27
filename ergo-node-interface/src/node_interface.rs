@@ -348,6 +348,7 @@ impl NodeInterface {
         let endpoint = "/utxo/byIdBinary/".to_string() + box_id;
         let res = self.send_get_req(&endpoint);
         let res_json = self.parse_response_to_json(res)?;
+        println!("res Json: {}", res_json.pretty(2));
 
         if let Some(ergo_box) = from_str(&res_json.to_string()).ok() {
             return Ok(ergo_box);
