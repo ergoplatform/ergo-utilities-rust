@@ -61,45 +61,6 @@ impl NodeInterface {
         "http://".to_string() + &self.ip + ":" + &self.port
     }
 
-    /// Registers a scan with the node and either returns the `scan_id`
-    /// or an error
-    pub fn register_scan(&self, scan_json: &JsonValue) -> Result<ScanID> {
-        let endpoint = "/scan/register";
-        let body = scan_json.clone().to_string();
-        let res = self.send_post_req(endpoint, body);
-        let res_json = self.parse_response_to_json(res)?;
-
-        if res_json["error"].is_null() {
-            return Ok(res_json["scanId"].to_string().clone());
-        } else {
-            return Err(NodeError::BadRequest(res_json["error"].to_string()));
-        }
-    }
-
-    /// Using the `scan_id` of a registered scan, acquires unspent boxes which have been found by said scan
-    pub fn scan_boxes(&self, scan_id: &ScanID) -> Result<Vec<ErgoBox>> {
-        let endpoint = "/scan/unspentBoxes/".to_string() + scan_id;
-        let res = self.send_get_req(&endpoint);
-        let res_json = self.parse_response_to_json(res)?;
-
-        let mut box_list = vec![];
-        for i in 0.. {
-            let box_json = &res_json[i]["box"];
-            if box_json.is_null() {
-                break;
-            } else {
-                let res_ergo_box = from_str(&box_json.to_string());
-                if let Ok(ergo_box) = res_ergo_box {
-                    box_list.push(ergo_box);
-                } else if let Err(e) = res_ergo_box {
-                    let mess = format!("Box Json: {}\nError: {:?}", box_json.to_string(), e);
-                    return Err(NodeError::FailedParsingBox(mess));
-                }
-            }
-        }
-        Ok(box_list)
-    }
-
     /// Submits a Signed Transaction provided as input as JSON
     /// to the Ergo Blockchain mempool.
     pub fn submit_transaction(&self, signed_tx_json: &JsonString) -> Result<TxId> {
