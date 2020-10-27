@@ -162,7 +162,7 @@ impl NodeInterface {
     /// scan.
     pub fn add_box_to_scan(&self, scan_id: &ScanID, box_id: &String) -> Result<()> {
         let ergo_box = serde_json::to_string(&self.box_from_id(box_id)?)
-            .map_err(|_| Err(NodeError::FailedParsingBox(box_id.clone())))?;
+            .map_err(|_| NodeError::FailedParsingBox(box_id.clone()))?;
 
         let endpoint = "/scan/addBox";
         let body = object! {
