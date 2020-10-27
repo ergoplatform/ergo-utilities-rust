@@ -1,3 +1,4 @@
+pub mod box_spec;
 pub mod predicated_boxes;
 // pub mod stage;
 
