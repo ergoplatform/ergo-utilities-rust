@@ -164,9 +164,13 @@ impl NodeInterface {
         let ergo_box = serde_json::to_string(&self.box_from_id(box_id)?)
             .map_err(|_| NodeError::FailedParsingBox(box_id.clone()))?;
 
+        let scan_id_int: u64 = scan_id
+            .parse()
+            .map_err(|_| NodeError::Other("Scan ID was not a valid integer number.".to_string()))?;
+
         let endpoint = "/scan/addBox";
         let body = object! {
-            "scanIds": vec![box_id.clone()],
+            "scanIds": vec![scan_id_int],
             "box": ergo_box,
         };
 

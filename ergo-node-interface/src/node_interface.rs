@@ -2,9 +2,7 @@
 /// Ergo Node via Rust.
 use crate::JsonString;
 use ergo_lib::chain::ergo_box::ErgoBox;
-use ergo_offchain_utilities::{
-    BlockHeight, NanoErg, P2PKAddressString, P2SAddressString, ScanID, TxId,
-};
+use ergo_offchain_utilities::{BlockHeight, NanoErg, P2PKAddressString, P2SAddressString, TxId};
 use json::JsonValue;
 use serde_json::from_str;
 use thiserror::Error;
