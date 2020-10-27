@@ -1,11 +1,14 @@
 pub use ergo_lib::ast::Constant;
 use ergo_lib::chain::address::{Address, AddressEncoder, NetworkPrefix};
 pub use ergo_lib::chain::ergo_box::ErgoBox;
-pub use ergo_lib::chain::token::TokenAmount;
+pub use ergo_lib::chain::token::{TokenAmount, TokenId};
 use ergo_lib::serialization::serializable::SigmaSerializable;
 use ergo_lib::ErgoTree;
+use ergo_offchain_utilities::{ErgoAddressString, NanoErg};
 use std::ops::Range;
 use thiserror::Error;
+
+pub type Result<T> = std::result::Result<T, BoxVerificationError>;
 
 #[derive(Error, Debug)]
 pub enum BoxVerificationError {
@@ -21,36 +24,21 @@ pub enum BoxVerificationError {
     LessRegistersThanPredicates,
     #[error("One of the register predicates failed for the provided box.")]
     FailedRegisterSpec,
-}
-/// A predicate which takes a `Constant` value from an `ErgoBox` register and
-/// evaluates the validity of said value. This is a function which is
-/// implemented by the developer to verify that a given register holds data
-/// which is allowed within the protocol.
-#[derive(Clone)]
-pub struct RegisterSpec {
-    predicate: fn(&Constant) -> bool,
-}
-impl RegisterSpec {
-    pub fn new(predicate: fn(&Constant) -> bool) -> Self {
-        RegisterSpec {
-            predicate: predicate,
-        }
-    }
+    #[error("The provided TokenId is invalid.")]
+    InvalidTokenId,
 }
 
-/// A predicate which takes a `TokenAmount` value and
-/// evaluates the validity of said tokens. This predicate is a function which
-/// is implemented by the developer to verify that a given token has the right
-/// token id + the correct amount.
 #[derive(Clone)]
 pub struct TokenSpec {
-    predicate: fn(&TokenAmount) -> bool,
+    pub value_range: Range<NanoErg>,
+    pub token_id: String,
 }
 impl TokenSpec {
-    pub fn new(predicate: fn(&TokenAmount) -> bool) -> Self {
-        TokenSpec {
-            predicate: predicate,
-        }
+    pub fn new(value_range: Range<NanoErg>, token_id: &str) -> Result<Self> {
+        Ok(TokenSpec {
+            value_range: value_range,
+            token_id: token_id.to_string(),
+        })
     }
 }
 
@@ -60,15 +48,33 @@ impl TokenSpec {
 /// Stages in multi-stage smart contract protocols, but can also be used
 /// to define input boxes for Actions.
 pub struct BoxSpec {
-    /// The P2S smart contract as `ErgoTree`
+    /// The script that locks said box as a `ErgoTree`
     pub ergo_tree: ErgoTree,
     /// The allowed range of nanoErgs
-    pub value_range: Range<i64>,
-    /// A sorted list of `RegisterSpec`s which define registers
+    pub value_range: Range<NanoErg>,
+    /// A sorted list of `Constant`s which define registers
     /// of an `ErgoBox`.
     /// First element is treated as R4, second as R5, and so on.
-    pub registers: Vec<RegisterSpec>,
+    pub registers: Vec<Constant>,
     /// A sorted list of `TokenSpec`s which define tokens
     /// of an `ErgoBox`.
-    pub token_predicates: Vec<TokenSpec>,
+    pub tokens: Vec<TokenSpec>,
+}
+
+impl BoxSpec {
+    pub fn address_string(&self) -> ErgoAddressString {
+        todo!()
+    }
+
+    pub fn utxo_scan_json(&self) {
+        todo!()
+    }
+
+    pub fn verify_box(&self, ergo_box: ErgoBox) -> bool {
+        todo!()
+    }
+
+    pub fn find_boxes_in_explorer(&self) -> Vec<ErgoBox> {
+        todo!()
+    }
 }
