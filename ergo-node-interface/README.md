@@ -19,6 +19,12 @@ Node Interface
 --------------
 This module contains the core `NodeInterface` struct which is used to interact with an Ergo Node. All endpoints are implemented as methods for the `NodeInterface` struct.
 
+
+```rust
+let node = NodeInterface::new(api_key, ip, port);
+println!("Current height: {}", node.current_block_height());
+```
+
 Furthermore a number of helper methods are implemented as well, such as:
 
 ```rust
