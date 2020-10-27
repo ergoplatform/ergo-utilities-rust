@@ -41,7 +41,7 @@ pub fn unspent_boxes_with_min_total(&self, total: NanoErg) -> Result<Vec<ErgoBox
 ```
 
 Scanning
---------------
+---------
 This module contains the `Scan` struct which allows a developer to easily work with UTXO-set scans. Each `Scan` is tied to a specific `NodeInterface`, which matches the reality as scans are saved on a per-node basis.
 
 The `Scan` struct provides you with the ability to easily:
@@ -68,7 +68,20 @@ let scan = Scan::register(
 ```
 
 
+Local Config
+------------
+This module provides a few helper functions to save/read from a local `node-interface.yaml` file which holds the Ergo Node ip/port/api key. This makes it much quicker for a dApp developer to get their dApp running without having to manually implement such logic himself.
 
+Example functions which are available:
+
+```rust
+/// Create a new `node-interface.config` with the barebones yaml inside
+pub fn create_new_local_config_file() -> Result<()>
+
+/// Opens a local `node-interface.yaml` file and uses the
+/// data inside to create a `NodeInterface`
+pub fn new_interface_from_local_config() -> Result<NodeInterface> {
+```
 
 
 
@@ -77,4 +90,4 @@ let scan = Scan::register(
 
 Contributing
 ============
-If you find a mistake, add a new endpoint, or wish to include a novel feature, please feel free to submit a PR.
+If you find a mistake, want to add a new endpoint, or wish to include a novel feature, please feel free to submit a PR.
