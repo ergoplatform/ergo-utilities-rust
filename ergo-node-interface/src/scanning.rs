@@ -117,6 +117,7 @@ impl Scan {
     }
 }
 
+/// Scanning-related endpoints
 impl NodeInterface {
     /// Registers a scan with the node and either returns the `scan_id`
     /// or an error
@@ -155,5 +156,27 @@ impl NodeInterface {
             }
         }
         Ok(box_list)
+    }
+
+    /// Using the `scan_id` of a registered scan, manually adds a box to said
+    /// scan.
+    pub fn add_box_to_scan(&self, scan_id: &ScanID, box_id: &String) -> Result<()> {
+        let ergo_box = serde_json::to_string(&self.box_from_id(box_id)?)
+            .map_err(|_| Err(NodeError::FailedParsingBox(box_id.clone())))?;
+
+        let endpoint = "/scan/addBox";
+        let body = object! {
+            "scanIds": vec![box_id.clone()],
+            "box": ergo_box,
+        };
+
+        let res = self.send_post_req(endpoint, body.to_string());
+        let res_json = self.parse_response_to_json(res)?;
+
+        if res_json["error"].is_null() {
+            return Ok(());
+        } else {
+            return Err(NodeError::BadRequest(res_json["error"].to_string()));
+        }
     }
 }
