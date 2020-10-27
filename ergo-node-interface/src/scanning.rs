@@ -160,7 +160,7 @@ impl NodeInterface {
 
     /// Using the `scan_id` of a registered scan, manually adds a box to said
     /// scan.
-    pub fn add_box_to_scan(&self, scan_id: &ScanID, box_id: &String) -> Result<()> {
+    pub fn add_box_to_scan(&self, scan_id: &ScanID, box_id: &String) -> Result<String> {
         let ergo_box = serde_json::to_string(&self.box_from_id(box_id)?)
             .map_err(|_| NodeError::FailedParsingBox(box_id.clone()))?;
 
@@ -174,7 +174,7 @@ impl NodeInterface {
         let res_json = self.parse_response_to_json(res)?;
 
         if res_json["error"].is_null() {
-            return Ok(());
+            return Ok(res_json.to_string());
         } else {
             return Err(NodeError::BadRequest(res_json["error"].to_string()));
         }
