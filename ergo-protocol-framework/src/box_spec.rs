@@ -4,9 +4,12 @@ pub use ergo_lib::chain::ergo_box::ErgoBox;
 pub use ergo_lib::chain::token::{TokenAmount, TokenId};
 use ergo_lib::serialization::serializable::SigmaSerializable;
 use ergo_lib::ErgoTree;
+use ergo_lib_wasm::box_coll::ErgoBoxes;
+use ergo_lib_wasm::ergo_box::ErgoBox as WErgoBox;
 use ergo_offchain_utilities::{ErgoAddressString, NanoErg};
 use std::ops::Range;
 use thiserror::Error;
+use wasm_bindgen::prelude::*;
 
 pub type Result<T> = std::result::Result<T, BoxVerificationError>;
 
@@ -28,10 +31,11 @@ pub enum BoxVerificationError {
     InvalidTokenId,
 }
 
+#[wasm_bindgen]
 #[derive(Clone)]
 pub struct TokenSpec {
-    pub value_range: Range<NanoErg>,
-    pub token_id: String,
+    value_range: Range<NanoErg>,
+    token_id: String,
 }
 impl TokenSpec {
     pub fn new(value_range: Range<NanoErg>, token_id: &str) -> Result<Self> {
@@ -47,29 +51,50 @@ impl TokenSpec {
 /// `ErgoBox`es which match the spec. This is often used for defining
 /// Stages in multi-stage smart contract protocols, but can also be used
 /// to define input boxes for Actions.
+#[wasm_bindgen]
+#[derive(Clone)]
 pub struct BoxSpec {
     /// The script that locks said box as a `ErgoTree`
-    pub ergo_tree: ErgoTree,
+    ergo_tree: ErgoTree,
     /// The allowed range of nanoErgs
-    pub value_range: Range<NanoErg>,
+    value_range: Range<NanoErg>,
     /// A sorted list of `Constant`s which define registers
     /// of an `ErgoBox`.
     /// First element is treated as R4, second as R5, and so on.
-    pub registers: Vec<Constant>,
+    registers: Vec<Constant>,
     /// A sorted list of `TokenSpec`s which define tokens
     /// of an `ErgoBox`.
-    pub tokens: Vec<TokenSpec>,
+    tokens: Vec<TokenSpec>,
 }
 
+#[wasm_bindgen]
 impl BoxSpec {
+    #[wasm_bindgen]
+    /// Acquire the address of the `BoxSpec` based on the `ErgoTree` inside
+    /// of the struct.
     pub fn address_string(&self) -> ErgoAddressString {
-        todo!()
+        let address = Address::P2S(self.ergo_tree.sigma_serialise_bytes());
+        let encoder = AddressEncoder::new(NetworkPrefix::Mainnet);
+        encoder.address_to_str(&address)
     }
 
+    #[wasm_bindgen]
     pub fn utxo_scan_json(&self) {
         todo!()
     }
 
+    #[wasm_bindgen]
+    pub fn w_verify_box(&self, ergo_box: WErgoBox) -> bool {
+        todo!()
+    }
+
+    #[wasm_bindgen]
+    pub fn w_find_boxes_in_explorer(&self) -> ErgoBoxes {
+        todo!()
+    }
+}
+
+impl BoxSpec {
     pub fn verify_box(&self, ergo_box: ErgoBox) -> bool {
         todo!()
     }
