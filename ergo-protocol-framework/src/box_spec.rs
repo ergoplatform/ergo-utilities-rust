@@ -16,23 +16,23 @@ pub enum BoxVerificationError {
     #[error("The number of token predicates defined for your `StageChecker` are greater than the number of unique tokens held in the box. In other words, the box holds an insufficient number of different types of tokens.")]
     LessTokensThanPredicates,
     #[error("One of the token predicates failed for the provided box.")]
-    FailedTokenPredicate,
+    FailedTokenSpec,
     #[error("The number of register predicates defined for your `StageChecker` are greater than the number of registers used in the box.")]
     LessRegistersThanPredicates,
     #[error("One of the register predicates failed for the provided box.")]
-    FailedRegisterPredicate,
+    FailedRegisterSpec,
 }
 /// A predicate which takes a `Constant` value from an `ErgoBox` register and
 /// evaluates the validity of said value. This is a function which is
 /// implemented by the developer to verify that a given register holds data
 /// which is allowed within the protocol.
 #[derive(Clone)]
-pub struct RegisterPredicate {
+pub struct RegisterSpec {
     predicate: fn(&Constant) -> bool,
 }
-impl RegisterPredicate {
+impl RegisterSpec {
     pub fn new(predicate: fn(&Constant) -> bool) -> Self {
-        RegisterPredicate {
+        RegisterSpec {
             predicate: predicate,
         }
     }
@@ -43,12 +43,12 @@ impl RegisterPredicate {
 /// is implemented by the developer to verify that a given token has the right
 /// token id + the correct amount.
 #[derive(Clone)]
-pub struct TokenPredicate {
+pub struct TokenSpec {
     predicate: fn(&TokenAmount) -> bool,
 }
-impl TokenPredicate {
+impl TokenSpec {
     pub fn new(predicate: fn(&TokenAmount) -> bool) -> Self {
-        TokenPredicate {
+        TokenSpec {
             predicate: predicate,
         }
     }
@@ -64,13 +64,11 @@ pub struct BoxSpec {
     pub ergo_tree: ErgoTree,
     /// The allowed range of nanoErgs
     pub value_range: Range<i64>,
-    /// A sorted list of `RegisterPredicate`s which are used to
-    /// evaluate values within registers of a box.
-    /// First predicate will be used for R4, second for R5, and so on.
-    pub register_predicates: Vec<RegisterPredicate>,
-    /// A sorted list of `TokenPredicate`s which are used to
-    /// evaluate `TokenAmount`s in an `ErgoBox`.
-    /// First predicate will be used for the first `TokenAmount`, second for
-    /// the second `TokenAmount`, and so on.
-    pub token_predicates: Vec<TokenPredicate>,
+    /// A sorted list of `RegisterSpec`s which define registers
+    /// of an `ErgoBox`.
+    /// First element is treated as R4, second as R5, and so on.
+    pub registers: Vec<RegisterSpec>,
+    /// A sorted list of `TokenSpec`s which define tokens
+    /// of an `ErgoBox`.
+    pub token_predicates: Vec<TokenSpec>,
 }
