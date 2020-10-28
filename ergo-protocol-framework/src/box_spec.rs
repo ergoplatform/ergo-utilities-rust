@@ -86,7 +86,11 @@ impl BoxSpec {
     }
 
     #[wasm_bindgen]
-    pub fn w_find_boxes_in_explorer(&self) -> ErgoBoxes {
+    pub fn w_find_boxes_in_explorer(&self, explorer_api_url: &str) -> ErgoBoxes {
+        // Look into these pages to figure out requests:
+        // - https://www.fpcomplete.com/blog/serverless-rust-wasm-cloudflare/
+        // - https://rustwasm.github.io/docs/wasm-bindgen/examples/fetch.html
+
         todo!()
     }
 }
@@ -130,11 +134,15 @@ impl BoxSpec {
     /// `explorer_api_url` must be formatted as such:
     /// `https://api.ergoplatform.com/api/v0/`
     pub fn find_boxes_in_explorer(&self, explorer_api_url: &str) -> Vec<ErgoBox> {
-        let endpoint = explorer_api_url.to_string()
+        let url = explorer_api_url.to_string()
             + "transactions/boxes/byAddress/unspent/"
             + &self.address_string();
 
-        println!("Endpoint: {}", endpoint);
+        println!("Endpoint: {}", url);
+
+        let client = reqwest::blocking::Client::new().get(&url);
+        let resp = client.send().unwrap();
+        println!("Resp Text: {}", resp.text().unwrap());
         vec![]
     }
 }
@@ -166,5 +174,7 @@ mod tests {
         let box_spec = BoxSpec::new(address, value_range, registers, tokens).unwrap();
 
         box_spec.find_boxes_in_explorer("https://api.ergoplatform.com/api/v0/");
+
+        assert!(1 == 2)
     }
 }

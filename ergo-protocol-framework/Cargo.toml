@@ -17,3 +17,4 @@ ergo-lib         = { git = "https://github.com/ergoplatform/sigma-rust/", branch
 ergo-lib-wasm         = { git = "https://github.com/ergoplatform/sigma-rust/", branch = "develop" }
 serde_json          = "1.0.58"
 wasm-bindgen        = "0.2.68"
+reqwest             = { version = "0.10", features = ["blocking"] }
