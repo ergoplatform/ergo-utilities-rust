@@ -108,7 +108,7 @@ pub fn deserialize_p2s_to_ergo_tree(p2s_address: P2SAddressString) -> Result<Erg
 
 /// Acquire the Base58 encoded P2S Address from a `ErgoTree`
 pub fn serialize_p2s_from_ergo_tree(ergo_tree: ErgoTree) -> P2SAddressString {
-    let address = Address::P2S(ergo_tree.sigma_serialise_bytes());
+    let address = Address::P2S(ergo_tree.sigma_serialize_bytes());
     let encoder = AddressEncoder::new(NetworkPrefix::Mainnet);
     encoder.address_to_str(&address)
 }
