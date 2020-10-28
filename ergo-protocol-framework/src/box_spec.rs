@@ -8,6 +8,7 @@ use ergo_lib_wasm::box_coll::ErgoBoxes;
 use ergo_lib_wasm::ergo_box::ErgoBox as WErgoBox;
 use ergo_offchain_utilities::encoding::address_string_to_ergo_tree;
 use ergo_offchain_utilities::{ErgoAddressString, NanoErg};
+use serde_json::from_str;
 use std::ops::Range;
 use thiserror::Error;
 use wasm_bindgen::prelude::*;
@@ -26,6 +27,8 @@ pub enum ProtocolFrameworkError {
     FailedRegisterSpec,
     #[error("The provided TokenId is invalid.")]
     InvalidTokenId,
+    #[error("{0}")]
+    Other(String),
 }
 
 #[wasm_bindgen]
@@ -114,6 +117,7 @@ impl BoxSpec {
         Err(ProtocolFrameworkError::InvalidAddress)
     }
 
+    /// Verify that a provided `ErgoBox` matches the spec
     pub fn verify_box(&self, ergo_box: ErgoBox) -> Result<()> {
         let address_check = match self.ergo_tree == ergo_box.ergo_tree {
             true => Ok(()),
@@ -133,7 +137,7 @@ impl BoxSpec {
     /// the Ergo Explorer Backend.
     /// `explorer_api_url` must be formatted as such:
     /// `https://api.ergoplatform.com/api/v0/`
-    pub fn find_boxes_in_explorer(&self, explorer_api_url: &str) -> Vec<ErgoBox> {
+    pub fn find_boxes_in_explorer(&self, explorer_api_url: &str) -> Result<Vec<ErgoBox>> {
         let url = explorer_api_url.to_string()
             + "transactions/boxes/byAddress/unspent/"
             + &self.address_string();
@@ -141,9 +145,55 @@ impl BoxSpec {
         println!("Endpoint: {}", url);
 
         let client = reqwest::blocking::Client::new().get(&url);
-        let resp = client.send().unwrap();
-        println!("Resp Text: {}", resp.text().unwrap());
-        vec![]
+        let resp = client.send().map_err(|_| {
+            ProtocolFrameworkError::Other(
+                "Failed to make GET response to the Ergo Explorer Backend API.".to_string(),
+            )
+        });
+        let text = resp?.text().map_err(|_| {
+            ProtocolFrameworkError::Other(
+                "Failed to extract text from Ergo Explorer Backend API Response".to_string(),
+            )
+        })?;
+
+        let ergo_boxes = self.parse_ergo_boxes_json_string(text)?;
+
+        Ok(vec![])
+    }
+
+    /// Parses `ErgoBox`es from a JSON `String` and then filters them
+    /// based on the `BoxSpec` using `verify_box()`.
+    pub fn parse_ergo_boxes_json_string(&self, ergo_boxes_text: String) -> Result<Vec<ErgoBox>> {
+        // Get the `JsonValue`
+        let json = json::parse(&ergo_boxes_text).map_err(|_| {
+            ProtocolFrameworkError::Other(
+                "Failed to extract text from Ergo Explorer Backend API Response".to_string(),
+            )
+        })?;
+        // Parse the json into `Vec<ErgoBox>`
+        let mut box_list: Vec<ErgoBox> = vec![];
+        for i in 0.. {
+            let box_json = &json[i];
+            if box_json.is_null() {
+                break;
+            } else {
+                let res_ergo_box = from_str(&box_json.to_string());
+                if let Ok(ergo_box) = res_ergo_box {
+                    box_list.push(ergo_box);
+                } else if let Err(e) = res_ergo_box {
+                    let mess = format!("Box Json: {}\nError: {:?}", box_json.to_string(), e);
+                    return Err(ProtocolFrameworkError::Other(mess));
+                }
+            }
+        }
+
+        let filtered_boxes = box_list.into_iter().fold(vec![], |mut acc, b| {
+            if self.verify_box(b.clone()).is_ok() {
+                acc.push(b);
+            }
+            return acc;
+        });
+        Ok(filtered_boxes.clone())
     }
 }
 
