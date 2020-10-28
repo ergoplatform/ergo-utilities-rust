@@ -34,11 +34,11 @@ pub enum ProtocolFrameworkError {
 #[wasm_bindgen]
 #[derive(Clone)]
 pub struct TokenSpec {
-    value_range: Range<NanoErg>,
+    value_range: Range<u64>,
     token_id: String,
 }
 impl TokenSpec {
-    pub fn new(value_range: Range<NanoErg>, token_id: &str) -> Result<Self> {
+    pub fn new(value_range: Range<u64>, token_id: &str) -> Result<Self> {
         Ok(TokenSpec {
             value_range: value_range,
             token_id: token_id.to_string(),
