@@ -156,9 +156,10 @@ impl BoxSpec {
             )
         })?;
 
+        // Parse the json String/filter the boxes against the `BoxSpec`
         let ergo_boxes = self.parse_ergo_boxes_json_string(text)?;
 
-        Ok(vec![])
+        Ok(ergo_boxes)
     }
 
     /// Parses `ErgoBox`es from a JSON `String` and then filters them
@@ -223,8 +224,10 @@ mod tests {
         let tokens = vec![];
         let box_spec = BoxSpec::new(address, value_range, registers, tokens).unwrap();
 
-        box_spec.find_boxes_in_explorer("https://api.ergoplatform.com/api/v0/");
+        let matching_boxes = box_spec
+            .find_boxes_in_explorer("https://api.ergoplatform.com/api/v0/")
+            .unwrap();
 
-        assert!(1 == 2)
+        assert!(matching_boxes.len() > 0)
     }
 }
