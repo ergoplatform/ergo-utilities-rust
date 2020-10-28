@@ -15,8 +15,8 @@ pub type Result<T> = std::result::Result<T, BoxVerificationError>;
 
 #[derive(Error, Debug)]
 pub enum BoxVerificationError {
-    #[error("The P2S address of the box does not match the `StageChecker` P2S address.")]
-    InvalidP2SAddress,
+    #[error("The address of the box does not match the `` P2S address.")]
+    InvalidAddress,
     #[error("The number of Ergs held within the box is outside of the valid range.")]
     InvalidErgsValue,
     #[error("The number of token predicates defined for your `StageChecker` are greater than the number of unique tokens held in the box. In other words, the box holds an insufficient number of different types of tokens.")]
@@ -95,7 +95,18 @@ impl BoxSpec {
 }
 
 impl BoxSpec {
-    pub fn verify_box(&self, ergo_box: ErgoBox) -> bool {
+    pub fn verify_box(&self, ergo_box: ErgoBox) -> Result<()> {
+        let address_check = match self.ergo_tree == ergo_box.ergo_tree {
+            true => Ok(()),
+            false => Err(BoxVerificationError::InvalidP2SAddress),
+        }?;
+
+        // Verify value held in the box is within the valid range
+        let value_within_range = match self.value_range.contains(&ergo_box.value.as_u64()) {
+            true => Ok(()),
+            false => Err(BoxVerificationError::InvalidErgsValue),
+        }?;
+
         todo!()
     }
 
