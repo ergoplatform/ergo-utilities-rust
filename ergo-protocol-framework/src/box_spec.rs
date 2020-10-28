@@ -98,7 +98,7 @@ impl BoxSpec {
     pub fn verify_box(&self, ergo_box: ErgoBox) -> Result<()> {
         let address_check = match self.ergo_tree == ergo_box.ergo_tree {
             true => Ok(()),
-            false => Err(BoxVerificationError::InvalidP2SAddress),
+            false => Err(BoxVerificationError::InvalidAddress),
         }?;
 
         // Verify value held in the box is within the valid range
@@ -110,7 +110,14 @@ impl BoxSpec {
         todo!()
     }
 
-    pub fn find_boxes_in_explorer(&self) -> Vec<ErgoBox> {
+    /// Finds boxes which match your `BoxSpec` via using an instance of
+    /// the Ergo Explorer Backend.
+    /// `explorer_api_url` must be formatted as such:
+    /// `https://api.ergoplatform.com/api/v0/`
+    pub fn find_boxes_in_explorer(&self, explorer_api_url: &str) -> Vec<ErgoBox> {
+        let explorer_api_url = "https://api.ergoplatform.com/api/v0/".to_string();
+        let endpoint =
+            explorer_api_url + "transactions/boxes/byAddress/unspent/" + &self.address_string();
         todo!()
     }
 }
