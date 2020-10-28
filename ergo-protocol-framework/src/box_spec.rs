@@ -11,10 +11,10 @@ use std::ops::Range;
 use thiserror::Error;
 use wasm_bindgen::prelude::*;
 
-pub type Result<T> = std::result::Result<T, BoxVerificationError>;
+pub type Result<T> = std::result::Result<T, ProtocolFrameworkError>;
 
 #[derive(Error, Debug)]
-pub enum BoxVerificationError {
+pub enum ProtocolFrameworkError {
     #[error("The address of the box does not match the address.")]
     InvalidAddress,
     #[error("The number of Ergs held within the box is outside of the valid range.")]
@@ -91,19 +91,19 @@ impl BoxSpec {
 }
 
 impl BoxSpec {
-    /// Create a new `BoxSpec`
-    pub fn new() -> BoxSpec {}
+    // /// Create a new `BoxSpec`
+    // pub fn new() -> BoxSpec {}
 
     pub fn verify_box(&self, ergo_box: ErgoBox) -> Result<()> {
         let address_check = match self.ergo_tree == ergo_box.ergo_tree {
             true => Ok(()),
-            false => Err(BoxVerificationError::InvalidAddress),
+            false => Err(ProtocolFrameworkError::InvalidAddress),
         }?;
 
         // Verify value held in the box is within the valid range
         let value_within_range = match self.value_range.contains(&ergo_box.value.as_u64()) {
             true => Ok(()),
-            false => Err(BoxVerificationError::InvalidErgsValue),
+            false => Err(ProtocolFrameworkError::InvalidErgsValue),
         }?;
 
         todo!()
