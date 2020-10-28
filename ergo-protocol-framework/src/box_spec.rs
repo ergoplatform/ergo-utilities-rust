@@ -15,16 +15,12 @@ pub type Result<T> = std::result::Result<T, BoxVerificationError>;
 
 #[derive(Error, Debug)]
 pub enum BoxVerificationError {
-    #[error("The address of the box does not match the `` P2S address.")]
+    #[error("The address of the box does not match the address.")]
     InvalidAddress,
     #[error("The number of Ergs held within the box is outside of the valid range.")]
     InvalidErgsValue,
-    #[error("The number of token predicates defined for your `StageChecker` are greater than the number of unique tokens held in the box. In other words, the box holds an insufficient number of different types of tokens.")]
-    LessTokensThanPredicates,
     #[error("One of the token predicates failed for the provided box.")]
     FailedTokenSpec,
-    #[error("The number of register predicates defined for your `StageChecker` are greater than the number of registers used in the box.")]
-    LessRegistersThanPredicates,
     #[error("One of the register predicates failed for the provided box.")]
     FailedRegisterSpec,
     #[error("The provided TokenId is invalid.")]
@@ -95,6 +91,9 @@ impl BoxSpec {
 }
 
 impl BoxSpec {
+    /// Create a new `BoxSpec`
+    pub fn new() -> BoxSpec {}
+
     pub fn verify_box(&self, ergo_box: ErgoBox) -> Result<()> {
         let address_check = match self.ergo_tree == ergo_box.ergo_tree {
             true => Ok(()),
@@ -120,4 +119,10 @@ impl BoxSpec {
             explorer_api_url + "transactions/boxes/byAddress/unspent/" + &self.address_string();
         todo!()
     }
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn create_ergo_box_spec() {}
 }
