@@ -6,6 +6,7 @@ use ergo_lib::serialization::serializable::SigmaSerializable;
 use ergo_lib::ErgoTree;
 use ergo_lib_wasm::box_coll::ErgoBoxes;
 use ergo_lib_wasm::ergo_box::ErgoBox as WErgoBox;
+use ergo_offchain_utilities::encoding::address_string_to_ergo_tree;
 use ergo_offchain_utilities::{ErgoAddressString, NanoErg};
 use std::ops::Range;
 use thiserror::Error;
@@ -91,8 +92,23 @@ impl BoxSpec {
 }
 
 impl BoxSpec {
-    // /// Create a new `BoxSpec`
-    // pub fn new() -> BoxSpec {}
+    /// Create a new `BoxSpec`
+    pub fn new(
+        address: ErgoAddressString,
+        value_range: Range<NanoErg>,
+        registers: Vec<Constant>,
+        tokens: Vec<TokenSpec>,
+    ) -> Result<BoxSpec> {
+        if let Ok(ergo_tree) = address_string_to_ergo_tree(&address) {
+            return Ok(BoxSpec {
+                ergo_tree: ergo_tree,
+                value_range: value_range,
+                registers: registers,
+                tokens: tokens,
+            });
+        }
+        Err(ProtocolFrameworkError::InvalidAddress)
+    }
 
     pub fn verify_box(&self, ergo_box: ErgoBox) -> Result<()> {
         let address_check = match self.ergo_tree == ergo_box.ergo_tree {
