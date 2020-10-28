@@ -70,7 +70,7 @@ impl BoxSpec {
     /// Acquire the address of the `BoxSpec` based on the `ErgoTree` inside
     /// of the struct.
     pub fn address_string(&self) -> ErgoAddressString {
-        let address = Address::P2S(self.ergo_tree.sigma_serialise_bytes());
+        let address = Address::P2S(self.ergo_tree.sigma_serialize_bytes());
         let encoder = AddressEncoder::new(NetworkPrefix::Mainnet);
         encoder.address_to_str(&address)
     }
