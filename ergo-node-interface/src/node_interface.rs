@@ -243,15 +243,15 @@ impl NodeInterface {
 
         // Find the highest value amount held in a single box in the wallet
         let highest_value = boxes.iter().fold(0, |acc, b| {
-            if b.value.as_u64() > acc {
-                b.value.as_u64()
+            if b.value.as_u64().clone() > acc {
+                b.value.as_u64().clone()
             } else {
                 acc
             }
         });
 
         for b in boxes {
-            if b.value.as_u64() == highest_value {
+            if b.value.as_u64().clone() == highest_value {
                 return Ok(b);
             }
         }
