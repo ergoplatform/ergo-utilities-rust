@@ -4,9 +4,6 @@ This repo houses experimental libraries for writing off-chain Ergo code in Rust.
 
 ## Current Libraries
 
-### Ergo Node Interface
-A Rust interface for interacting with an Ergo Node. This library also provides a higher level wrapping around UTXO-set scanning to make it easier to use.
-
 ### Ergo Off-Chain Utilities
 Utilities related to encoding/hashing/serialization values/data what is useful for off-chain application.
 
