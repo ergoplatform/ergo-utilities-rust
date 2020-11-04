@@ -2,6 +2,5 @@
 
 members = [
     "ergo-offchain-utilities",
-    "ergo-node-interface",
     "ergo-protocol-framework",
 ]
