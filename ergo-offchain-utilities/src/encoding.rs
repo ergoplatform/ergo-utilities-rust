@@ -5,6 +5,7 @@ use base16;
 use blake2b_simd::Params;
 use ergo_lib::ast::{CollPrim, Constant, ConstantColl, ConstantVal};
 use ergo_lib::chain::address::{Address, AddressEncoder, NetworkPrefix};
+use ergo_lib::chain::Base16EncodedBytes;
 use ergo_lib::serialization::SigmaSerializable;
 use ergo_lib::ErgoTree;
 use std::fmt::{Debug, Display};
@@ -30,29 +31,41 @@ pub fn string_to_blake2b_hash(b: String) -> Result<String> {
 }
 
 /// Serialize a `i32` Int value into a hex-encoded string to be used inside of a register for a box
-pub fn serialize_int(i: i32) -> String {
+pub fn serialize_int(i: i32) -> Constant {
     let constant: Constant = i.into();
-    constant.base16_str()
+    constant
 }
 
 /// Serialize a `i64` Long value into a hex-encoded string to be used inside of a register for a box
-pub fn serialize_long(i: i64) -> String {
+pub fn serialize_long(i: i64) -> Constant {
     let constant: Constant = i.into();
-    constant.base16_str()
+    constant
 }
 
-/// Serialize a `String` value into a hex-encoded string to be used inside of a register for a box
-pub fn serialize_string(s: &String) -> String {
+/// Serialize a `String` value into a hex-encoded string
+/// and then convert it into a `Constant` to be used in registers.
+pub fn serialize_string(s: &String) -> Constant {
     let b = convert_to_signed_bytes(&s.clone().into_bytes());
-    let constant: Constant = b.into();
-    constant.base16_str()
+    b.into()
 }
 
 /// Decodes a hex-encoded string into bytes and then serializes it into a properly formatted hex-encoded string to be used inside of a register for a box
-pub fn serialize_hex_encoded_string(s: &String) -> Result<String> {
+pub fn serialize_hex_encoded_string(s: &String) -> Result<Constant> {
     let b = decode_hex(s)?;
     let constant: Constant = convert_to_signed_bytes(&b).into();
-    Ok(constant.base16_str())
+    Ok(constant)
+}
+
+/// Given an address, extract its `ErgoTree`, serialize it into hex-encoded
+/// bytes, hash it with blake2b_256, and then prepare it to be used
+/// in a register as a Constant
+pub fn hash_and_serialize_p2s(address: ErgoAddressString) -> Result<Constant> {
+    let ergo_tree = address_string_to_ergo_tree(&address)?;
+    // Convert into hex-encoded bytes
+    let base16_bytes = Base16EncodedBytes::new(&ergo_tree.sigma_serialize_bytes());
+    // Convert into String
+    let ergo_tree_hex_string = base16_bytes.into();
+    serialize_hex_encoded_string(&string_to_blake2b_hash(ergo_tree_hex_string)?)
 }
 
 /// Deserialize a hex-encoded `i32` Int inside of a `Constant` acquired from a register of an `ErgoBox`
