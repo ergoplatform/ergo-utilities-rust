@@ -30,14 +30,14 @@ pub fn string_to_blake2b_hash(b: String) -> Result<String> {
     Ok(a)
 }
 
-/// Serialize a `String` value into a hex-encoded string
+/// Serialize a `String` value into a signed hex-encoded byte string
 /// and then convert it into a `Constant` to be used in registers.
 pub fn serialize_string(s: &String) -> Constant {
     let b = convert_to_signed_bytes(&s.clone().into_bytes());
     b.into()
 }
 
-/// Decodes a hex-encoded string into bytes and then serializes it into a properly formatted hex-encoded string to be used inside of a register for a box
+/// Decodes a hex-encoded string into bytes and then serializes it into a properly formatted signed hex-encoded string and converted into a `Constant`
 pub fn serialize_hex_encoded_string(s: &String) -> Result<Constant> {
     let b = decode_hex(s)?;
     let constant: Constant = convert_to_signed_bytes(&b).into();
@@ -47,7 +47,7 @@ pub fn serialize_hex_encoded_string(s: &String) -> Result<Constant> {
 /// Given an address, extract its `ErgoTree`, serialize it into hex-encoded
 /// bytes, hash it with blake2b_256, and then prepare it to be used
 /// in a register as a Constant
-pub fn hash_and_serialize_p2s(address: ErgoAddressString) -> Result<Constant> {
+pub fn hash_and_serialize_p2s(address: &ErgoAddressString) -> Result<Constant> {
     let ergo_tree = address_string_to_ergo_tree(&address)?;
     // Convert into hex-encoded bytes
     let base16_bytes = Base16EncodedBytes::new(&ergo_tree.sigma_serialize_bytes());
@@ -56,16 +56,16 @@ pub fn hash_and_serialize_p2s(address: ErgoAddressString) -> Result<Constant> {
     serialize_hex_encoded_string(&string_to_blake2b_hash(ergo_tree_hex_string)?)
 }
 
-/// Deserialize a hex-encoded `i32` Int inside of a `Constant` acquired from a register of an `ErgoBox`
-pub fn deserialize_int(c: &Constant) -> Result<i32> {
+/// Unwraps a hex-encoded `i32` Int inside of a `Constant` acquired from a register of an `ErgoBox`
+pub fn unwrap_int(c: &Constant) -> Result<i32> {
     match &c.v {
         ConstantVal::Int(i) => return Ok(i.clone()),
         _ => return Err(EncodingError::FailedToDeserialize(c.base16_str())),
     };
 }
 
-/// Deserialize a hex-encoded `i64` Long inside of a `Constant` acquired from a register of an `ErgoBox`
-pub fn deserialize_long(c: &Constant) -> Result<i64> {
+/// Unwrap a hex-encoded `i64` Long inside of a `Constant` acquired from a register of an `ErgoBox`
+pub fn unwrap_long(c: &Constant) -> Result<i64> {
     // Eventually use &c.v.try_extract_from()
     match &c.v {
         ConstantVal::Long(i) => return Ok(i.clone()),
@@ -73,8 +73,8 @@ pub fn deserialize_long(c: &Constant) -> Result<i64> {
     };
 }
 
-/// Deserialize a String which is inside of a `Constant` acquired from a register of an `ErgoBox`
-pub fn deserialize_string(c: &Constant) -> Result<String> {
+/// Unwrap a String which is inside of a `Constant` acquired from a register of an `ErgoBox`
+pub fn unwrap_string(c: &Constant) -> Result<String> {
     let byte_array: Result<Vec<u8>> = match &c.v {
         ConstantVal::Coll(ConstantColl::Primitive(CollPrim::CollByte(ba))) => {
             Ok(convert_to_unsigned_bytes(ba))
@@ -86,8 +86,8 @@ pub fn deserialize_string(c: &Constant) -> Result<String> {
         .to_string())
 }
 
-/// Deserialize a hex-encoded String which is inside of a `Constant` acquired from a register of an `ErgoBox`.
-pub fn deserialize_hex_encoded_string(c: &Constant) -> Result<String> {
+/// Unwraps a hex-encoded String which is inside of a `Constant` acquired from a register of an `ErgoBox`.
+pub fn unwrap_hex_encoded_string(c: &Constant) -> Result<String> {
     let byte_array: Result<Vec<u8>> = match &c.v {
         ConstantVal::Coll(ConstantColl::Primitive(CollPrim::CollByte(ba))) => {
             Ok(convert_to_unsigned_bytes(ba))
@@ -174,34 +174,6 @@ pub fn nanoerg_to_erg(nanoerg_amount: u64) -> f64 {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn long_serialization_test() {
-        let l: i64 = 255;
-        let ser_l: String = serialize_long(l);
-        let constant_l: Constant = l.into();
-        assert_eq!(ser_l, "05fe03".to_string());
-        assert_eq!(l, deserialize_long(&constant_l).unwrap());
-
-        assert_eq!(
-            serialize_string(&"Oracle Pools".to_string()),
-            "0e0c4f7261636c6520506f6f6c73".to_string()
-        );
-    }
-
-    #[test]
-    fn string_serialization_test() {
-        let s: String = "Oracle Pools".to_string();
-        let a = s.clone().into_bytes();
-        let b: Vec<i8> = a.iter().map(|c| c.clone() as i8).collect();
-        let constant: Constant = b.into();
-
-        assert_eq!(s, deserialize_string(&constant).unwrap());
-        assert_eq!(
-            serialize_string(&s),
-            "0e0c4f7261636c6520506f6f6c73".to_string()
-        );
-    }
 
     #[test]
     fn erg_conv_is_valid() {
