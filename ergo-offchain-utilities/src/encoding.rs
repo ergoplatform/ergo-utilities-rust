@@ -30,18 +30,6 @@ pub fn string_to_blake2b_hash(b: String) -> Result<String> {
     Ok(a)
 }
 
-/// Serialize a `i32` Int value into a hex-encoded string to be used inside of a register for a box
-pub fn serialize_int(i: i32) -> Constant {
-    let constant: Constant = i.into();
-    constant
-}
-
-/// Serialize a `i64` Long value into a hex-encoded string to be used inside of a register for a box
-pub fn serialize_long(i: i64) -> Constant {
-    let constant: Constant = i.into();
-    constant
-}
-
 /// Serialize a `String` value into a hex-encoded string
 /// and then convert it into a `Constant` to be used in registers.
 pub fn serialize_string(s: &String) -> Constant {
