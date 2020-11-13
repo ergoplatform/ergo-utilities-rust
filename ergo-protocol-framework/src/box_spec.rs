@@ -58,8 +58,8 @@ impl TokenSpec {
 #[wasm_bindgen]
 #[derive(Clone)]
 pub struct BoxSpec {
-    /// The script that locks said box as a `ErgoTree`
-    ergo_tree: Option<ErgoTree>,
+    /// The address of the box
+    address: Option<ErgoAddressString>,
     /// The allowed range of nanoErgs
     value_range: Option<Range<NanoErg>>,
     /// A sorted list of `Constant`s which define registers
@@ -80,18 +80,6 @@ pub struct BoxSpec {
 /// are made WASM-compatible.
 #[wasm_bindgen]
 impl BoxSpec {
-    #[wasm_bindgen]
-    /// Acquire the address of the `BoxSpec` based on the `ErgoTree` inside
-    /// of the struct.
-    pub fn address_string(&self) -> Option<ErgoAddressString> {
-        if let Some(ergo_tree) = self.ergo_tree.clone() {
-            let address = Address::P2S(ergo_tree.sigma_serialize_bytes());
-            let encoder = AddressEncoder::new(NetworkPrefix::Mainnet);
-            return Some(encoder.address_to_str(&address));
-        }
-        None
-    }
-
     #[wasm_bindgen]
     pub fn utxo_scan_json(&self) -> String {
         todo!()
@@ -115,13 +103,21 @@ impl BoxSpec {
 /// Method definitions for `BoxSpec` that are intended to be used in
 /// Rust.
 impl BoxSpec {
+    pub fn ergo_tree(&self) -> Result<ErgoTree> {
+        if let Some(address) = self.address {
+            return address_string_to_ergo_tree(&address)
+                .map_err(|_| ProtocolFrameworkError::InvalidAddress);
+        }
+        Err(ProtocolFrameworkError::InvalidAddress)
+    }
+
     /// Create a new basic `BoxSpec` with no predicate.
     pub fn new(
         address: Option<ErgoAddressString>,
         value_range: Option<Range<NanoErg>>,
         registers: Vec<Option<Constant>>,
         tokens: Vec<Option<TokenSpec>>,
-    ) -> Result<BoxSpec> {
+    ) -> BoxSpec {
         BoxSpec::new_predicated(address, value_range, registers, tokens, None)
     }
 
@@ -132,24 +128,15 @@ impl BoxSpec {
         registers: Vec<Option<Constant>>,
         tokens: Vec<Option<TokenSpec>>,
         predicate: Option<fn(&ErgoBox) -> Result<()>>,
-    ) -> Result<BoxSpec> {
-        let mut ergo_tree = None;
-        // If an address was provided, convert it into an ErgoTree
-        if let Some(a) = address {
-            if let Ok(et) = address_string_to_ergo_tree(&a) {
-                ergo_tree = Some(et);
-            } else {
-                return Err(ProtocolFrameworkError::InvalidAddress);
-            }
-        }
+    ) -> BoxSpec {
         // Create the BoxSpec
-        return Ok(BoxSpec {
-            ergo_tree: ergo_tree,
+        return BoxSpec {
+            address: address,
             value_range: value_range,
             registers: registers,
             tokens: tokens,
             predicate: predicate,
-        });
+        };
     }
 
     /// Verify that a provided `ErgoBox` matches the spec
@@ -157,7 +144,7 @@ impl BoxSpec {
         let ergo_box_regs = ergo_box.additional_registers.get_ordered_values();
 
         // Verify the address/ErgoTree locking script
-        if let Some(tree) = self.ergo_tree.clone() {
+        if let Ok(tree) = self.ergo_tree() {
             match tree == ergo_box.ergo_tree {
                 true => Ok(()),
                 false => Err(ProtocolFrameworkError::InvalidAddress),
@@ -215,13 +202,13 @@ impl BoxSpec {
     /// `https://api.ergoplatform.com/api/v0/`
     pub fn find_boxes_in_explorer(&self, explorer_api_url: &str) -> Result<Vec<ErgoBox>> {
         // Verify an address exists
-        if self.address_string().is_none() {
+        if self.address.is_none() {
             return Err(ProtocolFrameworkError::Other("Using the Ergo Explorer API currently requires defining an address for your `BoxStruct`.".to_string()));
         }
 
         let url = explorer_api_url.to_string()
             + "transactions/boxes/byAddress/unspent/"
-            + &self.address_string().unwrap();
+            + &self.address.unwrap();
 
         println!("Endpoint: {}", url);
 
