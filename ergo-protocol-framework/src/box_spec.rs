@@ -17,16 +17,18 @@ pub type Result<T> = std::result::Result<T, ProtocolFrameworkError>;
 
 #[derive(Error, Debug)]
 pub enum ProtocolFrameworkError {
-    #[error("The address of the box does not match the address.")]
+    #[error("The address of the box does not match the address in the `BoxSpec`.")]
     InvalidAddress,
-    #[error("The number of Ergs held within the box is outside of the valid range.")]
+    #[error(
+        "The number of Ergs held within the box is outside of the valid range for the `BoxSpec`."
+    )]
     InvalidErgsValue,
-    #[error("One of the token predicates failed for the provided box.")]
+    #[error("One of the tokens failed to match the `BoxSpec`.")]
     FailedTokenSpec,
-    #[error("One of the register predicates failed for the provided box.")]
+    #[error("One of the registers failed to match the `BoxSpec`.")]
     FailedRegisterSpec,
-    #[error("The provided TokenId is invalid.")]
-    InvalidTokenId,
+    #[error("The encoded predicate on the BoxSpec failed.")]
+    FailedPredicate,
     #[error("{0}")]
     Other(String),
 }
@@ -193,6 +195,13 @@ impl BoxSpec {
                 if !id_check || !range_check {
                     return Err(ProtocolFrameworkError::FailedTokenSpec);
                 }
+            }
+        }
+
+        // Verify the predicate
+        if let Some(predicate) = self.predicate {
+            if (predicate)(&ergo_box).is_err() {
+                return Err(ProtocolFrameworkError::FailedPredicate);
             }
         }
 
