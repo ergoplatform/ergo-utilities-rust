@@ -10,13 +10,12 @@ use thiserror::Error;
 use wasm_bindgen::prelude::*;
 
 /// A predicated box which is intended to be spent for the Ergs inside
-/// The predicate simply requires the box to simply have at least `1000000`
+/// The spec simply requires the box to simply have at least `1000000`
 /// nanoErgs inside.
 #[wasm_bindgen]
 pub struct ErgsBox {
     ergo_box: ErgoBox,
 }
-
 /// WASM ErgsBox Methods
 #[wasm_bindgen]
 impl ErgsBox {
@@ -27,19 +26,18 @@ impl ErgsBox {
         ErgsBox::new(&b).map_err(|e| JsValue::from_str(&format! {"{:?}", e}))
     }
 }
-
+/// WrappedBox impl
 impl WrappedBox for ErgsBox {
     fn get_box(&self) -> ErgoBox {
         self.ergo_box.clone()
     }
 }
-
+/// SpecifiedBox impl
 impl SpecifiedBox for ErgsBox {
     fn box_spec() -> BoxSpec {
-        BoxSpec::new(None, Some(1000000..10000000000000), vec![], vec![])
+        BoxSpec::new(None, Some(1000000..10000000000000000000), vec![], vec![])
     }
 }
-
 /// Rust ErgsBox Methods
 impl ErgsBox {
     /// Create a new `ErgsBox`
