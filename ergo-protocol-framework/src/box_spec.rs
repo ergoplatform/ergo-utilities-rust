@@ -67,6 +67,10 @@ pub struct BoxSpec {
     /// A sorted list of `TokenSpec`s which define tokens
     /// of an `ErgoBox`.
     tokens: Vec<Option<TokenSpec>>,
+    /// An optional predicate which allows for defining custom
+    /// specification logic which gets processed when verifying
+    /// the box.
+    predicate: Option<fn(&ErgoBox) -> Result<()>>,
 }
 
 /// Method definitions for `BoxSpec` that are WASM-compatible by default
@@ -109,12 +113,23 @@ impl BoxSpec {
 /// Method definitions for `BoxSpec` that are intended to be used in
 /// Rust.
 impl BoxSpec {
-    /// Create a new `BoxSpec`
+    /// Create a new basic `BoxSpec` with no predicate.
     pub fn new(
         address: Option<ErgoAddressString>,
         value_range: Option<Range<NanoErg>>,
         registers: Vec<Option<Constant>>,
         tokens: Vec<Option<TokenSpec>>,
+    ) -> Result<BoxSpec> {
+        BoxSpec::new_predicated(address, value_range, registers, tokens, None)
+    }
+
+    /// Create a new `BoxSpec` with a custom predicate defined.
+    pub fn new_predicated(
+        address: Option<ErgoAddressString>,
+        value_range: Option<Range<NanoErg>>,
+        registers: Vec<Option<Constant>>,
+        tokens: Vec<Option<TokenSpec>>,
+        predicate: Option<fn(&ErgoBox) -> Result<()>>,
     ) -> Result<BoxSpec> {
         let mut ergo_tree = None;
         // If an address was provided, convert it into an ErgoTree
@@ -131,6 +146,7 @@ impl BoxSpec {
             value_range: value_range,
             registers: registers,
             tokens: tokens,
+            predicate: predicate,
         });
     }
 
@@ -281,6 +297,8 @@ mod tests {
         let tokens = vec![];
         let box_spec = BoxSpec::new(address, value_range, registers, tokens).unwrap();
 
+        // Currently fails until v0.4 of ergo-lib releases which fixes
+        // the json parsing issue for box_id from explorer
         let matching_boxes = box_spec
             .find_boxes_in_explorer("https://api.ergoplatform.com/api/v0/")
             .unwrap();
