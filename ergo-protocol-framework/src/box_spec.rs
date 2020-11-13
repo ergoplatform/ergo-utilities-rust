@@ -93,7 +93,7 @@ impl BoxSpec {
     }
 
     #[wasm_bindgen]
-    pub fn utxo_scan_json(&self) {
+    pub fn utxo_scan_json(&self) -> String {
         todo!()
     }
 
