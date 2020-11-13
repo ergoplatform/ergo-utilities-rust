@@ -44,10 +44,10 @@ pub fn serialize_hex_encoded_string(s: &String) -> Result<Constant> {
     Ok(constant)
 }
 
-/// Given an address, extract its `ErgoTree`, serialize it into hex-encoded
+/// Given a P2S address, extract its `ErgoTree`, serialize it into hex-encoded
 /// bytes, hash it with blake2b_256, and then prepare it to be used
 /// in a register as a Constant
-pub fn hash_and_serialize_p2s(address: &ErgoAddressString) -> Result<Constant> {
+pub fn hash_and_serialize_p2s(address: &P2SAddressString) -> Result<Constant> {
     let ergo_tree = address_string_to_ergo_tree(&address)?;
     // Convert into hex-encoded bytes
     let base16_bytes = Base16EncodedBytes::new(&ergo_tree.sigma_serialize_bytes());
