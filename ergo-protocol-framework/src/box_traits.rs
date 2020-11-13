@@ -31,3 +31,18 @@ pub trait WrappedBox {
     // // Returns the registers of the wrapped `ErgoBox`
     // fn registers(&self) -> Vec<Constant>
 }
+
+pub trait SpecifiedBox: WrappedBox {
+    // Associated fn which returns the `BoxSpec` for said `SpecifiedBox`
+    fn get_box_spec() -> BoxSpec;
+
+    // Acquire UTXO-set scan JSON from the `BoxSpec`
+    fn get_utxo_scan_json_string() -> String {
+        Self::get_box_spec().utxo_scan_json()
+    }
+
+    // Acquire UTXOs via the Ergo Explorer API using the `BoxSpec`
+    fn find_utxos_via_explorer(explorer_api_url: &str) -> Result<Vec<ErgoBox>> {
+        Self::get_box_spec().find_boxes_in_explorer(explorer_api_url)
+    }
+}
