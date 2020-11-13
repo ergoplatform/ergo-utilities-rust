@@ -1,6 +1,6 @@
 [package]
 name = "ergo-protocol-framework"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Robert Kornacki <11645932+robkorn@users.noreply.github.com>"]
 edition = "2018"
 
@@ -13,8 +13,10 @@ crate-type = ["cdylib"]
 [dependencies]
 thiserror           = "1.0.20"
 ergo-offchain-utilities          = { git = "https://github.com/robkorn/ergo-utilities-rust" }
-ergo-lib            =  "0.3.0"
-ergo-lib-wasm       =  "0.3.0"
+ergo-lib           = "0.3.0"
+ergo-lib-wasm      = "0.3.0"
+# ergo-lib         = { git = "https://github.com/ergoplatform/sigma-rust/", branch = "develop" }
+# ergo-lib-wasm         = { git = "https://github.com/ergoplatform/sigma-rust/", branch = "develop" }
 serde_json          = "1.0.58"
 wasm-bindgen        = "0.2.68"
 reqwest             = { version = "0.10", features = ["blocking"] }
