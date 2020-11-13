@@ -136,6 +136,8 @@ impl BoxSpec {
 
     /// Verify that a provided `ErgoBox` matches the spec
     pub fn verify_box(&self, ergo_box: ErgoBox) -> Result<()> {
+        let ergo_box_regs = ergo_box.additional_registers.get_ordered_values();
+
         // Verify the address/ErgoTree locking script
         if let Some(tree) = self.ergo_tree.clone() {
             match tree == ergo_box.ergo_tree {
@@ -149,6 +151,16 @@ impl BoxSpec {
                 true => Ok(()),
                 false => Err(ProtocolFrameworkError::InvalidErgsValue),
             }?;
+        }
+
+        // Verify all of the Registers
+        for i in 0..(self.registers.len() - 1) {
+            if let Some(constant) = self.registers[i].clone() {
+                match constant == ergo_box_regs[i] {
+                    true => continue,
+                    false => return Err(ProtocolFrameworkError::FailedRegisterSpec),
+                }
+            }
         }
 
         todo!()
