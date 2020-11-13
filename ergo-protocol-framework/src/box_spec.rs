@@ -163,7 +163,25 @@ impl BoxSpec {
             }
         }
 
-        todo!()
+        // Verify all of the Tokens
+        for i in 0..(self.registers.len() - 1) {
+            if let Some(spec) = self.tokens[i].clone() {
+                let tok = ergo_box.tokens[i].clone();
+                let tok_id: String = tok.token_id.0.into();
+                // Verify Token ID matches spec
+                let id_check = tok_id == spec.token_id;
+                // Verify Token value is within range spec
+                let range_check = spec.value_range.contains(&tok.amount.into());
+
+                // If either check fails then return error
+                if !id_check || !range_check {
+                    return Err(ProtocolFrameworkError::FailedTokenSpec);
+                }
+            }
+        }
+
+        // Verification successful
+        Ok(())
     }
 
     /// Finds boxes which match your `BoxSpec` via using an instance of
