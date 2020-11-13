@@ -104,7 +104,7 @@ impl BoxSpec {
 /// Rust.
 impl BoxSpec {
     pub fn ergo_tree(&self) -> Result<ErgoTree> {
-        if let Some(address) = self.address {
+        if let Some(address) = self.address.clone() {
             return address_string_to_ergo_tree(&address)
                 .map_err(|_| ProtocolFrameworkError::InvalidAddress);
         }
@@ -140,7 +140,7 @@ impl BoxSpec {
     }
 
     /// Verify that a provided `ErgoBox` matches the spec
-    pub fn verify_box(&self, ergo_box: ErgoBox) -> Result<()> {
+    pub fn verify_box(&self, ergo_box: &ErgoBox) -> Result<()> {
         let ergo_box_regs = ergo_box.additional_registers.get_ordered_values();
 
         // Verify the address/ErgoTree locking script
@@ -208,7 +208,7 @@ impl BoxSpec {
 
         let url = explorer_api_url.to_string()
             + "transactions/boxes/byAddress/unspent/"
-            + &self.address.unwrap();
+            + &self.address.clone().unwrap();
 
         println!("Endpoint: {}", url);
 
@@ -257,7 +257,7 @@ impl BoxSpec {
         }
 
         let filtered_boxes = box_list.into_iter().fold(vec![], |mut acc, b| {
-            if self.verify_box(b.clone()).is_ok() {
+            if self.verify_box(&b).is_ok() {
                 acc.push(b);
             }
             return acc;
