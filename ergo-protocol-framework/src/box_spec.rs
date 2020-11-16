@@ -206,6 +206,10 @@ impl BoxSpec {
     /// the Ergo Explorer Backend.
     /// `explorer_api_url` must be formatted as such:
     /// `https://api.ergoplatform.com/api/v0/`
+    /// -----
+    /// Potentially replace this method with 2 methods that are pure:
+    /// 1. explorer_url_to_find_boxes()
+    /// 2. process_response_from_explorer_into_boxes()
     pub fn find_boxes_in_explorer(&self, explorer_api_url: &str) -> Result<Vec<ErgoBox>> {
         // Verify an address exists
         if self.address.is_none() {
