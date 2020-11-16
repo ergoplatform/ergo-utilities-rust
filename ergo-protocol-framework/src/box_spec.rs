@@ -18,11 +18,11 @@ pub struct TokenSpec {
     token_id: String,
 }
 impl TokenSpec {
-    pub fn new(value_range: Range<u64>, token_id: &str) -> Result<Self> {
-        Ok(TokenSpec {
+    pub fn new(value_range: Range<u64>, token_id: &str) -> TokenSpec {
+        TokenSpec {
             value_range: value_range,
             token_id: token_id.to_string(),
-        })
+        }
     }
 }
 
