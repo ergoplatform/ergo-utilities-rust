@@ -26,6 +26,17 @@ impl TokenSpec {
     }
 }
 
+// Implement `RegisterSpec` in the future.
+// Offers to only define the type of the register and not the value using
+// Option<Constant> for the value.
+// #[wasm_bindgen]
+// #[derive(Clone)]
+// pub struct RegisterSpec {
+//     // Find the sigma-rust struct for types
+//     value_type: SType,
+//     value_range: Option<Constant>,
+// }
+
 /// A specification which specifies parameters of a `ErgoBox`.
 /// This spec is used as a "source of truth" to both verify and find
 /// `ErgoBox`es which match the spec. This is often used for defining
