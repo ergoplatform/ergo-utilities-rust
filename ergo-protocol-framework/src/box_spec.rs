@@ -74,6 +74,20 @@ impl BoxSpec {
         todo!()
     }
 
+    /// Returns a new `BoxSpec` with all fields exactly the same
+    /// except the address is set to the String provided as input.
+    /// This method is generally used to hone down a more generic
+    /// `BoxSpec` definition into a more specific one for your given
+    /// use case. Ie. Add a user's P2PK address to find boxes matching
+    /// the `BoxSpec` in their wallet.
+    #[wasm_bindgen]
+    pub fn modified_address(&self, address: Option<ErgoAddressString>) -> BoxSpec {
+        BoxSpec {
+            address: address,
+            ..self.clone()
+        }
+    }
+
     #[wasm_bindgen]
     pub fn w_verify_box(&self, ergo_box: WErgoBox) -> bool {
         todo!()
@@ -295,21 +309,8 @@ mod tests {
     }
 }
 
-/// Methods related to modifying fields
+/// Methods related to modifying fields (which aren't WASM-compatible)
 impl BoxSpec {
-    /// Returns a new `BoxSpec` with all fields exactly the same
-    /// except the address is set to the String provided as input.
-    /// This method is generally used to hone down a more generic
-    /// `BoxSpec` definition into a more specific one for your given
-    /// use case. Ie. Add a user's P2PK address to find boxes matching
-    /// the `BoxSpec` in their wallet.
-    pub fn modified_address(&self, address: Option<ErgoAddressString>) -> BoxSpec {
-        BoxSpec {
-            address: address,
-            ..self.clone()
-        }
-    }
-
     /// Returns a new `BoxSpec` with all fields exactly the same
     /// except the value_range is set to the range provided as input.
     pub fn modified_value_range(&self, value_range: Option<Range<u64>>) -> BoxSpec {
@@ -318,7 +319,6 @@ impl BoxSpec {
             ..self.clone()
         }
     }
-
     /// Returns a new `BoxSpec` with all fields exactly the same
     /// except the registers are set to the registers provided as input.
     pub fn modified_registers(&self, registers: Vec<Option<Constant>>) -> BoxSpec {
