@@ -92,12 +92,29 @@ impl BoxSpec {
 /// Method definitions for `BoxSpec` that are intended to be used in
 /// Rust.
 impl BoxSpec {
+    /// Acquire the `ErgoTree` of the address in the `BoxSpec`
     pub fn ergo_tree(&self) -> Result<ErgoTree> {
         if let Some(address) = self.address.clone() {
             return address_string_to_ergo_tree(&address)
                 .map_err(|_| ProtocolFrameworkError::InvalidSpecAddress);
         }
         Err(ProtocolFrameworkError::InvalidSpecAddress)
+    }
+
+    /// Returns a new `BoxSpec` with all fields exactly the same
+    /// except the address is set to the String provided as input.
+    /// This method is generally used to hone down a more generic
+    /// `BoxSpec` definition into a more specific one for your given
+    /// use case. Ie. Add a user's P2PK address to find boxes matching
+    /// the `BoxSpec` in their wallet.
+    pub fn modified_address(&self, address: ErgoAddressString) -> BoxSpec {
+        BoxSpec::new_predicated(
+            Some(address),
+            self.value_range.clone(),
+            self.registers.clone(),
+            self.tokens.clone(),
+            self.predicate,
+        )
     }
 
     /// Create a new basic `BoxSpec` with no predicate.
