@@ -128,7 +128,7 @@ impl BoxSpec {
             match tree == ergo_box.ergo_tree {
                 true => Ok(()),
                 false => Err(ProtocolFrameworkError::InvalidAddress(
-                    self.address.unwrap_or_default(),
+                    self.address.clone().unwrap_or_default(),
                 )),
             }?;
         }
