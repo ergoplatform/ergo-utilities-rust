@@ -1,3 +1,6 @@
+/// This file holds a number of default "Specified Boxes".
+/// These are wrapper structs for `ErgoBox`es which meet a given
+/// specification.
 use crate::box_spec::{BoxSpec, TokenSpec};
 use crate::box_traits::{SpecifiedBox, WrappedBox};
 use crate::error::{ProtocolFrameworkError, Result};
