@@ -165,28 +165,32 @@ impl BoxSpec {
         }
 
         // Verify all of the Registers
-        for i in 0..(self.registers.len() - 1) {
-            if let Some(constant) = self.registers[i].clone() {
-                match constant == ergo_box_regs[i] {
-                    true => continue,
-                    false => return Err(ProtocolFrameworkError::FailedRegisterSpec),
+        if self.registers.len() > 0 {
+            for i in 0..(self.registers.len() - 1) {
+                if let Some(constant) = self.registers[i].clone() {
+                    match constant == ergo_box_regs[i] {
+                        true => continue,
+                        false => return Err(ProtocolFrameworkError::FailedRegisterSpec),
+                    }
                 }
             }
         }
 
         // Verify all of the Tokens
-        for i in 0..(self.registers.len() - 1) {
-            if let Some(spec) = self.tokens[i].clone() {
-                let tok = ergo_box.tokens[i].clone();
-                let tok_id: String = tok.token_id.0.into();
-                // Verify Token ID matches spec
-                let id_check = tok_id == spec.token_id;
-                // Verify Token value is within range spec
-                let range_check = spec.value_range.contains(&tok.amount.into());
+        if self.tokens.len() > 0 {
+            for i in 0..(self.tokens.len() - 1) {
+                if let Some(spec) = self.tokens[i].clone() {
+                    let tok = ergo_box.tokens[i].clone();
+                    let tok_id: String = tok.token_id.0.into();
+                    // Verify Token ID matches spec
+                    let id_check = tok_id == spec.token_id;
+                    // Verify Token value is within range spec
+                    let range_check = spec.value_range.contains(&tok.amount.into());
 
-                // If either check fails then return error
-                if !id_check || !range_check {
-                    return Err(ProtocolFrameworkError::FailedTokenSpec);
+                    // If either check fails then return error
+                    if !id_check || !range_check {
+                        return Err(ProtocolFrameworkError::FailedTokenSpec);
+                    }
                 }
             }
         }
@@ -208,8 +212,8 @@ impl BoxSpec {
     /// `https://api.ergoplatform.com/api/v0/`
     /// -----
     /// Potentially replace this method with 2 methods that are pure:
-    /// 1. explorer_url_to_find_boxes()
-    /// 2. process_response_from_explorer_into_boxes()
+    /// 1. explorer_endpoint()
+    /// 2. process_explorer_response()
     pub fn find_boxes_in_explorer(&self, explorer_api_url: &str) -> Result<Vec<ErgoBox>> {
         // Verify an address exists
         if self.address.is_none() {
