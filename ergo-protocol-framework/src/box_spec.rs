@@ -27,13 +27,14 @@ impl TokenSpec {
 }
 
 // Implement `RegisterSpec` in the future.
-// Offers to only define the type of the register and not the value using
-// Option<Constant> for the value.
+// Offers both fields as `Option`s, thus allowing a developer to specify
+// how many Registers are expected, potentially the types of each register,
+// and potentially the specific value of a register.
 // #[wasm_bindgen]
 // #[derive(Clone)]
 // pub struct RegisterSpec {
 //     // Find the sigma-rust struct for types
-//     value_type: SType,
+//     value_type: Option<SType>,
 //     value_range: Option<Constant>,
 // }
 
