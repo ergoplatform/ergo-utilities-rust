@@ -1,7 +1,7 @@
 use crate::box_spec::BoxSpec;
 use crate::error::Result;
 use ergo_lib::chain::data_input::DataInput;
-use ergo_lib::chain::ergo_box::{ErgoBox, ErgoBoxCandidate};
+use ergo_lib::chain::ergo_box::ErgoBox;
 use ergo_lib::chain::input::UnsignedInput;
 use ergo_offchain_utilities::encoding::serialize_p2s_from_ergo_tree;
 use ergo_offchain_utilities::{NanoErg, P2SAddressString};

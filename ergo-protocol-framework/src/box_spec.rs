@@ -1,9 +1,7 @@
 use crate::error::{ProtocolFrameworkError, Result};
 pub use ergo_lib::ast::Constant;
-use ergo_lib::chain::address::{Address, AddressEncoder, NetworkPrefix};
 pub use ergo_lib::chain::ergo_box::ErgoBox;
 pub use ergo_lib::chain::token::{TokenAmount, TokenId};
-use ergo_lib::serialization::serializable::SigmaSerializable;
 use ergo_lib::ErgoTree;
 use ergo_lib_wasm::box_coll::ErgoBoxes;
 use ergo_lib_wasm::ergo_box::ErgoBox as WErgoBox;

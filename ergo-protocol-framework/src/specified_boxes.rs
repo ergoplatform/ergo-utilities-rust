@@ -1,14 +1,13 @@
 /// This file holds a number of default "Specified Boxes".
 /// These are wrapper structs for `ErgoBox`es which meet a given
 /// specification.
-use crate::box_spec::{BoxSpec, TokenSpec};
+use crate::box_spec::BoxSpec;
 use crate::box_traits::{SpecifiedBox, WrappedBox};
 use crate::error::{ProtocolFrameworkError, Result};
 use ergo_lib::ast::ConstantVal;
-use ergo_lib::chain::ergo_box::{BoxValue, ErgoBox, ErgoBoxCandidate, NonMandatoryRegisters};
+use ergo_lib::chain::ergo_box::ErgoBox;
 use ergo_lib_wasm::box_coll::ErgoBoxes;
 use ergo_lib_wasm::ergo_box::ErgoBox as WErgoBox;
-use thiserror::Error;
 use wasm_bindgen::prelude::*;
 
 /// A specified box which is intended to be spent for the Ergs inside.

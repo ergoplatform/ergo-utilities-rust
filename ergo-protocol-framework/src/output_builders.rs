@@ -44,7 +44,6 @@ impl TokensChangeBox {
     ) -> Result<ErgoBoxCandidate> {
         // Find the tokens that exist in the inputs which need to be preserved
         let tc_tokens = find_and_sum_other_tokens(&vec![], input_boxes);
-
         create_candidate(value, &user_address, &tc_tokens, &vec![], current_height)
     }
 

@@ -2,9 +2,9 @@
 use crate::error::{ProtocolFrameworkError, Result};
 use ergo_lib::ast::Constant;
 use ergo_lib::chain::ergo_box::{BoxValue, ErgoBox, ErgoBoxCandidate, NonMandatoryRegisters};
-use ergo_lib::chain::token::{Token, TokenAmount, TokenId};
+use ergo_lib::chain::token::{Token, TokenAmount};
 use ergo_offchain_utilities::encoding::address_string_to_ergo_tree;
-use ergo_offchain_utilities::{BlockHeight, ErgoAddressString, NanoErg, P2PKAddressString};
+use ergo_offchain_utilities::{BlockHeight, ErgoAddressString, NanoErg};
 use std::convert::TryFrom;
 
 /// Create an `ErgoBoxCandidate`
