@@ -166,7 +166,7 @@ impl BoxSpec {
 
         // Verify all of the Registers
         if self.registers.len() > 0 {
-            for i in 0..(self.registers.len() - 1) {
+            for i in 0..(self.registers.len()) {
                 if let Some(constant) = self.registers[i].clone() {
                     match constant == ergo_box_regs[i] {
                         true => continue,
@@ -178,7 +178,7 @@ impl BoxSpec {
 
         // Verify all of the Tokens
         if self.tokens.len() > 0 {
-            for i in 0..(self.tokens.len() - 1) {
+            for i in 0..(self.tokens.len()) {
                 if let Some(spec) = self.tokens[i].clone() {
                     let tok = ergo_box.tokens[i].clone();
                     let tok_id: String = tok.token_id.0.into();
