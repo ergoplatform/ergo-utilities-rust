@@ -86,9 +86,9 @@ impl BoxSpec {
     pub fn ergo_tree(&self) -> Result<ErgoTree> {
         if let Some(address) = self.address.clone() {
             return address_string_to_ergo_tree(&address)
-                .map_err(|_| ProtocolFrameworkError::InvalidAddress);
+                .map_err(|_| ProtocolFrameworkError::InvalidSpecAddress);
         }
-        Err(ProtocolFrameworkError::InvalidAddress)
+        Err(ProtocolFrameworkError::InvalidSpecAddress)
     }
 
     /// Create a new basic `BoxSpec` with no predicate.
@@ -127,14 +127,16 @@ impl BoxSpec {
         if let Ok(tree) = self.ergo_tree() {
             match tree == ergo_box.ergo_tree {
                 true => Ok(()),
-                false => Err(ProtocolFrameworkError::InvalidAddress),
+                false => Err(ProtocolFrameworkError::InvalidAddress(
+                    self.address.unwrap_or_default(),
+                )),
             }?;
         }
         // Verify value held in the box is within the valid range
         if let Some(value_range) = self.value_range.clone() {
             match value_range.contains(&ergo_box.value.as_u64()) {
                 true => Ok(()),
-                false => Err(ProtocolFrameworkError::InvalidErgsValue),
+                false => Err(ProtocolFrameworkError::InvalidSpecErgsValue),
             }?;
         }
 
@@ -168,7 +170,7 @@ impl BoxSpec {
         // Verify the predicate
         if let Some(predicate) = self.predicate {
             if (predicate)(&ergo_box).is_err() {
-                return Err(ProtocolFrameworkError::FailedPredicate);
+                return Err(ProtocolFrameworkError::FailedSpecPredicate);
             }
         }
 
