@@ -137,9 +137,9 @@ impl OracleBoxLong {
         // Verify that a valid Long datapoint was extracted.
         let datapoint_check = OracleBoxLong::extract_long_datapoint(b).is_ok();
         // Check only a single token type is held in the box
-        let tokens_len_check = b.tokens.len() != 1;
+        let tokens_len_check = b.tokens.len() == 1;
         // Check that said single type of token is value == 1. (Aka is an NFT)
-        let nft_check = u64::from(b.tokens[0].amount) != 1;
+        let nft_check = u64::from(b.tokens[0].amount) == 1;
 
         datapoint_check && tokens_len_check && nft_check
     }
