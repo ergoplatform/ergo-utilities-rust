@@ -50,7 +50,7 @@ pub struct BoxSpec {
     /// An optional predicate which allows for defining custom
     /// specification logic which gets processed when verifying
     /// the box.
-    predicate: Option<fn(&ErgoBox) -> Result<()>>,
+    predicate: Option<fn(&ErgoBox) -> bool>,
 }
 
 /// Method definitions for `BoxSpec` that are WASM-compatible by default
@@ -105,7 +105,7 @@ impl BoxSpec {
         value_range: Option<Range<NanoErg>>,
         registers: Vec<Option<Constant>>,
         tokens: Vec<Option<TokenSpec>>,
-        predicate: Option<fn(&ErgoBox) -> Result<()>>,
+        predicate: Option<fn(&ErgoBox) -> bool>,
     ) -> BoxSpec {
         // Create the BoxSpec
         return BoxSpec {
@@ -167,7 +167,7 @@ impl BoxSpec {
 
         // Verify the predicate
         if let Some(predicate) = self.predicate {
-            if (predicate)(&ergo_box).is_err() {
+            if !(predicate)(&ergo_box) {
                 return Err(ProtocolFrameworkError::FailedSpecPredicate);
             }
         }

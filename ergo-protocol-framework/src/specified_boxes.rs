@@ -45,7 +45,7 @@ impl ErgsBox {
 impl ErgsBox {
     /// Create a new `ErgsBox`
     pub fn new(b: &ErgoBox) -> Result<ErgsBox> {
-        ErgsBox::box_spec().verify_box(b)?;
+        Self::box_spec().verify_box(b)?;
         return Ok(ErgsBox {
             ergo_box: b.clone(),
         });
@@ -121,8 +121,9 @@ impl OracleBoxLong {
 impl OracleBoxLong {
     // Create a new `OracleBoxLong`
     pub fn new(b: &ErgoBox) -> Result<OracleBoxLong> {
-        // Error Checking
-        OracleBoxLong::predicate(&b)?;
+        // Check that the box matches the spec
+        Self::box_spec().verify_box(b)?;
+
         let datapoint = OracleBoxLong::extract_long_datapoint(&b)?;
         return Ok(OracleBoxLong {
             ergo_box: b.clone(),
@@ -132,24 +133,15 @@ impl OracleBoxLong {
     }
 
     // The predicate for an `OracleBoxLong`'s `BoxSpec`
-    fn predicate(b: &ErgoBox) -> Result<()> {
-        // Using `?` to verify that a valid Long datapoint was extracted.
-        // If it failed, it will push the error upwards.
-        OracleBoxLong::extract_long_datapoint(b)?;
-
+    fn predicate(b: &ErgoBox) -> bool {
+        // Verify that a valid Long datapoint was extracted.
+        let datapoint_check = OracleBoxLong::extract_long_datapoint(b).is_ok();
         // Check only a single token type is held in the box
-        if b.tokens.len() != 1 {
-            return Err(ProtocolFrameworkError::Other(
-                "The oracle box is required to only hold a single NFT token.".to_string(),
-            ));
-        }
+        let tokens_len_check = b.tokens.len() != 1;
         // Check that said single type of token is value == 1. (Aka is an NFT)
-        if u64::from(b.tokens[0].amount) != 1 {
-            return Err(ProtocolFrameworkError::Other(
-                "The oracle box is required to only hold a single NFT token.".to_string(),
-            ));
-        }
-        Ok(())
+        let nft_check = u64::from(b.tokens[0].amount) != 1;
+
+        datapoint_check && tokens_len_check && nft_check
     }
 
     /// Extracts a Long out of register R4 of the provided `ErgoBox`.
