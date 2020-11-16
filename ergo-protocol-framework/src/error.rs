@@ -5,7 +5,7 @@ pub type Result<T> = std::result::Result<T, ProtocolFrameworkError>;
 
 #[derive(Error, Debug)]
 pub enum ProtocolFrameworkError {
-    #[error("The address of the `BoxSpec` is invalid.")]
+    #[error("The address of the box being verified does not match the `BoxSpec`.")]
     InvalidSpecAddress,
     #[error(
         "The number of Ergs held within the box is outside of the valid range for the `BoxSpec`."
