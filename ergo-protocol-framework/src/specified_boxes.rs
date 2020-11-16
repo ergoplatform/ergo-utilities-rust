@@ -28,7 +28,7 @@ impl SpecifiedBox for ErgsBox {
     /// A simple `BoxSpec` that just checks the value of nanoErgs is
     /// above `1000000`
     fn box_spec() -> BoxSpec {
-        BoxSpec::new(None, Some(1000000..10000000000000000000), vec![], vec![])
+        BoxSpec::new(None, Some(1000000..u64::MAX), vec![], vec![])
     }
 }
 /// WASM-compatible ErgsBox Methods
