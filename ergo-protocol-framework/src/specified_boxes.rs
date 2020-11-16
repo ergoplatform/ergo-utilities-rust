@@ -1,5 +1,6 @@
-use crate::box_spec::{BoxSpec, ProtocolFrameworkError, Result, TokenSpec};
+use crate::box_spec::{BoxSpec, TokenSpec};
 use crate::box_traits::{SpecifiedBox, WrappedBox};
+use crate::error::{ProtocolFrameworkError, Result};
 use ergo_lib::ast::ConstantVal;
 use ergo_lib::chain::ergo_box::{BoxValue, ErgoBox, ErgoBoxCandidate, NonMandatoryRegisters};
 use ergo_lib_wasm::box_coll::ErgoBoxes;

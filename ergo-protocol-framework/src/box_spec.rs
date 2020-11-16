@@ -1,3 +1,4 @@
+use crate::error::{ProtocolFrameworkError, Result};
 pub use ergo_lib::ast::Constant;
 use ergo_lib::chain::address::{Address, AddressEncoder, NetworkPrefix};
 pub use ergo_lib::chain::ergo_box::ErgoBox;
@@ -10,28 +11,7 @@ use ergo_offchain_utilities::encoding::address_string_to_ergo_tree;
 use ergo_offchain_utilities::{ErgoAddressString, NanoErg};
 use serde_json::from_str;
 use std::ops::Range;
-use thiserror::Error;
 use wasm_bindgen::prelude::*;
-
-pub type Result<T> = std::result::Result<T, ProtocolFrameworkError>;
-
-#[derive(Error, Debug)]
-pub enum ProtocolFrameworkError {
-    #[error("The address of the box does not match the address in the `BoxSpec`.")]
-    InvalidAddress,
-    #[error(
-        "The number of Ergs held within the box is outside of the valid range for the `BoxSpec`."
-    )]
-    InvalidErgsValue,
-    #[error("One of the tokens failed to match the `BoxSpec`.")]
-    FailedTokenSpec,
-    #[error("One of the registers failed to match the `BoxSpec`.")]
-    FailedRegisterSpec,
-    #[error("The encoded predicate on the BoxSpec failed.")]
-    FailedPredicate,
-    #[error("{0}")]
-    Other(String),
-}
 
 #[wasm_bindgen]
 #[derive(Clone)]
@@ -280,7 +260,7 @@ mod tests {
         let tokens = vec![];
         let box_spec_res = BoxSpec::new(address, value_range, registers, tokens);
 
-        assert!(box_spec_res.is_ok())
+        assert!(box_spec_res.tokens.is_empty())
     }
 
     #[test]
@@ -291,7 +271,7 @@ mod tests {
         let value_range = Some(1..1000000000000);
         let registers = vec![];
         let tokens = vec![];
-        let box_spec = BoxSpec::new(address, value_range, registers, tokens).unwrap();
+        let box_spec = BoxSpec::new(address, value_range, registers, tokens);
 
         // Currently fails until v0.4 of ergo-lib releases which fixes
         // the json parsing issue for box_id from explorer

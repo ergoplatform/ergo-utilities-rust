@@ -1,4 +1,5 @@
-use crate::box_spec::{BoxSpec, Result};
+use crate::box_spec::BoxSpec;
+use crate::error::Result;
 use ergo_lib::chain::data_input::DataInput;
 use ergo_lib::chain::ergo_box::{ErgoBox, ErgoBoxCandidate};
 use ergo_lib::chain::input::UnsignedInput;
