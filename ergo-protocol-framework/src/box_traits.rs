@@ -1,8 +1,10 @@
 use crate::box_spec::BoxSpec;
 use crate::error::Result;
+pub use ergo_lib::ast::Constant;
 use ergo_lib::chain::data_input::DataInput;
 use ergo_lib::chain::ergo_box::ErgoBox;
 use ergo_lib::chain::input::UnsignedInput;
+pub use ergo_lib::chain::token::Token;
 use ergo_offchain_utilities::encoding::serialize_p2s_from_ergo_tree;
 use ergo_offchain_utilities::{NanoErg, P2SAddressString};
 
@@ -29,8 +31,17 @@ pub trait WrappedBox {
     fn p2s_address(&self) -> P2SAddressString {
         serialize_p2s_from_ergo_tree(self.get_box().ergo_tree)
     }
-    // // Returns the registers of the wrapped `ErgoBox`
-    // fn registers(&self) -> Vec<Constant>
+    // Returns the registers of the wrapped `ErgoBox` as `Constant`s
+    fn registers(&self) -> Vec<Constant> {
+        self.get_box()
+            .additional_registers
+            .get_ordered_values()
+            .clone()
+    }
+    // Returns the `Token`s inside of an `ErgoBox`
+    fn tokens(&self) -> Vec<Token> {
+        self.get_box().tokens
+    }
 }
 
 pub trait SpecifiedBox: WrappedBox {
