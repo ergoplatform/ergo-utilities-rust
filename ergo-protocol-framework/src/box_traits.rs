@@ -11,19 +11,19 @@ use ergo_offchain_utilities::{NanoErg, P2SAddressString};
 /// A trait which represents an `ErgoBox` wrapped in an overarching struct.
 pub trait WrappedBox {
     fn get_box(&self) -> ErgoBox;
-    // Converts the `WrappedBox` into a `DataInput`
+    /// Converts the `WrappedBox` into a `DataInput`
     fn as_data_input(&self) -> DataInput {
         self.get_box().box_id().into()
     }
-    // Converts the `WrappedBox` into an `UnsignedInput`
+    /// Converts the `WrappedBox` into an `UnsignedInput`
     fn as_unsigned_input(&self) -> UnsignedInput {
         self.get_box().into()
     }
-    // Returns the Box ID of the wrapped `ErgoBox` as a base16 String
+    /// Returns the Box ID of the wrapped `ErgoBox` as a base16 String
     fn box_id(&self) -> String {
         self.get_box().box_id().into()
     }
-    // Returns the amount of nanoErgs held in the wrapped `ErgoBox` as u64
+    /// Returns the amount of nanoErgs held in the wrapped `ErgoBox` as u64
     fn nano_ergs(&self) -> NanoErg {
         self.get_box().value.as_u64().clone()
     }
@@ -31,16 +31,21 @@ pub trait WrappedBox {
     fn p2s_address(&self) -> P2SAddressString {
         serialize_p2s_from_ergo_tree(self.get_box().ergo_tree)
     }
-    // Returns the registers of the wrapped `ErgoBox` as `Constant`s
+    /// Returns the registers of the wrapped `ErgoBox` as an ordered Vector
+    /// of `Constant`s. First element is R4, second element is R5, etc.
     fn registers(&self) -> Vec<Constant> {
         self.get_box()
             .additional_registers
             .get_ordered_values()
             .clone()
     }
-    // Returns the `Token`s inside of an `ErgoBox`
+    /// Returns the `Token`s inside of the wrapped `ErgoBox`
     fn tokens(&self) -> Vec<Token> {
         self.get_box().tokens
+    }
+    /// Returns the creation height of the wrapped `ErgoBox`
+    fn creation_height(&self) -> u64 {
+        self.get_box().creation_height.clone() as u64
     }
 }
 
