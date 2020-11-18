@@ -2,9 +2,9 @@ use crate::error::{ProtocolFrameworkError, Result};
 pub use ergo_lib::ast::Constant;
 pub use ergo_lib::chain::ergo_box::ErgoBox;
 pub use ergo_lib::chain::token::{TokenAmount, TokenId};
-use ergo_lib::ErgoTree;
-use ergo_lib_wasm::box_coll::ErgoBoxes;
-use ergo_lib_wasm::ergo_box::ErgoBox as WErgoBox;
+pub use ergo_lib::ErgoTree;
+pub use ergo_lib_wasm::box_coll::ErgoBoxes;
+pub use ergo_lib_wasm::ergo_box::ErgoBox as WErgoBox;
 use ergo_offchain_utilities::encoding::address_string_to_ergo_tree;
 use ergo_offchain_utilities::{ErgoAddressString, NanoErg};
 use serde_json::from_str;
@@ -33,9 +33,14 @@ impl TokenSpec {
 // #[wasm_bindgen]
 // #[derive(Clone)]
 // pub struct RegisterSpec {
-//     // Find the sigma-rust struct for types
+//     value: Option<Constant>,
 //     value_type: Option<SType>,
-//     value_range: Option<Constant>,
+// }
+
+// pub enum RegisterSpec {
+//     Type(SType),
+//     Value(Constant),
+//     None,
 // }
 
 /// A specification which specifies parameters of a `ErgoBox`.
@@ -319,34 +324,32 @@ mod tests {
 
         assert!(box_spec_res.tokens.is_empty())
     }
-    // #[test]
-    // fn find_boxes_in_explorer() {
-    //     let address =
-    //         Some("9aFbqNsmDwSxCdcLDKmSxVTL58ms2A39Rpn2zodVzkBN5MzB8zvW5PFX551W1A5vUdFJ3yxwvwgYTTS4JrPQcb5qxBbRDJkGNikuqHRXhnbniK4ajumEj7ot2o7DbcNFaM674fWufQzSGS1KtgMw95ZojyqhswUNbKpYDV1PhKw62bEMdJL9vAvzea4KwKXGUTdYYkcPdQKFWXfrdo2nTS3ucFNxqyTRB3VtZk7AWE3eeNHFcXZ1kLkfrX1ZBjpQ7qrBemHk4KZgS8fzmm6hPSZThiVVtBfQ2CZhJQdAZjRwGrw5TDcZ4BBDAZxg9h13vZ7tQSPsdAtjMFQT1DxbqAruKxX38ZwaQ3UfWmbBpbJEThAQaS4gsCBBSjswrv8BvupxaHZ4oQmA2LZiz4nYaPr8MJtR4fbM9LErwV4yDVMb873bRE5TBF59NipUyHAir7ysajPjbGc8aRLqsMVjntFSCFYx7822RBrj7RRX11CpiGK6vdfKHe3k14EH6YaNXvGSq8DrfNHEK4SgreknTqCgjL6i3EMZKPCW8Lao3Q5tbJFnFjEyntpUDf5zfGgFURxzobeEY4USqFaxyppHkgLjQuFQtDWbYVu3ztQL6hdWHjZXMK4VVvEDeLd1woebD1CyqS5kJHpGa78wQZ4iKygw4ijYrodZpqqEwTXdqwEB6xaLfkxZCBPrYPST3xz67GGTBUFy6zkXP5vwVVM5gWQJFdWCZniAAzBpzHeVq1yzaBp5GTJgr9bfrrAmuX8ra1m125yfeT9sTWroVu"
-    //             .to_string());
-    //     let value_range = Some(1..1000000000000);
-    //     let registers = vec![];
-    //     let tokens = vec![];
-    //     let box_spec = BoxSpec::new(address, value_range, registers, tokens);
+    #[test]
+    fn find_boxes_in_explorer() {
+        let address =
+            Some("9aFbqNsmDwSxCdcLDKmSxVTL58ms2A39Rpn2zodVzkBN5MzB8zvW5PFX551W1A5vUdFJ3yxwvwgYTTS4JrPQcb5qxBbRDJkGNikuqHRXhnbniK4ajumEj7ot2o7DbcNFaM674fWufQzSGS1KtgMw95ZojyqhswUNbKpYDV1PhKw62bEMdJL9vAvzea4KwKXGUTdYYkcPdQKFWXfrdo2nTS3ucFNxqyTRB3VtZk7AWE3eeNHFcXZ1kLkfrX1ZBjpQ7qrBemHk4KZgS8fzmm6hPSZThiVVtBfQ2CZhJQdAZjRwGrw5TDcZ4BBDAZxg9h13vZ7tQSPsdAtjMFQT1DxbqAruKxX38ZwaQ3UfWmbBpbJEThAQaS4gsCBBSjswrv8BvupxaHZ4oQmA2LZiz4nYaPr8MJtR4fbM9LErwV4yDVMb873bRE5TBF59NipUyHAir7ysajPjbGc8aRLqsMVjntFSCFYx7822RBrj7RRX11CpiGK6vdfKHe3k14EH6YaNXvGSq8DrfNHEK4SgreknTqCgjL6i3EMZKPCW8Lao3Q5tbJFnFjEyntpUDf5zfGgFURxzobeEY4USqFaxyppHkgLjQuFQtDWbYVu3ztQL6hdWHjZXMK4VVvEDeLd1woebD1CyqS5kJHpGa78wQZ4iKygw4ijYrodZpqqEwTXdqwEB6xaLfkxZCBPrYPST3xz67GGTBUFy6zkXP5vwVVM5gWQJFdWCZniAAzBpzHeVq1yzaBp5GTJgr9bfrrAmuX8ra1m125yfeT9sTWroVu"
+                .to_string());
+        let value_range = Some(1..1000000000000);
+        let registers = vec![];
+        let tokens = vec![];
+        let box_spec = BoxSpec::new(address, value_range, registers, tokens);
 
-    //     // Currently fails until v0.4 of ergo-lib releases which fixes
-    //     // the json parsing issue for box_id from explorer
-    //     // let matching_boxes = box_spec
-    //     //     .find_boxes_in_explorer("https://api.ergoplatform.com/api/v0/")
-    //     //     .unwrap();
+        let url = box_spec
+            .explorer_endpoint("https://api.ergoplatform.com/api/v0/")
+            .unwrap();
 
-    //     let client = reqwest::blocking::Client::new().get(&url);
-    //     let resp = client.send().map_err(|_| {
-    //         ProtocolFrameworkError::Other(
-    //             "Failed to make GET response to the Ergo Explorer Backend API.".to_string(),
-    //         )
-    //     });
-    //     let text = resp?.text().map_err(|_| {
-    //         ProtocolFrameworkError::Other(
-    //             "Failed to extract text from Ergo Explorer Backend API Response".to_string(),
-    //         )
-    //     })?;
+        let client = reqwest::blocking::Client::new().get(&url);
+        let resp = client.send().map_err(|_| {
+            ProtocolFrameworkError::Other(
+                "Failed to make GET response to the Ergo Explorer Backend API.".to_string(),
+            )
+        });
+        let text = resp.unwrap().text().unwrap();
 
-    //     assert!(matching_boxes.len() > 0)
-    // }
+        // Currently fails until v0.4 of ergo-lib releases which fixes
+        // the json parsing issue for box_id from explorer
+        let matching_boxes = box_spec.process_explorer_response(&text).unwrap();
+
+        assert!(matching_boxes.len() > 0)
+    }
 }
