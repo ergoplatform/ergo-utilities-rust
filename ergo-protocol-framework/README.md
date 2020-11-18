@@ -104,15 +104,20 @@ Example Output Builders:
 This module exposes a few basic functions for making your life easier when building `UnsignedTransaction`s inside of your Actions.
 
 
-
-
 ## Getting Started
 
+To learn how to use the EPF a tutorial series has been created which takes you step-by-step from writing the portable off-chain library to implement a basic CLI frontend.
+
+Currently available parts:
+1. [Building The Math Bounty dApp Off-Chain Library](1.Building_The_Math_Bounty_dApp_Off-Chain_Library.md)
 
 
-An example of the classic "Pin Lock" contract can be found here:
 
-1. For each stage create an empty struct with the name of your Stage.
-```rust
-pub struct LiveEpoch {}
+# Documentation
+
+To read the documentation for the EPF run the command below:
+
 ```
+cargo doc --open
+```
+

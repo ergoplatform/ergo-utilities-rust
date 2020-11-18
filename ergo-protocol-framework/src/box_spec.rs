@@ -43,7 +43,7 @@ impl TokenSpec {
 //     None,
 // }
 
-/// A specification which specifies parameters of a `ErgoBox`.
+/// A specification which specifies parameters of an `ErgoBox`.
 /// This spec is used as a "source of truth" to both verify and find
 /// `ErgoBox`es which match the spec. This is often used for defining
 /// Stages in multi-stage smart contract protocols, but can also be used

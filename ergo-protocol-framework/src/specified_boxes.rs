@@ -1,6 +1,6 @@
-/// This file holds a number of default "Specified Boxes".
+/// This file holds a number of default general "Specified Boxes".
 /// These are wrapper structs for `ErgoBox`es which meet a given
-/// specification and provide you with a good interface
+/// specification and provide you with a simple interface
 /// for implementing Actions of your protocols.
 use crate::box_spec::BoxSpec;
 use crate::box_traits::{SpecifiedBox, WrappedBox};
