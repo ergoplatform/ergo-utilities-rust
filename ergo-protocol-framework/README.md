@@ -35,8 +35,80 @@ The EPF provides you with the required tools to specify each of these building b
 
 ## Modules Of The Ergo Protocol Framework
 
+### Box Spec
+This module exposes the `BoxSpec` struct, which allows you to create a specification of a UTXO. This is used for defining the boxes which are required for the actions of your protocol.
+
+```rust
+/// A specification which specifies parameters of an `ErgoBox`.
+/// This spec is used as a "source of truth" to both verify and find
+/// `ErgoBox`es which match the spec. This is often used for defining
+/// Stages in multi-stage smart contract protocols, but can also be used
+/// to define input boxes for Actions.
+/// All fields are wrapped in `Option`s to allow ignoring specifying
+/// the field.
+#[wasm_bindgen]
+#[derive(Clone)]
+pub struct BoxSpec {
+    /// The address of the box
+    address: Option<ErgoAddressString>,
+    /// The allowed range of nanoErgs
+    value_range: Option<Range<NanoErg>>,
+    /// A sorted list of `Constant`s which define registers
+    /// of an `ErgoBox`.
+    /// First element is treated as R4, second as R5, and so on.
+    registers: Vec<Option<Constant>>,
+    /// A sorted list of `TokenSpec`s which define tokens
+    /// of an `ErgoBox`.
+    tokens: Vec<Option<TokenSpec>>,
+    /// An optional predicate which allows for defining custom
+    /// specification logic which gets processed when verifying
+    /// the box.
+    predicate: Option<fn(&ErgoBox) -> bool>,
+}
+```
+
+Once you've constructed a `BoxSpec`, you have a number of essential methods that simplify the experience of writing off-chain code for dApps.
+
+For example, `verify_box` allows you to test whether an `ErgoBox` you provide as input matches the specification you created with your `BoxSpec`.
+
+```rust
+pub fn verify_box(&self, ergo_box: &ErgoBox) -> Result<()> {
+```
+
+### Box Traits
+This module exposes two traits:
+1. `WrappedBox`
+2. `SpecifiedBox`
+
+All `SpecifiedBox`es are also `WrappedBox`es. In your off-chain code you will be defining all of your inputs UTXOs to actions as structs that implement both `WrappedBox` and `SpecifiedBox`.
+
+Both of these traits provide a simplified and improved interface for interacting with `ErgoBox`es.
+
+
+### Specified Boxes
+This module exposes generic "Specified Box" structs that implement `SpecifiedBox` and `WrappedBox` traits, and can be used as inputs for Actions in your off-chain protocol code.
+
+
+### Output Builders
+This module exposes structs which provide you with a basic interface
+for creating common output UTXOs within your Actions. These are often
+used for creating outputs that hold a user's change or pay a tx fee.
+
+Example Output Builders:
+1. ChangeBox
+2. TokensChangeBox
+3. TxFeeBox
+
+
+### Tx Creation
+This module exposes a few basic functions for making your life easier when building `UnsignedTransaction`s inside of your Actions.
+
+
+
 
 ## Getting Started
+
+
 
 An example of the classic "Pin Lock" contract can be found here:
 
