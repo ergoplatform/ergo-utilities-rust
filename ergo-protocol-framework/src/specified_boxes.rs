@@ -1,6 +1,7 @@
 /// This file holds a number of default "Specified Boxes".
 /// These are wrapper structs for `ErgoBox`es which meet a given
-/// specification.
+/// specification and provide you with a good interface
+/// for implementing Actions of your protocols.
 use crate::box_spec::BoxSpec;
 use crate::box_traits::{SpecifiedBox, WrappedBox};
 use crate::error::{ProtocolFrameworkError, Result};
@@ -14,6 +15,7 @@ use wasm_bindgen::prelude::*;
 /// The spec simply requires the box to simply have at least `1000000`
 /// nanoErgs inside.
 #[wasm_bindgen]
+#[derive(Clone, Debug)]
 pub struct ErgsBox {
     ergo_box: ErgoBox,
 }
@@ -83,6 +85,7 @@ impl ErgsBox {
 /// box has a single type of Token
 /// and said token has a value of 1. (Checking that it has an NFT)
 #[wasm_bindgen]
+#[derive(Clone, Debug)]
 pub struct OracleBoxLong {
     ergo_box: ErgoBox,
     pub datapoint: i64,
