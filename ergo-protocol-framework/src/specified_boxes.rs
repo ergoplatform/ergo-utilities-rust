@@ -9,14 +9,14 @@ use ergo_lib::ast::ConstantVal;
 use ergo_lib::chain::ergo_box::ErgoBox;
 use ergo_lib_wasm::box_coll::ErgoBoxes;
 use ergo_lib_wasm::ergo_box::ErgoBox as WErgoBox;
-use ergo_protocol_framework_derive::WrappedBox;
+use ergo_protocol_framework_derive::WrapBox;
 use wasm_bindgen::prelude::*;
 
 /// A specified box which is intended to be spent for the Ergs inside.
 /// The spec simply requires the box to simply have at least `1000000`
 /// nanoErgs inside.
 #[wasm_bindgen]
-#[derive(Clone, Debug, WrappedBox)]
+#[derive(Clone, Debug, WrapBox)]
 pub struct ErgsBox {
     ergo_box: ErgoBox,
 }
@@ -80,7 +80,7 @@ impl ErgsBox {
 /// box has a single type of Token
 /// and said token has a value of 1. (Checking that it has an NFT)
 #[wasm_bindgen]
-#[derive(Clone, Debug, WrappedBox)]
+#[derive(Clone, Debug, WrapBox)]
 pub struct OracleBoxLong {
     ergo_box: ErgoBox,
     pub datapoint: i64,

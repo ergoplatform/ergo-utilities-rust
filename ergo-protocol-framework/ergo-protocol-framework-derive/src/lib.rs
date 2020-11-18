@@ -4,7 +4,7 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn;
 
-#[proc_macro_derive(WrappedBox)]
+#[proc_macro_derive(WrapBox)]
 pub fn wrapped_box_derive(input: TokenStream) -> TokenStream {
     // Construct a representation of Rust code as a syntax tree
     // that we can manipulate
