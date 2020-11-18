@@ -5,7 +5,6 @@
 use crate::box_spec::BoxSpec;
 use crate::box_traits::{SpecifiedBox, WrappedBox};
 use crate::error::{ProtocolFrameworkError, Result};
-use ergo_lib::ast::ConstantVal;
 use ergo_lib::chain::ergo_box::ErgoBox;
 use ergo_lib_wasm::box_coll::ErgoBoxes;
 use ergo_lib_wasm::ergo_box::ErgoBox as WErgoBox;
@@ -68,92 +67,5 @@ impl ErgsBox {
         boxes
             .into_iter()
             .fold(0, |acc, pb| pb.get_box().value.as_u64().clone() + acc)
-    }
-}
-
-/// A specified box which indicates it is an
-/// oracle box which stores a `Long` integer datapoint inside of R4.
-/// This may be an Oracle Pool box, or any other kind of oracle box.
-/// This specified box automatically extracts the long datapoint from the
-/// box and exposes it as a public field to be easily used.
-/// It solely uses a predicate for the spec. This predicate checks that the
-/// box has a single type of Token
-/// and said token has a value of 1. (Checking that it has an NFT)
-#[wasm_bindgen]
-#[derive(Clone, Debug, WrapBox)]
-pub struct OracleBoxLong {
-    ergo_box: ErgoBox,
-    pub datapoint: i64,
-    /// The token id of the oracle's NFT
-    nft_id: String,
-}
-/// SpecifiedBox impl
-impl SpecifiedBox for OracleBoxLong {
-    /// A predicated box spec for an Oracle Box with a long in R4
-    fn box_spec() -> BoxSpec {
-        BoxSpec::new_predicated(None, None, vec![], vec![], Some(OracleBoxLong::predicate))
-    }
-}
-/// WASM-compatible OracleBoxLong Methods
-#[wasm_bindgen]
-impl OracleBoxLong {
-    #[wasm_bindgen(constructor)]
-    pub fn w_new(wb: WErgoBox) -> std::result::Result<OracleBoxLong, JsValue> {
-        let b: ErgoBox = wb.into();
-        OracleBoxLong::new(&b).map_err(|e| JsValue::from_str(&format! {"{:?}", e}))
-    }
-
-    #[wasm_bindgen(getter)]
-    pub fn nft_id(&self) -> String {
-        self.nft_id.clone()
-    }
-}
-
-/// Rust OracleBoxLong Methods
-impl OracleBoxLong {
-    // Create a new `OracleBoxLong`
-    pub fn new(b: &ErgoBox) -> Result<OracleBoxLong> {
-        // Check that the box matches the spec
-        Self::box_spec().verify_box(b)?;
-
-        let datapoint = OracleBoxLong::extract_long_datapoint(&b)?;
-        return Ok(OracleBoxLong {
-            ergo_box: b.clone(),
-            datapoint: datapoint,
-            nft_id: b.tokens[0].token_id.0.clone().into(),
-        });
-    }
-
-    // The predicate for an `OracleBoxLong`'s `BoxSpec`
-    fn predicate(b: &ErgoBox) -> bool {
-        // Verify that a valid Long datapoint was extracted.
-        let datapoint_check = OracleBoxLong::extract_long_datapoint(b).is_ok();
-        // Check only a single token type is held in the box
-        let tokens_len_check = b.tokens.len() == 1;
-        // Check that said single type of token is value == 1. (Aka is an NFT)
-        let nft_check = u64::from(b.tokens[0].amount) == 1;
-
-        datapoint_check && tokens_len_check && nft_check
-    }
-
-    /// Extracts a Long out of register R4 of the provided `ErgoBox`.
-    /// Does error-checking along the way.
-    fn extract_long_datapoint(b: &ErgoBox) -> Result<i64> {
-        let registers = b.additional_registers.get_ordered_values();
-        if registers.len() < 1 {
-            return Err(ProtocolFrameworkError::Other(
-                "No datapoint in R4.".to_string(),
-            ));
-        } else {
-            // Match on the ConstantVal::Long of Register R4
-            match registers[0].v {
-                ConstantVal::Long(i) => return Ok(i),
-                _ => {
-                    return Err(ProtocolFrameworkError::Other(
-                        "Value in R4 is not a Long.".to_string(),
-                    ))
-                }
-            };
-        }
     }
 }
