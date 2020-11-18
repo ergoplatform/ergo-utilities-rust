@@ -7,6 +7,7 @@ pub mod tx_creation;
 
 pub use box_spec::{BoxSpec, TokenSpec};
 pub use box_traits::{SpecifiedBox, WrappedBox};
+pub use ergo_protocol_framework_derive::*;
 pub use error::{ProtocolFrameworkError, Result};
 pub use output_builders::{ChangeBox, TokensChangeBox, TxFeeBox};
 pub use specified_boxes::{ErgsBox, OracleBoxLong};
