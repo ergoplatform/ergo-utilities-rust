@@ -21,3 +21,4 @@ serde_json          = "1.0.58"
 wasm-bindgen        = "0.2.68"
 reqwest             = { version = "0.10", features = ["blocking"] }
 json                = "0.12.4"
+ergo_protocol_framework_derive = { path = "ergo-protocol-framework-derive"}

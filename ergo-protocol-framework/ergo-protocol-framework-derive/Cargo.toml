@@ -1,13 +1,14 @@
 [package]
-name = "ergo-offchain-utilities"
+name = "ergo_protocol_framework_derive"
 version = "0.1.0"
 authors = ["Robert Kornacki <11645932+robkorn@users.noreply.github.com>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[lib]
+proc-macro = true
+
 [dependencies]
-ergo-lib            = "0.2.0"
-thiserror           = "1.0.20"
-blake2b_simd        = "0.5.10"
-base16              = "0.2.1"
+syn = "1.0"
+quote = "1.0"
