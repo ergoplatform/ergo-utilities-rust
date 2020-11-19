@@ -6,8 +6,8 @@ use blake2b_simd::Params;
 use ergo_lib::ast::constant::{Constant, TryExtractFrom};
 use ergo_lib::chain::address::{Address, AddressEncoder, NetworkPrefix};
 use ergo_lib::chain::Base16EncodedBytes;
+use ergo_lib::ergo_tree::ErgoTree;
 use ergo_lib::serialization::SigmaSerializable;
-use ergo_lib::ErgoTree;
 use std::fmt::{Debug, Display};
 use std::str;
 use thiserror::Error;
@@ -60,12 +60,12 @@ pub fn hash_and_serialize_p2s(address: &P2SAddressString) -> Result<Constant> {
 
 /// Unwraps a hex-encoded `i32` Int inside of a `Constant` acquired from a register of an `ErgoBox`
 pub fn unwrap_int(c: &Constant) -> Result<i32> {
-    i32::try_extract_from(c.v).map_err(|_| EncodingError::FailedToUnwrap(c.base16_str()))
+    i32::try_extract_from(c.clone()).map_err(|_| EncodingError::FailedToUnwrap(c.base16_str()))
 }
 
 /// Unwrap a hex-encoded `i64` Long inside of a `Constant` acquired from a register of an `ErgoBox`
 pub fn unwrap_long(c: &Constant) -> Result<i64> {
-    i64::try_extract_from(c.v).map_err(|_| EncodingError::FailedToUnwrap(c.base16_str()))
+    i64::try_extract_from(c.clone()).map_err(|_| EncodingError::FailedToUnwrap(c.base16_str()))
 }
 
 /// Unwrap a String which is inside of a `Constant` acquired from a register of an `ErgoBox`
