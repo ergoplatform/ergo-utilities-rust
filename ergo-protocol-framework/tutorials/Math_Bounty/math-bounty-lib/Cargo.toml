@@ -8,5 +8,5 @@ edition = "2018"
 
 [dependencies]
 ergo-protocol-framework      = { git = "https://github.com/robkorn/ergo-utilities-rust", branch = "EPF-v0.2"}
-# ergo-lib                    = "0.3.0"
-ergo-lib                         = { git = "https://github.com/ergoplatform/sigma-rust/", branch = "develop", features = ["json"] }
+ergo-lib                     = "0.4.1"
+# ergo-lib                         = { git = "https://github.com/ergoplatform/sigma-rust/", branch = "develop", features = ["json"] }
