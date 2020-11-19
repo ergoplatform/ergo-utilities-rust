@@ -72,6 +72,8 @@ impl MathProblemProtocol {
             ChangeBox::output_candidate(&vec![], total_change, &user_address, current_height)
                 .unwrap();
 
+        // Our output candidates list, specifically with the Math Problem box
+        // candidate being the first, meaning Output #0.
         let output_candidates = vec![
             math_problem_candidate,
             transaction_fee_candidate,
