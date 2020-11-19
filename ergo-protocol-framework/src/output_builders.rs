@@ -8,6 +8,13 @@ use ergo_lib::chain::ergo_box::{ErgoBox, ErgoBoxCandidate};
 use ergo_lib::chain::token::Token;
 use ergo_offchain_utilities::{NanoErg, P2PKAddressString};
 
+// /// A function which takes all input boxes/output candidates
+// /// and creates two new output candidates. One tx fee box, and one
+// /// change box which holds
+// /// all nanoErgs/tokens which are unaccounted for in inputs/outputs.
+// /// This function then builds and returns an `UnsignedTransaction`.
+// pub fn balance_and_create_unsigned_tx(inputs: Vec<ErgoBox>, data_inputs: Vec<ErgoBox>, outputs: Vec<ErgoBoxCandidate>, transaction_fee: NanoErg) -> Result<ErgoBoxCandidate>
+
 /// A struct used while constructing txs to build a `ErgoBoxCandidate`
 /// that holds any change Ergs & tokens from the input boxes which are
 /// not relevant to the protocol at hand
@@ -19,7 +26,7 @@ impl ChangeBox {
     pub fn output_candidate(
         tokens: &Vec<Token>,
         value: NanoErg,
-        user_address: P2PKAddressString,
+        user_address: &P2PKAddressString,
         current_height: u64,
     ) -> Result<ErgoBoxCandidate> {
         create_candidate(value, &user_address, &tokens, &vec![], current_height)

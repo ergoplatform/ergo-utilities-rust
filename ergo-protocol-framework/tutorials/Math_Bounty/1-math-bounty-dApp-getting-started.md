@@ -159,10 +159,11 @@ What this means is that all of our transaction creation logic within our actions
         current_height: u64,
         transaction_fee: u64,
         ergs_box_for_fee: ErgsBox,
+        user_address: String,
     ) -> UnsignedTransaction
 ```
 
-The current height is required for tx building, the transaction fee is to be decided by the front-end implementor when the action method is used, and the `ergs_box_for_fee` is a wrapped `ErgoBox` which is used to pay for the fee for the transaction. These are the minimum arguments required for any action you will ever write.
+The current height is required for tx building, the transaction fee is to be decided by the front-end implementor when the action method is used, the `ergs_box_for_fee` is a wrapped `ErgoBox` which is used to pay for the fee for the transaction, and the user's address is required to send change back to the user. These are the minimum arguments required for any action you will ever write.
 
 Furthermore, in our current scenario, we also have the `ergs_box_for_bounty` input argument and `bounty_amount_in_nano_ergs`. In the front-end the user will provide the amount of nanoErgs they want to submit as a bounty to the dApp, and the front-end implementation must find an input `ErgsBox` with sufficient nanoErgs to cover the bounty amount which is owned by the user.
 
@@ -199,3 +200,74 @@ let tx_inputs = vec![
 All we are doing here is making the bounty `ErgsBox` the first input (index 0) and the fee `ErgsBox` the second input (index 1). To convert from a `SpecifiedBox`(or `WrappedBox`, which `ErgsBox`es are both) into an input we can feed to `UnsignedTransaction::new`, then we simply call the `.as_unsigned_input()` method.
 
 We've already completed 2/3 of the requirements for creating an `UnsignedTransaction`, but now we get to the more interesting part where we encode the logic of our action.
+
+
+### Implementing Action Logic
+
+First of all we need to figure out how much extra change is held within the `ErgsBox`es that were provided as inputs. This is very simple math:
+
+```rust
+let total_nano_ergs = ergs_box_for_bounty.nano_ergs() + ergs_box_for_fee.nano_ergs();
+let total_change = total_nano_ergs - bounty_amount_in_nano_ergs - transaction_fee;
+```
+
+In short, whatever we don't use for the bounty or the tx fee has to go back to the user as change.
+
+Now with that out of the way we can begin creating our outputs. First we are going to create our Math Problem Box output candidate. We are going to use the `create_candidate` function provided by the EPF to do this.
+
+```rust
+// Creating our Math Problem Box output candidate
+let math_problem_candidate = create_candidate(
+    bounty_amount_in_nano_ergs,
+    &"94hWSMqgxHtRNEWoKrJFGVNQEYX34zfX68FNxWr".to_string(),
+    &vec![],
+    &vec![],
+    current_height,
+)
+.unwrap();
+```
+
+The `create_candidate` function takes the following inputs:
+1. nanoErgs to be held in the resulting output box.
+2. The address which the output box will be at.
+3. Tokens that the output box will hold.
+4. Register values that the box will hold.
+5. Current block height
+
+In our case we simply want to create an output at the P2S smart contract address we compiled at the start of this tutorial, `94hWSMqgxHtRNEWoKrJFGVNQEYX34zfX68FNxWr`, and for it to hold an amount of nanoErgs equal to `bounty_amount_in_nano_ergs`. We do not require any tokens to be held in the output, nor any data in the registers, and as such we leave these empty.
+
+As a result, we have created our Math Problem Box output candidate which will lock the bounty Ergs under the smart contract. Now we can finish off building the two final candidates for our action.
+
+### Creating The Tx Fee And Change Boxes
+
+Rather than manually using the `create_candidate` function for every single output candidate we are building, which can get tedious, the EPF provides us with some default "output builders". These are structs that off associated functions which build output candidates for easily, thereby making our lives easier.
+
+Thus to create a tx fee box output candidate, all we have to do is:
+```rust
+let transaction_fee_candidate =
+    TxFeeBox::output_candidate(transaction_fee, current_height).unwrap();
+```
+
+Similarly the EPF also offers an output builder for a change box which we will use as well:
+
+```rust
+let change_box_candidate = ChangeBox::output_candidate(
+    &vec![],
+    total_change,
+    &user_address,
+    current_height,
+)
+```
+
+And just like that we've finished creating all three required output candidates for our action. To reiterate, the three output box candidates we created were:
+1. The Math Problem Box
+2. Transaction Fee Box
+3. The Change Box
+
+And now to finish implementing our action at last, all we have to do is add the candidates we created into our list of `output_candidates` in the correct order. (In our case, our smart contract only specifies that the Math Problem Box must be the first output)
+
+
+```rust
+
+
+```

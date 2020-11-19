@@ -42,12 +42,41 @@ impl MathProblemProtocol {
         current_height: u64,
         transaction_fee: u64,
         ergs_box_for_fee: ErgsBox,
+        user_address: String,
     ) -> UnsignedTransaction {
         let tx_inputs = vec![
             ergs_box_for_bounty.as_unsigned_input(),
             ergs_box_for_fee.as_unsigned_input(),
         ];
-        let output_candidates = vec![];
+
+        // Calculating left over change nanoErgs
+        let total_nano_ergs = ergs_box_for_bounty.nano_ergs() + ergs_box_for_fee.nano_ergs();
+        let total_change = total_nano_ergs - bounty_amount_in_nano_ergs - transaction_fee;
+
+        // Creating our Math Problem Box output candidate
+        let math_problem_candidate = create_candidate(
+            bounty_amount_in_nano_ergs,
+            &"94hWSMqgxHtRNEWoKrJFGVNQEYX34zfX68FNxWr".to_string(),
+            &vec![],
+            &vec![],
+            current_height,
+        )
+        .unwrap();
+
+        // Create the Transaction Fee box candidate
+        let transaction_fee_candidate =
+            TxFeeBox::output_candidate(transaction_fee, current_height).unwrap();
+
+        // Create the Change box candidate
+        let change_box_candidate =
+            ChangeBox::output_candidate(&vec![], total_change, &user_address, current_height)
+                .unwrap();
+
+        let output_candidates = vec![
+            math_problem_candidate,
+            transaction_fee_candidate,
+            change_box_candidate,
+        ];
 
         UnsignedTransaction::new(tx_inputs, vec![], output_candidates)
     }
