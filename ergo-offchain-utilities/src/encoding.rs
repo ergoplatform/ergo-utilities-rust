@@ -3,7 +3,7 @@
 use crate::{ErgoAddressString, P2PKAddressString, P2SAddressString};
 use base16;
 use blake2b_simd::Params;
-use ergo_lib::ast::{CollPrim, Constant, ConstantColl, ConstantVal};
+use ergo_lib::ast::constant::{Constant, TryExtractFrom};
 use ergo_lib::chain::address::{Address, AddressEncoder, NetworkPrefix};
 use ergo_lib::chain::Base16EncodedBytes;
 use ergo_lib::serialization::SigmaSerializable;
@@ -20,6 +20,8 @@ pub enum EncodingError<T: Debug + Display> {
     FailedToSerialize(T),
     #[error("Failed to deserialize: {0}")]
     FailedToDeserialize(T),
+    #[error("Failed to unwrap: {0}")]
+    FailedToUnwrap(T),
 }
 
 /// Takes the blake2b hash of a String, then converted into/represented as hex as a String
@@ -58,28 +60,19 @@ pub fn hash_and_serialize_p2s(address: &P2SAddressString) -> Result<Constant> {
 
 /// Unwraps a hex-encoded `i32` Int inside of a `Constant` acquired from a register of an `ErgoBox`
 pub fn unwrap_int(c: &Constant) -> Result<i32> {
-    match &c.v {
-        ConstantVal::Int(i) => return Ok(i.clone()),
-        _ => return Err(EncodingError::FailedToDeserialize(c.base16_str())),
-    };
+    i32::try_extract_from(c.v).map_err(|_| EncodingError::FailedToUnwrap(c.base16_str()))
 }
 
 /// Unwrap a hex-encoded `i64` Long inside of a `Constant` acquired from a register of an `ErgoBox`
 pub fn unwrap_long(c: &Constant) -> Result<i64> {
-    // Eventually use &c.v.try_extract_from()
-    match &c.v {
-        ConstantVal::Long(i) => return Ok(i.clone()),
-        _ => return Err(EncodingError::FailedToDeserialize(c.base16_str())),
-    };
+    i64::try_extract_from(c.v).map_err(|_| EncodingError::FailedToUnwrap(c.base16_str()))
 }
 
 /// Unwrap a String which is inside of a `Constant` acquired from a register of an `ErgoBox`
 pub fn unwrap_string(c: &Constant) -> Result<String> {
-    let byte_array: Result<Vec<u8>> = match &c.v {
-        ConstantVal::Coll(ConstantColl::Primitive(CollPrim::CollByte(ba))) => {
-            Ok(convert_to_unsigned_bytes(ba))
-        }
-        _ => Err(EncodingError::FailedToDeserialize(c.base16_str())),
+    let byte_array: Result<Vec<u8>> = match Vec::<i8>::try_extract_from(c.clone()) {
+        Ok(ba) => Ok(convert_to_unsigned_bytes(&ba)),
+        _ => Err(EncodingError::FailedToUnwrap(c.base16_str())),
     };
     Ok(str::from_utf8(&byte_array?)
         .map_err(|_| EncodingError::FailedToDeserialize(c.base16_str()))?
@@ -88,11 +81,9 @@ pub fn unwrap_string(c: &Constant) -> Result<String> {
 
 /// Unwraps a hex-encoded String which is inside of a `Constant` acquired from a register of an `ErgoBox`.
 pub fn unwrap_hex_encoded_string(c: &Constant) -> Result<String> {
-    let byte_array: Result<Vec<u8>> = match &c.v {
-        ConstantVal::Coll(ConstantColl::Primitive(CollPrim::CollByte(ba))) => {
-            Ok(convert_to_unsigned_bytes(ba))
-        }
-        _ => Err(EncodingError::FailedToDeserialize(c.base16_str())),
+    let byte_array: Result<Vec<u8>> = match Vec::<i8>::try_extract_from(c.clone()) {
+        Ok(ba) => Ok(convert_to_unsigned_bytes(&ba)),
+        _ => Err(EncodingError::FailedToUnwrap(c.base16_str())),
     };
     Ok(base16::encode_lower(&byte_array?))
 }
@@ -116,11 +107,9 @@ pub fn serialize_p2s_from_ergo_tree(ergo_tree: ErgoTree) -> P2SAddressString {
 
 /// Deserialize ErgoTree inside of a `Constant` acquired from a register of an `ErgoBox` into a P2S Base58 String.
 pub fn deserialize_ergo_tree_constant(c: &Constant) -> Result<P2SAddressString> {
-    let byte_array: Result<Vec<u8>> = match &c.v {
-        ConstantVal::Coll(ConstantColl::Primitive(CollPrim::CollByte(ba))) => {
-            Ok(convert_to_unsigned_bytes(ba))
-        }
-        _ => Err(EncodingError::FailedToDeserialize(c.base16_str())),
+    let byte_array: Result<Vec<u8>> = match Vec::<i8>::try_extract_from(c.clone()) {
+        Ok(ba) => Ok(convert_to_unsigned_bytes(&ba)),
+        _ => Err(EncodingError::FailedToUnwrap(c.base16_str())),
     };
 
     let address = Address::P2S(byte_array?);
