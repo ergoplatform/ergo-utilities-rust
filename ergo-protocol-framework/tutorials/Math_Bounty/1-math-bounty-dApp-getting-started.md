@@ -66,18 +66,18 @@ pub struct MathBountyBox {
 }
 ```
 
-Now that we've defined the `MathBountyBox`, we can also derive a few traits automatically to make our lives easier:
+Now that we've defined the `MathBountyBox`, we can also use derive a few traits and helper methods automatically:
 
 ```rust
-#[derive(Debug, Clone, WrapBox)]
+#[derive(Debug, Clone, WrapBox, SpecBox)]
 pub struct MathBountyBox {
     ergo_box: ErgoBox,
 }
 ```
 
-To the Rust-initiated, `Debug` and `Clone` are typical, but `WrapBox` is new. This is a procedural macro which automatically implements the `WrappedBox` trait for our `MathBountyBox`. In other words, we have access to new helper methods without writing any extra code ourselves.
+To the Rust-initiated, `Debug` and `Clone` are typical, but `WrapBox` and `SpecBox` are novel. These are procedural macros which automatically implements the `WrappedBox` trait and a `new` method tied to the `SpecifiedBox` trait for our `MathBountyBox`. In other words, we have access to new helper methods without writing any extra code ourselves thanks to these macros. (Note: You must import `ProtocolFrameworkError` if you ever derive `SpecBox`. We do this automatically by importing * in this project.)
 
-Next we are going to implement the `SpecifiedBox` trait on our `MathBountyBox`.
+Next we are going to implement the `SpecifiedBox` trait on our `MathBountyBox`, in order to take advantage of the `SpecBox` derive.
 
 ```rust
 impl SpecifiedBox for MathBountyBox {
