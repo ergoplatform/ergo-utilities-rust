@@ -2,9 +2,9 @@
 
 In this tutorial series we will be building a simple "Math Bounty" dApp using the Ergo Protocol Framework. In short, this dApp allows individuals to lock Ergs up under a contract which requires a person to solve the math problem encoded in the contract in order to withdraw the funds inside. The idea for this dApp originally came from [this Ergo Forum Thread](https://www.ergoforum.org/t/mathematical-fun-with-ergoscript/76).
 
-In our case we'll be using a simpler problem/contract to make it easy to follow along. Do note that this dApp isn't 100% secure because either because bad actors/bots can front-run your answer submission by watching the mempool. Nonetheless, this is an instructive example that you will be able to run live on testnet/mainnet for educational purposes. (Refer to the above linked thread for more details about how to make a more complicated, but secure Math Bounty smart contract)
+In our case we'll be using a simpler problem/contract to make it easy to follow along. Do note that this dApp isn't 100% secure because because bad actors/bots can front-run your answer submission by watching the mempool. Nonetheless, this is an instructive example that you will be able to run live on testnet/mainnet for educational purposes. (Refer to the above linked thread for more details about how to make a more complicated, but secure Math Bounty smart contract)
 
-In this first tutorial of the series, we will be covering the basics of how to get started in creating your dApp's off-chain library all the way to writing your first protocol action.
+In this first tutorial of the series, we will be covering the basics of how to get begin writing your dApp's off-chain library all the way to writing your first protocol action.
 
 ## The Smart Contract
 
@@ -17,18 +17,36 @@ Before we dive into building the off-chain portion of our dApp, let's take a loo
 ```
 As can be seen, the contract is extremely simple.
 
-In short, a user can withdraw funds if they can figure out what number multiplied by `2` is equal to `4`. Specifically, funds can be withdrawn if the output UTXO with the index 0 has a register R4, with a Long Integer in the register, and said register is equal to the number `2` (in order for the equation to be true).
+In short, a user can withdraw funds if they can figure out what number multiplied by `2` is equal to `4`. Specifically, funds can be withdrawn if the output UTXO with the index 0 has a register R4 that is a Long Integer is equal to the number `2` (in order for the equation to be true).
 
-Compiling this contract into a P2S address results in the address: `94hWSMqgxHtRNEWoKrJFGVNQEYX34zfX68FNxWr`. ([Click here to try compiling it for yourself on the PlutoMonkey Playground](https://wallet.plutomonkey.com/p2s/?source=ewogSU5QVVRTKDApLlI0W0xvbmddLmdldCAqIDIgPT0gNAp9))
-
-
-In the rest of this tutorial we will be writing the off-chain library for our dApp which performs all of the transaction creation logic for someone to perform the "Solve Problem" action, and thus withdraw the funds locked.
+Compiling this contract into a P2S address results in the address: `94hWSMqgxHtRNEWoKrJFGVNQEYX34zfX68FNxWr`
+([Click here to try compiling it for yourself on the PlutoMonkey Playground](https://wallet.plutomonkey.com/p2s/?source=ewogSU5QVVRTKDApLlI0W0xvbmddLmdldCAqIDIgPT0gNAp9))
 
 
-## 
+In the rest of this tutorial we will begin writing the off-chain library for our dApp which performs all of the transaction creation logic.
 
 
+## Preparing Your Project
 
+We are going to be coding in Rust so ensure that you have the tooling installed on your machine: [Install Rust](https://www.rust-lang.org/tools/install)
+
+Once installed you will have access to the `cargo` command in your terminal. We are going to be creating a new library called `math-bounty-lib` which will hold all of your protocol's off-chain code.
+
+```rust
+cargo new math-bounty-lib --lib
+```
+
+Cargo will create a new project folder for you called `math-bounty-lib`. Within the newly created `Cargo.toml` file inside of the project folder we will need to add a couple dependencies to get started using the EPF. In the `[dependencies]` section add:
+
+```rust
+ergo-protocol-framework      =  "0.1.0"
+ergo-lib                     = "0.4.0"
+```
+
+Now we can jump over to the `src/lib.rs` file and get started coding.
+
+
+## Writing Your Off-Chain Library
 
 First we're going to import all of the Ergo Protocol Framework structs/functions/macros to keep things simple:
 
@@ -45,32 +63,32 @@ You may have noticed that we also imported `ErgoBox` from the `ergo_lib` library
 
 The next thing we are going to do is define the stages of our protocol. In our case we have a simple single-stage smart contract protocol in our dApp. This means we need to only create a single Rust stage-representing struct for our dApp.
 
-This stage in our dApp will be called the `Math Problem` stage. As such, we will name the struct which will wrap an `ErgoBox` at this stage the `MathProblemBox`.
+This stage in our dApp will be called the `Math Bounty` stage. As such, we will name the struct which will wrap an `ErgoBox` at this stage the `MathBountyBox`.
 
 ```rust
-pub struct MathProblemBox {
+pub struct MathBountyBox {
     ergo_box: ErgoBox,
 }
 ```
 
-Now that we've defined the `MathProblemBox`, we can also derive a few traits automatically to make our lives easier:
+Now that we've defined the `MathBountyBox`, we can also derive a few traits automatically to make our lives easier:
 
 ```rust
 #[derive(Debug, Clone, WrapBox)]
-pub struct MathProblemBox {
+pub struct MathBountyBox {
     ergo_box: ErgoBox,
 }
 ```
 
-To the Rust-initiated, `Debug` and `Clone` are typical, but `WrapBox` is new. This is a procedural macro which automatically implements the `WrappedBox` trait for our `MathProblemBox`. In other words, we have access to new helper methods without writing any extra code ourselves.
+To the Rust-initiated, `Debug` and `Clone` are typical, but `WrapBox` is new. This is a procedural macro which automatically implements the `WrappedBox` trait for our `MathBountyBox`. In other words, we have access to new helper methods without writing any extra code ourselves.
 
 
 -----
 
-Next we are going to implement the `SpecifiedBox` trait on our `MathProblemBox`.
+Next we are going to implement the `SpecifiedBox` trait on our `MathBountyBox`.
 
 ```rust
-impl SpecifiedBox for MathProblemBox {
+impl SpecifiedBox for MathBountyBox {
     fn box_spec() -> BoxSpec {
         todo!();
     }
@@ -81,11 +99,11 @@ Now this is where things get interesting. This trait requires us to implement a 
 
 A `BoxSpec` is a specification in the form of a Rust struct which specifies parameters of an `ErgoBox`. This spec struct is used as a "source of truth" to both verify and find `ErgoBox`es which match the spec.
 
-As such, we are going to create a `BoxSpec` for the Math Problem stage, which will be used by our `MathProblemBox` struct. We will be doing this using the `BoxSpec::new()` method which allows us to specify the address, value range, registers, and tokens for our specification. In our case we will only be using the address due to the simplicity of our dApp.
+As such, we are going to create a `BoxSpec` for the Math Bounty stage, which will be used by our `MathBountyBox` struct. We will be doing this using the `BoxSpec::new()` method which allows us to specify the address, value range, registers, and tokens for our specification. In our case we will only be using the address due to the simplicity of our dApp.
 
 
 ```rust
-impl SpecifiedBox for MathProblemBox {
+impl SpecifiedBox for MathBountyBox {
     fn box_spec() -> BoxSpec {
         let address = Some("94hWSMqgxHtRNEWoKrJFGVNQEYX34zfX68FNxWr".to_string());
         BoxSpec::new(address, None, vec![], vec![])
@@ -93,54 +111,54 @@ impl SpecifiedBox for MathProblemBox {
 }
 ```
 
-Our Rust-based spec of the Math Problem stage states that an `ErgoBox` which has an address of `94hWSMqgxHtRNEWoKrJFGVNQEYX34zfX68FNxWr` is a valid `MathProblemBox`. Furthermore this means that no matter what Ergs/registers/tokens the `ErgoBox` has inside, it is still considered a valid `MathProblemBox`. For our use case, this is a valid spec for what we were going for.
+Our Rust-based spec of the Math Bounty stage states that an `ErgoBox` which has an address of `94hWSMqgxHtRNEWoKrJFGVNQEYX34zfX68FNxWr` is a valid `MathBountyBox`. Furthermore this means that no matter what Ergs/registers/tokens the `ErgoBox` has inside, it is still considered a valid `MathBountyBox`. For our use case, this is a valid spec for what we were going for.
 
 
 ---
 
-Next up, we are going to implement the `new` method so that a `MathProblemBox` can be created.
+Next up, we are going to implement the `new` method so that a `MathBountyBox` can be created.
 
 ```rust
-impl MathProblemBox {
-    pub fn new(ergo_box: &ErgoBox) -> Option<MathProblemBox> {
+impl MathBountyBox {
+    pub fn new(ergo_box: &ErgoBox) -> Option<MathBountyBox> {
         // Using the automatically implemented `verify_box` method
         // from the `BoxSpec` to verify the `ErgoBox` is a valid
-        // `MathProblemBox`.
+        // `MathBountyBox`.
         Self::box_spec().verify_box(ergo_box).ok()?;
 
-        // Creating the `MathProblemBox`
-        let math_problem_box = MathProblemBox {
+        // Creating the `MathBountyBox`
+        let math_problem_box = MathBountyBox {
             ergo_box: ergo_box.clone(),
         };
 
-        // Returning the `MathProblemBox`
+        // Returning the `MathBountyBox`
         Some(math_problem_box)
     }
 }
 ```
 
-As can be seen above, we use the `verify_box` method to ensure that the `ErgoBox` is indeed a valid `MathProblemBox` according to the spec we defined. This `verify_box` method is automatically available for use once the `SpecifiedBox` trait has been implemented.
+As can be seen above, we use the `verify_box` method to ensure that the `ErgoBox` is indeed a valid `MathBountyBox` according to the spec we defined. This `verify_box` method is automatically available for use once the `SpecifiedBox` trait has been implemented.
 
 
 ---
 
-Going forward, we are going to begin defining the actions of our protocol. Before we get there, first we must create an empty struct which represents our dApp protocol. In our case, we are just going to call it `MathProblemProtocol`.
+Going forward, we are going to begin defining the actions of our protocol. Before we get there, first we must create an empty struct which represents our dApp protocol. In our case, we are just going to call it `MathProtocol`.
 
 
 ```rust
-pub struct MathProblemProtocol {}
+pub struct MathBountyProtocol {}
 ```
 
-With a struct that represents our smart contract protocol we can implement protocol actions as methods on said struct. Thus when we expose this `MathProblemProtocol` publicly, it will be easy in the future to implement front-ends for our dApp.
+With a struct that represents our smart contract protocol we can implement protocol actions as methods on said struct. Thus when we expose this `MathBountyProtocol` publicly, it will be easy in the future to implement front-ends for our dApp.
 
-We will now begin to write our first action, `Bootstrap Math Problem Box`, by making it a method.
+We will now begin to write our first action, `Bootstrap Math Bounty Box`, by making it a method.
 
 ```rust
 use ergo_lib::chain::transaction::unsigned::UnsignedTransaction;
 
 
-impl MathProblemProtocol {
-    /// A bootstrap action which allows a user to create a `MathProblemBox`
+impl MathBountyProtocol {
+    /// A bootstrap action which allows a user to create a `MathBountyBox`
     /// with funds locked inside as a bounty for solving the math problem.
     pub action_bootstrap_math_problem_box() -> UnsignedTransaction (
         todo!()
@@ -150,7 +168,7 @@ impl MathProblemProtocol {
 
 When writing actions with the Ergo Protocol Framework, we must keep in mind that we are building pure, portable, and reusable code.
 
-What this means is that all of our transaction creation logic within our actions must be self-contained. This is why we are creating/returning an `UnsignedTransaction` from our action. Furthermore this means that any external data (from the blockchain, or user input) must be provided to the action method via arguments. Thus for our `Bootstrap Math Problem Box` action, we will need the following inputs:
+What this means is that all of our transaction creation logic within our actions must be self-contained. This is why we are creating/returning an `UnsignedTransaction` from our action. Furthermore this means that any external data (from the blockchain, or user input) must be provided to the action method via arguments. Thus for our `Bootstrap Math Bounty Box` action, we will need the following inputs:
 
 ```rust
     pub fn action_bootstrap_math_problem_box(
@@ -186,7 +204,7 @@ As can be seen, to create an unsigned transaction we simply need three things:
 2. An ordered list of data-inputs
 3. An ordered list of output box candidates
 
-In our case we will not be using any data-inputs (aka. read-only inputs) because our protocol is simple and does not rely on any other UTXOs on the blockchain. Thus we will move forward by defining our `tx_inputs` and our `output_candidates` in such a way that the resulting `UnsignedTransaction` is a valid implementation of our `Bootstrap Math Problem Box` action.
+In our case we will not be using any data-inputs (aka. read-only inputs) because our protocol is simple and does not rely on any other UTXOs on the blockchain. Thus we will move forward by defining our `tx_inputs` and our `output_candidates` in such a way that the resulting `UnsignedTransaction` is a valid implementation of our `Bootstrap Math Bounty Box` action.
 
 Let's implement the inputs first as these are very simple.
 
@@ -213,10 +231,10 @@ let total_change = total_nano_ergs - bounty_amount_in_nano_ergs - transaction_fe
 
 In short, whatever we don't use for the bounty or the tx fee has to go back to the user as change.
 
-Now with that out of the way we can begin creating our outputs. First we are going to create our Math Problem Box output candidate. We are going to use the `create_candidate` function provided by the EPF to do this.
+Now with that out of the way we can begin creating our outputs. First we are going to create our Math Bounty Box output candidate. We are going to use the `create_candidate` function provided by the EPF to do this.
 
 ```rust
-// Creating our Math Problem Box output candidate
+// Creating our Math Bounty Box output candidate
 let math_problem_candidate = create_candidate(
     bounty_amount_in_nano_ergs,
     &"94hWSMqgxHtRNEWoKrJFGVNQEYX34zfX68FNxWr".to_string(),
@@ -236,7 +254,7 @@ The `create_candidate` function takes the following inputs:
 
 In our case we simply want to create an output at the P2S smart contract address we compiled at the start of this tutorial, `94hWSMqgxHtRNEWoKrJFGVNQEYX34zfX68FNxWr`, and for it to hold an amount of nanoErgs equal to `bounty_amount_in_nano_ergs`. We do not require any tokens to be held in the output, nor any data in the registers, and as such we leave these empty.
 
-As a result, we have created our Math Problem Box output candidate which will lock the bounty Ergs under the smart contract. Now we can finish off building the two final candidates for our action.
+As a result, we have created our Math Bounty Box output candidate which will lock the bounty Ergs under the smart contract. Now we can finish off building the two final candidates for our action.
 
 ### Creating The Tx Fee And Change Boxes
 
@@ -260,11 +278,11 @@ let change_box_candidate = ChangeBox::output_candidate(
 ```
 
 And just like that we've finished creating all three required output candidates for our action. To reiterate, the three output box candidates we created were:
-1. The Math Problem Box
+1. The Math Bounty Box
 2. Transaction Fee Box
 3. The Change Box
 
-And now to finish implementing our action at last, all we have to do is add the candidates we created into our list of `output_candidates` in the correct order. (In our case, our smart contract only specifies that the Math Problem Box must be the first output)
+And now to finish implementing our action at last, all we have to do is add the candidates we created into our list of `output_candidates` in the correct order. (In our case, our smart contract only specifies that the Math Bounty Box must be the first output)
 
 
 ```rust
@@ -292,38 +310,38 @@ use ergo_lib::chain::transaction::unsigned::UnsignedTransaction;
 use ergo_protocol_framework::*;
 
 #[derive(Debug, Clone, WrapBox)]
-pub struct MathProblemBox {
+pub struct MathBountyBox {
     ergo_box: ErgoBox,
 }
 
-impl SpecifiedBox for MathProblemBox {
+impl SpecifiedBox for MathBountyBox {
     fn box_spec() -> BoxSpec {
         let address = Some("94hWSMqgxHtRNEWoKrJFGVNQEYX34zfX68FNxWr".to_string());
         BoxSpec::new(address, None, vec![], vec![])
     }
 }
 
-impl MathProblemBox {
-    pub fn new(ergo_box: &ErgoBox) -> Option<MathProblemBox> {
+impl MathBountyBox {
+    pub fn new(ergo_box: &ErgoBox) -> Option<MathBountyBox> {
         // Using the automatically implemented `verify_box` method
         // from the `BoxSpec` to verify the `ErgoBox` is a valid
-        // `MathProblemBox`.
+        // `MathBountyBox`.
         Self::box_spec().verify_box(ergo_box).ok()?;
 
-        // Creating the `MathProblemBox`
-        let math_problem_box = MathProblemBox {
+        // Creating the `MathBountyBox`
+        let math_problem_box = MathBountyBox {
             ergo_box: ergo_box.clone(),
         };
 
-        // Returning the `MathProblemBox`
+        // Returning the `MathBountyBox`
         Some(math_problem_box)
     }
 }
 
-pub struct MathProblemProtocol {}
+pub struct MathBountyProtocol {}
 
-impl MathProblemProtocol {
-    /// A bootstrap action which allows a user to create a `MathProblemBox`
+impl MathBountyProtocol {
+    /// A bootstrap action which allows a user to create a `MathBountyBox`
     /// with funds locked inside as a bounty for solving the math problem.
     pub fn action_bootstrap_math_problem_box(
         bounty_amount_in_nano_ergs: u64,
@@ -342,7 +360,7 @@ impl MathProblemProtocol {
         let total_nano_ergs = ergs_box_for_bounty.nano_ergs() + ergs_box_for_fee.nano_ergs();
         let total_change = total_nano_ergs - bounty_amount_in_nano_ergs - transaction_fee;
 
-        // Creating our Math Problem Box output candidate
+        // Creating our Math Bounty Box output candidate
         let math_problem_candidate = create_candidate(
             bounty_amount_in_nano_ergs,
             &"94hWSMqgxHtRNEWoKrJFGVNQEYX34zfX68FNxWr".to_string(),
@@ -361,7 +379,7 @@ impl MathProblemProtocol {
             ChangeBox::output_candidate(&vec![], total_change, &user_address, current_height)
                 .unwrap();
 
-        // Our output candidates list, specifically with the Math Problem box
+        // Our output candidates list, specifically with the Math Bounty box
         // candidate being the first, meaning Output #0.
         let output_candidates = vec![
             math_problem_candidate,
