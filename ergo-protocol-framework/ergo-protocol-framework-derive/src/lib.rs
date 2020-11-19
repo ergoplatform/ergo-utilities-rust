@@ -39,8 +39,8 @@ pub fn specified_box_derive(input: TokenStream) -> TokenStream {
 fn impl_specified_box(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
     let gen = quote! {
-        impl SpecifiedBox for #name {
-            pub fn new(b: &ErgoBox) -> std::result::Result<#name, ergo_protocol_framework::ProtocolFrameworkError> {
+        impl #name {
+            pub fn new(b: &ErgoBox) -> std::result::Result<#name, ProtocolFrameworkError> {
                 Self::box_spec().verify_box(&b)?;
                 return Ok(#name {
                     ergo_box: b.clone(),

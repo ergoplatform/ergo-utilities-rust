@@ -8,14 +8,14 @@ use crate::error::{ProtocolFrameworkError, Result};
 use ergo_lib::chain::ergo_box::ErgoBox;
 use ergo_lib_wasm::box_coll::ErgoBoxes;
 use ergo_lib_wasm::ergo_box::ErgoBox as WErgoBox;
-use ergo_protocol_framework_derive::WrapBox;
+use ergo_protocol_framework_derive::{SpecBox, WrapBox};
 use wasm_bindgen::prelude::*;
 
 /// A specified box which is intended to be spent for the Ergs inside.
 /// The spec simply requires the box to simply have at least `1000000`
 /// nanoErgs inside.
 #[wasm_bindgen]
-#[derive(Clone, Debug, WrapBox)]
+#[derive(Clone, Debug, WrapBox, SpecBox)]
 pub struct ErgsBox {
     ergo_box: ErgoBox,
 }
@@ -39,14 +39,6 @@ impl ErgsBox {
 }
 /// Rust ErgsBox Methods
 impl ErgsBox {
-    /// Create a new `ErgsBox`
-    pub fn new(b: &ErgoBox) -> Result<ErgsBox> {
-        Self::box_spec().verify_box(b)?;
-        return Ok(ErgsBox {
-            ergo_box: b.clone(),
-        });
-    }
-
     /// Converts from the WASM wrapper `ErgoBoxes` into a vector of
     /// `ErgsBox`es.
     pub fn convert_from_ergo_boxes(ergo_boxes: &ErgoBoxes) -> Result<Vec<ErgsBox>> {
