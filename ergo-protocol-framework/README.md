@@ -82,7 +82,7 @@ This module exposes two traits:
 
 All `SpecifiedBox`es are also `WrappedBox`es. In your off-chain code you will be defining all of your inputs UTXOs to actions as structs that implement both `WrappedBox` and `SpecifiedBox`.
 
-Both of these traits provide a simplified and improved interface for interacting with `ErgoBox`es.
+`WrappedBox`es provide a simplified interface for interacting with `ErgoBox`es. `SpecifiedBox`es on the other hand specify that a given `WrappedBox` also implements a `BoxSpec` via the `box_spec()` method.
 
 
 ### Specified Boxes
