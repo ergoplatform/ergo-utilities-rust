@@ -1,4 +1,5 @@
 use ergo_lib::chain::ergo_box::ErgoBox;
+use ergo_lib::chain::transaction::unsigned::UnsignedTransaction;
 use ergo_protocol_framework::*;
 
 #[derive(Debug, Clone, WrapBox)]
@@ -27,5 +28,23 @@ impl MathProblemBox {
 
         // Returning the `MathProblemBox`
         Some(math_problem_box)
+    }
+}
+
+pub struct MathProblemProtocol {}
+
+impl MathProblemProtocol {
+    /// A bootstrap action which allows a user to create a `MathProblemBox`
+    /// with funds locked inside as a bounty for solving the math problem.
+    pub fn action_bootstrap_math_problem_box(
+        current_height: u64,
+        transaction_fee: u64,
+        ergs_box_for_fee: ErgsBox,
+    ) -> UnsignedTransaction {
+        let tx_inputs = vec![];
+        let data_inputs = vec![];
+        let output_candidates = vec![];
+
+        UnsignedTransaction::new(tx_inputs, data_inputs, output_candidates)
     }
 }
