@@ -22,12 +22,12 @@ impl MathBountyBox {
         Self::box_spec().verify_box(ergo_box).ok()?;
 
         // Creating the `MathBountyBox`
-        let math_problem_box = MathBountyBox {
+        let math_bounty_box = MathBountyBox {
             ergo_box: ergo_box.clone(),
         };
 
         // Returning the `MathBountyBox`
-        Some(math_problem_box)
+        Some(math_bounty_box)
     }
 }
 
@@ -36,7 +36,7 @@ pub struct MathBountyProtocol {}
 impl MathBountyProtocol {
     /// A bootstrap action which allows a user to create a `MathBountyBox`
     /// with funds locked inside as a bounty for solving the math problem.
-    pub fn action_bootstrap_math_problem_box(
+    pub fn action_bootstrap_math_bounty_box(
         bounty_amount_in_nano_ergs: u64,
         ergs_box_for_bounty: ErgsBox,
         current_height: u64,
@@ -54,7 +54,7 @@ impl MathBountyProtocol {
         let total_change = total_nano_ergs - bounty_amount_in_nano_ergs - transaction_fee;
 
         // Creating our Math Bounty Box output candidate
-        let math_problem_candidate = create_candidate(
+        let math_bounty_candidate = create_candidate(
             bounty_amount_in_nano_ergs,
             &"94hWSMqgxHtRNEWoKrJFGVNQEYX34zfX68FNxWr".to_string(),
             &vec![],
@@ -75,7 +75,7 @@ impl MathBountyProtocol {
         // Our output candidates list, specifically with the Math Bounty box
         // candidate being the first, meaning Output #0.
         let output_candidates = vec![
-            math_problem_candidate,
+            math_bounty_candidate,
             transaction_fee_candidate,
             change_box_candidate,
         ];
