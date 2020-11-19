@@ -1,8 +1,8 @@
 use crate::error::{ProtocolFrameworkError, Result};
-pub use ergo_lib::ast::Constant;
+use ergo_lib::ast::constant::Constant;
 pub use ergo_lib::chain::ergo_box::ErgoBox;
 pub use ergo_lib::chain::token::{TokenAmount, TokenId};
-pub use ergo_lib::ErgoTree;
+use ergo_lib::ergo_tree::ErgoTree;
 pub use ergo_lib_wasm::box_coll::ErgoBoxes;
 pub use ergo_lib_wasm::ergo_box::ErgoBox as WErgoBox;
 use ergo_offchain_utilities::encoding::address_string_to_ergo_tree;

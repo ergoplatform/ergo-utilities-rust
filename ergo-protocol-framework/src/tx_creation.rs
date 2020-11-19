@@ -1,6 +1,6 @@
 // This file holds a number of functions which aid in tx creation.
 use crate::error::{ProtocolFrameworkError, Result};
-use ergo_lib::ast::Constant;
+use ergo_lib::ast::constant::Constant;
 use ergo_lib::chain::ergo_box::{BoxValue, ErgoBox, ErgoBoxCandidate, NonMandatoryRegisters};
 use ergo_lib::chain::token::{Token, TokenAmount};
 use ergo_offchain_utilities::encoding::address_string_to_ergo_tree;

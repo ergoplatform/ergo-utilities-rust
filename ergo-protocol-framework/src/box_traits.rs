@@ -1,10 +1,10 @@
 use crate::box_spec::BoxSpec;
 use crate::error::Result;
-pub use ergo_lib::ast::Constant;
+use ergo_lib::ast::constant::Constant;
 use ergo_lib::chain::ergo_box::ErgoBox;
 pub use ergo_lib::chain::token::Token;
-use ergo_lib::chain::transaction::unsigned::UnsignedInput;
 use ergo_lib::chain::transaction::DataInput;
+use ergo_lib::chain::transaction::UnsignedInput;
 use ergo_offchain_utilities::encoding::serialize_p2s_from_ergo_tree;
 use ergo_offchain_utilities::{NanoErg, P2SAddressString};
 
