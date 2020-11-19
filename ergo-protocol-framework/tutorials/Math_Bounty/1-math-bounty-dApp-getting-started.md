@@ -1,8 +1,10 @@
-# 1. Building The Math Bounty dApp Off-Chain Library
+# 1. Math Bounty dApp - Getting Started Writing Your First Action
 
 In this tutorial series we will be building a simple "Math Bounty" dApp using the Ergo Protocol Framework. In short, this dApp allows individuals to lock Ergs up under a contract which requires a person to solve the math problem encoded in the contract in order to withdraw the funds inside. The idea for this dApp originally came from [this Ergo Forum Thread](https://www.ergoforum.org/t/mathematical-fun-with-ergoscript/76).
 
-In our case we'll be using a simpler problem/contract to make it easy to follow along. Do note that this dApp isn't 100% secure because either because you can be front-run by others who are watching the mempool. Nonetheless, this is an instructive example that you will be able to run live on mainnet. (Refer to the above linked thread for more details about how to make a more complicated, but secure Math Bounty smart contract)
+In our case we'll be using a simpler problem/contract to make it easy to follow along. Do note that this dApp isn't 100% secure because either because bad actors/bots can front-run your answer submission by watching the mempool. Nonetheless, this is an instructive example that you will be able to run live on testnet/mainnet for educational purposes. (Refer to the above linked thread for more details about how to make a more complicated, but secure Math Bounty smart contract)
+
+In this first tutorial of the series, we will be covering the basics of how to get started in creating your dApp's off-chain library all the way to writing your first protocol action.
 
 ## The Smart Contract
 
@@ -166,7 +168,7 @@ Furthermore, in our current scenario, we also have the `ergs_box_for_bounty` inp
 
 This is actually a lot simpler than it all may sound thanks to the EPF implementing a number of key helper methods on top of `SpecifiedBox`s (an `ErgsBox` being one of the default provided `SpecifiedBox`es by the EPF) for acquiring UTXOs easily. This will all be tackled in a future tutorial once we are working on building a front-end for our dApp.
 
-Next let's write the basic scaffolding for creating our `UnsignedTransaction` that we are returning from our method:
+Next let's write the basic scaffolding for creating our `UnsignedTransaction` that we are returning in our method:
 
 ```rust
 {
@@ -177,3 +179,23 @@ Next let's write the basic scaffolding for creating our `UnsignedTransaction` th
     UnsignedTransaction::new(tx_inputs, data_inputs, output_candidates)
 }
 ```
+
+As can be seen, to create an unsigned transaction we simply need three things:
+1. An ordered list of input boxes
+2. An ordered list of data-inputs
+3. An ordered list of output box candidates
+
+In our case we will not be using any data-inputs (aka. read-only inputs) because our protocol is simple and does not rely on any other UTXOs on the blockchain. Thus we will move forward by defining our `tx_inputs` and our `output_candidates` in such a way that the resulting `UnsignedTransaction` is a valid implementation of our `Bootstrap Math Problem Box` action.
+
+Let's implement the inputs first as these are very simple.
+
+```rust
+let tx_inputs = vec![
+    ergs_box_for_bounty.as_unsigned_input(),
+    ergs_box_for_fee.as_unsigned_input(),
+];
+```
+
+All we are doing here is making the bounty `ErgsBox` the first input (index 0) and the fee `ErgsBox` the second input (index 1). To convert from a `SpecifiedBox`(or `WrappedBox`, which `ErgsBox`es are both) into an input we can feed to `UnsignedTransaction::new`, then we simply call the `.as_unsigned_input()` method.
+
+We've already completed 2/3 of the requirements for creating an `UnsignedTransaction`, but now we get to the more interesting part where we encode the logic of our action.

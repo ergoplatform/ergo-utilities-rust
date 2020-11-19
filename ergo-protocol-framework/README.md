@@ -109,7 +109,7 @@ This module exposes a few basic functions for making your life easier when build
 To learn how to use the EPF a tutorial series has been created which takes you step-by-step from writing the portable off-chain library to implement a basic CLI frontend.
 
 Currently available parts:
-1. [Building The Math Bounty dApp Off-Chain Library](tutorials/Math_Bounty/1.Building_The_Math_Bounty_dApp_Off-Chain_Library.md)
+1. [Math Bounty dApp - Getting Started Writing Your First Action](tutorials/Math_Bounty/1-math-bounty-dApp-getting-started.md)
 
 
 

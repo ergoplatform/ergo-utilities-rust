@@ -37,14 +37,18 @@ impl MathProblemProtocol {
     /// A bootstrap action which allows a user to create a `MathProblemBox`
     /// with funds locked inside as a bounty for solving the math problem.
     pub fn action_bootstrap_math_problem_box(
+        bounty_amount_in_nano_ergs: u64,
+        ergs_box_for_bounty: ErgsBox,
         current_height: u64,
         transaction_fee: u64,
         ergs_box_for_fee: ErgsBox,
     ) -> UnsignedTransaction {
-        let tx_inputs = vec![];
-        let data_inputs = vec![];
+        let tx_inputs = vec![
+            ergs_box_for_bounty.as_unsigned_input(),
+            ergs_box_for_fee.as_unsigned_input(),
+        ];
         let output_candidates = vec![];
 
-        UnsignedTransaction::new(tx_inputs, data_inputs, output_candidates)
+        UnsignedTransaction::new(tx_inputs, vec![], output_candidates)
     }
 }
