@@ -11,14 +11,14 @@ crate-type = ["cdylib", "rlib"]
 
 
 [dependencies]
-thiserror           = "1.0.20"
+thiserror                        = "1.0.20"
 ergo-offchain-utilities          = { git = "https://github.com/robkorn/ergo-utilities-rust" }
-ergo-lib           = "0.3.0"
-ergo-lib-wasm      = "0.3.0"
-# ergo-lib         = { git = "https://github.com/ergoplatform/sigma-rust/", branch = "develop" }
-# ergo-lib-wasm         = { git = "https://github.com/ergoplatform/sigma-rust/", branch = "develop" }
-serde_json          = "1.0.58"
-wasm-bindgen        = "0.2.68"
-reqwest             = { version = "0.10", features = ["blocking"] }
-json                = "0.12.4"
-ergo_protocol_framework_derive = { path = "ergo-protocol-framework-derive"}
+# ergo-lib           = "0.3.0"
+# ergo-lib-wasm      = "0.3.0"
+ergo-lib                         = { git = "https://github.com/ergoplatform/sigma-rust/", branch = "develop", features = ["json"] }
+ergo-lib-wasm                    = { git = "https://github.com/ergoplatform/sigma-rust/", branch = "develop" }
+serde_json                       = "1.0.58"
+wasm-bindgen                     = "0.2.68"
+reqwest                          = { version = "0.10", features = ["blocking"] }
+json                             = "0.12.4"
+ergo_protocol_framework_derive   = { path = "ergo-protocol-framework-derive"}
