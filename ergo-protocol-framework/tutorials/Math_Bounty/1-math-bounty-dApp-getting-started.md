@@ -2,7 +2,7 @@
 
 In this tutorial series we will be building a simple "Math Bounty" dApp using the Ergo Protocol Framework. In short, this dApp allows individuals to lock Ergs up under a contract which requires a person to solve the math problem encoded in the contract in order to withdraw the funds inside. The idea for this dApp originally came from [this Ergo Forum Thread](https://www.ergoforum.org/t/mathematical-fun-with-ergoscript/76).
 
-In our case we'll be using a simpler problem/contract to make it easy to follow along. Do note that this dApp isn't 100% secure because because bad actors/bots can front-run your answer submission by watching the mempool. Nonetheless, this is an instructive example that you will be able to run live on testnet/mainnet for educational purposes. (Refer to the above linked thread for more details about how to make a more complicated, but secure Math Bounty smart contract)
+In our case we'll be using a simpler problem/contract to make it easy to follow along. Do note that this dApp isn't 100% secure because bad actors/bots can front-run your answer submission by watching the mempool. Nonetheless, this is an instructive example that you will be able to run live on testnet/mainnet for educational purposes. (Refer to the above linked thread for more details about how to make a more complicated, but secure Math Bounty smart contract)
 
 In this first tutorial of the series, we will be covering the basics of how to get begin writing your dApp's off-chain library all the way to writing your first protocol action.
 
@@ -39,7 +39,7 @@ cargo new math-bounty-lib --lib
 Cargo will create a new project folder for you called `math-bounty-lib`. Within the newly created `Cargo.toml` file inside of the project folder we will need to add a couple dependencies to get started using the EPF. In the `[dependencies]` section add:
 
 ```rust
-ergo-protocol-framework      =  "0.1.0"
+ergo-protocol-framework      = "0.1.0"
 ergo-lib                     = "0.4.0"
 ```
 
