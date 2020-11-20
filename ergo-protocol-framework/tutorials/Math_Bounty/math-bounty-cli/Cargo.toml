@@ -8,4 +8,5 @@ edition = "2018"
 
 [dependencies]
 math-bounty-lib     = {path = "../math-bounty-lib"}
-ergo-node-interface = "0.1.1"
+ergo-node-interface = "0.2.2"
+nano-get            = { version = "0.2.4", features = ["https"] }

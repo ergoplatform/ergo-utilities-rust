@@ -53,7 +53,7 @@ Now we can jump over to the `src/lib.rs` file and get started coding.
 First we're going to import all of the Ergo-related types and the Ergo Protocol Framework structs/functions/macros for use in our project:
 
 ```rust
-use ergo_protocol_framework::*;
+pub use ergo_protocol_framework::*;
 ```
 
 At this point we will begin crafting the components of our off-chain code by starting off with the stages of our protocol. In our case we have a simple single-stage smart contract protocol for our dApp. This means we need to only create a single Rust stage-representing struct for our dApp.

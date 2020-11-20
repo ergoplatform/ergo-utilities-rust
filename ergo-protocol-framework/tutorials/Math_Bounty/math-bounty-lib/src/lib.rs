@@ -1,4 +1,4 @@
-use ergo_protocol_framework::*;
+pub use ergo_protocol_framework::*;
 
 #[derive(Debug, Clone, WrapBox)]
 pub struct MathBountyBox {
