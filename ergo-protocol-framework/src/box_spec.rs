@@ -39,6 +39,14 @@ pub struct RegisterSpec {
     value: Option<Constant>,
     value_type: Option<SType>,
 }
+impl RegisterSpec {
+    pub fn new(value_type: Option<SType>, value: Option<Constant>) -> RegisterSpec {
+        RegisterSpec {
+            value: value,
+            value_type: value_type,
+        }
+    }
+}
 
 /// A specification which specifies parameters of an `ErgoBox`.
 /// This spec is used as a "source of truth" to both verify and find
