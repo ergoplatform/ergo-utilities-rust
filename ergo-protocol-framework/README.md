@@ -104,6 +104,20 @@ Example Output Builders:
 This module exposes a few basic functions for making your life easier when building `UnsignedTransaction`s inside of your Actions.
 
 
+### Encoding
+This module exposes a number of helpful functions related to encoding/decoding/wrapping/unwrapping values from one form into another.
+
+Examples:
+
+```rust
+pub fn erg_to_nanoerg(erg_amount: f64) -> u64;
+pub fn nanoerg_to_erg(nanoerg_amount: u64) -> f64;
+pub fn unwrap_long(c: &Constant) -> Result<i64>;
+pub fn serialize_p2s_from_ergo_tree(ergo_tree: ErgoTree) -> P2SAddressString;
+```
+
+
+
 ## Getting Started
 
 To learn how to use the EPF a tutorial series has been created which takes you step-by-step from writing the portable off-chain library to implement a basic CLI frontend.
