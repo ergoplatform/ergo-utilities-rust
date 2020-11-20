@@ -43,18 +43,18 @@ ergo-protocol-framework      = "0.1.0"
 ergo-lib                     = "0.4.0"
 ```
 
+You may have noticed that we included `ergo-lib` as a dependency as well. This is the go-to rust library for all of the core types/structs/functionality. The EPF exposes everything we'll need in our current project, but if your dApp gets sufficiently advanced you may eventually need to use the `ergo-lib` directly yourself.
+
 Now we can jump over to the `src/lib.rs` file and get started coding.
 
 
 ## Writing And Specifying Your First Stage
 
-First we're going to import all of the Ergo Protocol Framework structs/functions/macros for use in our project:
+First we're going to import all of the Ergo-related types and the Ergo Protocol Framework structs/functions/macros for use in our project:
 
 ```rust
 use ergo_protocol_framework::*;
-use ergo_lib::chain::ergo_box::ErgoBox;
 ```
-You may have noticed that we also imported `ErgoBox` from the `ergo_lib` library. This is the Rust struct representation of an Ergo box(UTXO) which we will use shortly.
 
 At this point we will begin crafting the components of our off-chain code by starting off with the stages of our protocol. In our case we have a simple single-stage smart contract protocol for our dApp. This means we need to only create a single Rust stage-representing struct for our dApp.
 
@@ -141,9 +141,6 @@ With a struct that represents our smart contract protocol we can implement proto
 We will now begin to write our first action, `Bootstrap Math Bounty Box`, by making it a method.
 
 ```rust
-use ergo_lib::chain::transaction::unsigned::UnsignedTransaction;
-
-
 impl MathBountyProtocol {
     /// A bootstrap action which allows a user to create a `MathBountyBox`
     /// with funds locked inside as a bounty for solving the math problem.
@@ -291,8 +288,6 @@ And with that we have implemented the `Bootstrap Math Bounty Box` action for our
 This is the final code from everything we've accomplished in this tutorial:
 
 ```rust
-use ergo_lib::chain::ergo_box::ErgoBox;
-use ergo_lib::chain::transaction::unsigned::UnsignedTransaction;
 use ergo_protocol_framework::*;
 
 #[derive(Debug, Clone, WrapBox)]

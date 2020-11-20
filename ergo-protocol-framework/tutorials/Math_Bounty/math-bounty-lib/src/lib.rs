@@ -1,5 +1,3 @@
-use ergo_lib::chain::ergo_box::ErgoBox;
-use ergo_lib::chain::transaction::unsigned::UnsignedTransaction;
 use ergo_protocol_framework::*;
 
 #[derive(Debug, Clone, WrapBox)]
