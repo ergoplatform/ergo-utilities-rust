@@ -1,12 +1,12 @@
 use crate::box_spec::BoxSpec;
+use crate::encoding::serialize_p2s_from_ergo_tree;
 use crate::error::Result;
+use crate::{NanoErg, P2SAddressString};
 use ergo_lib::ast::constant::Constant;
 use ergo_lib::chain::ergo_box::ErgoBox;
 pub use ergo_lib::chain::token::Token;
 use ergo_lib::chain::transaction::DataInput;
 use ergo_lib::chain::transaction::UnsignedInput;
-use ergo_offchain_utilities::encoding::serialize_p2s_from_ergo_tree;
-use ergo_offchain_utilities::{NanoErg, P2SAddressString};
 
 /// A trait which represents an `ErgoBox` wrapped in an overarching struct.
 pub trait WrappedBox {

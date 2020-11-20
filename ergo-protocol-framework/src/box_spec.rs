@@ -1,12 +1,12 @@
+use crate::encoding::address_string_to_ergo_tree;
 use crate::error::{ProtocolFrameworkError, Result};
+use crate::{ErgoAddressString, NanoErg};
 use ergo_lib::ast::constant::Constant;
 use ergo_lib::chain::ergo_box::ErgoBox;
 use ergo_lib::ergo_tree::ErgoTree;
 use ergo_lib::types::stype::SType;
 use ergo_lib_wasm::box_coll::ErgoBoxes;
 use ergo_lib_wasm::ergo_box::ErgoBox as WErgoBox;
-use ergo_offchain_utilities::encoding::address_string_to_ergo_tree;
-use ergo_offchain_utilities::{ErgoAddressString, NanoErg};
 use serde_json::from_str;
 use std::ops::Range;
 use wasm_bindgen::prelude::*;

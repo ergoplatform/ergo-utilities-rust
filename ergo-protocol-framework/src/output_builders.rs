@@ -4,9 +4,9 @@
 /// candidates;
 use crate::error::Result;
 use crate::tx_creation::{create_candidate, find_and_sum_other_tokens};
+use crate::{NanoErg, P2PKAddressString};
 use ergo_lib::chain::ergo_box::{ErgoBox, ErgoBoxCandidate};
 use ergo_lib::chain::token::Token;
-use ergo_offchain_utilities::{NanoErg, P2PKAddressString};
 
 // /// A function which takes all input boxes/output candidates
 // /// and creates two new output candidates. One tx fee box, and one

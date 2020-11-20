@@ -1,4 +1,5 @@
-use ergo_offchain_utilities::{NanoErg, P2PKAddressString, P2SAddressString};
+use crate::encoding::EncodingError;
+use crate::{NanoErg, P2PKAddressString, P2SAddressString};
 use thiserror::Error;
 
 pub type Result<T> = std::result::Result<T, ProtocolFrameworkError>;
@@ -29,4 +30,6 @@ pub enum ProtocolFrameworkError {
     InvalidRegisterValues(),
     #[error("{0}")]
     Other(String),
+    #[error(transparent)]
+    EncodeError(#[from] EncodingError<String>),
 }
