@@ -1,6 +1,6 @@
 # 1. Math Bounty dApp - Getting Started Writing Your First Action
 
-In this tutorial series we will be building a simple "Math Bounty" dApp using the Ergo Protocol Framework. In short, this dApp allows individuals to lock Ergs up under a contract which requires a person to solve the math problem encoded in the contract in order to withdraw the funds inside. The idea for this dApp originally came from [this Ergo Forum Thread](https://www.ergoforum.org/t/mathematical-fun-with-ergoscript/76).
+In this tutorial series we will be building a simple "Math Bounty" dApp using the Ergo Headless dApp Framework. In short, this dApp allows individuals to lock Ergs up under a contract which requires a person to solve the math problem encoded in the contract in order to withdraw the funds inside. The idea for this dApp originally came from [this Ergo Forum Thread](https://www.ergoforum.org/t/mathematical-fun-with-ergoscript/76).
 
 In our case we'll be using a simpler problem/contract to make it easy to follow along. Do note that this dApp isn't 100% secure because bad actors/bots can front-run your answer submission by watching the mempool. Nonetheless, this is an instructive example that you will be able to run live on testnet/mainnet for educational purposes. (Refer to the above linked thread for more details about how to make a more complicated, but secure Math Bounty smart contract)
 
@@ -36,21 +36,21 @@ Once installed you will have access to the `cargo` command in your terminal. We 
 cargo new math-bounty-lib --lib
 ```
 
-Cargo will create a new project folder for you called `math-bounty-lib`. Within the newly created `Cargo.toml` file inside of the project folder we will need to add a couple dependencies to get started using the EPF. In the `[dependencies]` section add:
+Cargo will create a new project folder for you called `math-bounty-lib`. Within the newly created `Cargo.toml` file inside of the project folder we will need to add a couple dependencies to get started using the HDF. In the `[dependencies]` section add:
 
 ```rust
 ergo-protocol-framework      = "0.1.0"
 ergo-lib                     = "0.4.0"
 ```
 
-You may have noticed that we included `ergo-lib` as a dependency as well. This is the go-to rust library for all of the core types/structs/functionality. The EPF exposes everything we'll need in our current project, but if your dApp gets sufficiently advanced you may eventually need to use the `ergo-lib` directly yourself.
+You may have noticed that we included `ergo-lib` as a dependency as well. This is the go-to rust library for all of the core types/structs/functionality. The HDF exposes everything we'll need in our current project, but if your dApp gets sufficiently advanced you may eventually need to use the `ergo-lib` directly yourself.
 
 Now we can jump over to the `src/lib.rs` file and get started coding.
 
 
 ## Writing And Specifying Your First Stage
 
-First we're going to import all of the Ergo-related types and the Ergo Protocol Framework structs/functions/macros for use in our project:
+First we're going to import all of the Ergo-related types and the Ergo Headless dApp Framework structs/functions/macros for use in our project:
 
 ```rust
 pub use ergo_protocol_framework::*;
@@ -150,7 +150,7 @@ impl MathBountyProtocol {
 }
 ```
 
-When writing actions with the Ergo Protocol Framework, we must keep in mind that we are building pure, portable, and reusable code.
+When writing actions with the Ergo Headless dApp Framework, we must keep in mind that we are building pure, portable, and reusable code.
 
 What this means is that all of our transaction creation logic within our actions must be self-contained. This is why we are creating/returning an `UnsignedTransaction` from our action. Furthermore this means that any external data (from the blockchain, or user input) must be provided to the action method via arguments. Thus for our `Bootstrap Math Bounty Box` action, we will need the following inputs:
 
@@ -169,7 +169,7 @@ The current height is required for tx building, the transaction fee is to be dec
 
 Furthermore, in our current scenario, we also have the `ergs_box_for_bounty` and `bounty_amount_in_nano_ergs` input arguments. In the front-end the user will provide the amount of nanoErgs they want to submit as a bounty to the dApp, and the front-end implementation must find an input `ErgsBox` with sufficient nanoErgs to cover the bounty amount which is owned by the user.
 
-This is actually a lot simpler than it all may sound thanks to the EPF implementing a number of key helper methods on top of `SpecifiedBox`s (an `ErgsBox` being one of the already implemented `SpecifiedBox`es by the EPF) for acquiring UTXOs easily. This will all be tackled in a future tutorial once we are working on building a front-end for our dApp.
+This is actually a lot simpler than it all may sound thanks to the HDF implementing a number of key helper methods on top of `SpecifiedBox`s (an `ErgsBox` being one of the already implemented `SpecifiedBox`es by the HDF) for acquiring UTXOs easily. This will all be tackled in a future tutorial once we are working on building a front-end for our dApp.
 
 Next let's write the basic scaffolding for creating our `UnsignedTransaction` that we are returning in our method:
 
@@ -222,7 +222,7 @@ let total_change = total_nano_ergs - bounty_amount_in_nano_ergs - transaction_fe
 
 In short, whatever we don't use for the bounty or the tx fee has to go back to the user as change.
 
-Now with that out of the way we can begin creating our output candidates. First we are going to create our Math Bounty Box output candidate. This will be via the `create_candidate` function provided by the EPF.
+Now with that out of the way we can begin creating our output candidates. First we are going to create our Math Bounty Box output candidate. This will be via the `create_candidate` function provided by the HDF.
 
 ```rust
 // Creating our Math Bounty Box output candidate
@@ -249,7 +249,7 @@ As a result, we have created our Math Bounty Box output candidate which will loc
 
 ### Creating The Tx Fee And Change Boxes
 
-Rather than manually using the `create_candidate` function for every single output candidate we are building, which can get tedious, the EPF provides us with some default "output builders". These are structs that offer associated functions which build output candidates more easily.
+Rather than manually using the `create_candidate` function for every single output candidate we are building, which can get tedious, the HDF provides us with some default "output builders". These are structs that offer associated functions which build output candidates more easily.
 
 Thus to create a tx fee box output candidate, all we have to do is:
 ```rust
@@ -257,7 +257,7 @@ let transaction_fee_candidate =
     TxFeeBox::output_candidate(transaction_fee, current_height).unwrap();
 ```
 
-Similarly the EPF also offers an output builder for a change box which we will use as well:
+Similarly the HDF also offers an output builder for a change box which we will use as well:
 
 ```rust
 let change_box_candidate = ChangeBox::output_candidate(

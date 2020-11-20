@@ -1,21 +1,21 @@
-# Ergo Protocol Framework
+# Ergo Headless dApp Framework
 
-A Rust framework that provides a streamlined experience in developing dApp off-chain code for single and multi-stage smart contract protocols. The EPF is completely pure, thus providing developers with the very first portable UTXO-based dApp development framework on any blockchain.
+A Rust framework that provides a streamlined experience for developing Ergo headless dApps. This library is completely pure thus providing developers with the very first portable UTXO-based headless dApp development framework on any blockchain.
 
 ## Project Goals
-1. Enable developers to write their off-chain logic once using the EPF, and have it be completely portable for any target platform (desktop, web, mobile).
-2. Provide developers with an easy experience to go from [Ergo dApp Specifications](https://github.com/ergoplatform/eips/blob/master/eip-0006.md) to off-chain code with greater assurance and a straightforward path of implementation.
-3. Separating the dApp off-chain logic from any front-end logic, thereby allowing reusability no matter what application or front-end is attempting to implement support for your dApp.
+1. Enable developers to write their off-chain logic once using the HDF to create their own headless dApps, thereby targeting all platforms (desktop, web, mobile).
+2. Provide developers with an easy experience to go from [Ergo dApp Specifications](https://github.com/ergoplatform/eips/blob/master/eip-0006.md) to headless dApp with greater assurance and a straightforward path of implementation.
+3. Separating the dApp off-chain logic from any front-end logic, thereby allowing reusability no matter what application or front-end is attempting to integrate your headless dApp.
 4. Providing easy-to-use methods for front-end implementors to easily access current state of the dApp protocol without having to understand how any of it works.
-5. Abstracting the concept of defining and acquiring input UTXOs for your protocol by using a novel design pattern to specify `BoxSpec`s for the required input UTXOs.
-6. Enabling scripts, (arbitrage) bots, and other software to be trivially built on top multiple dApps built using the EPF, thus offering a standardized interface and a level of composability.
+5. Abstracting the concept of defining and acquiring input UTXOs for your headless dApp by using a novel design pattern in specifying `BoxSpec`s for the required input UTXOs.
+6. Enabling scripts, (arbitrage) bots, and other software to be trivially built on top multiple headless dApps built using the HDF, thus offering a standardized interface and a level of composability.
 
 
-## Understanding The Ergo Protocol Framework
+## Understanding The Ergo Headless dApp Framework
 
-Before you get started using the EPF, there are a number of terms and concepts that are important to understand. The overarching design of the EPF is based off of [EIP-6: Ergo Smart Contract Protocol Specification Format](https://github.com/ergoplatform/eips/blob/master/eip-0006.md).
+Before you get started using the HDF, there are a number of terms and concepts that are important to understand. The overarching design of the HDF is based off of [EIP-6: Ergo Smart Contract Protocol Specification Format](https://github.com/ergoplatform/eips/blob/master/eip-0006.md).
 
-What this means is that at the highest level, your dApp is defined as a [smart contract protocol](https://github.com/ergoplatform/eips/blob/master/eip-0006.md#smart-contract-protocol). If your dApp only has a single [stage](https://github.com/ergoplatform/eips/blob/master/eip-0006.md#stage), then it is defined as a "single-stage smart contract protocol". If your dApp has multiple stages, then it is a "multi-stage smart contract protocol. The EPF supports building both single and multi-stage protocol dApps.
+What this means is that at the highest level, your dApp is defined as a [smart contract protocol](https://github.com/ergoplatform/eips/blob/master/eip-0006.md#smart-contract-protocol). If your dApp only has a single [stage](https://github.com/ergoplatform/eips/blob/master/eip-0006.md#stage), then it is defined as a "single-stage smart contract protocol". If your dApp has multiple stages, then it is a "multi-stage smart contract protocol. The HDF supports building both single and multi-stage protocol dApps.
 
 Each stage can be considered a state in the protocol where a UTXO with Ergs, tokens, and data (within registers) is at in a given point in time. There may be a single box(UTXO) which moves from one stage to the next throughout the entire protocol, multiple boxes which go through all of the stages in parallel, or a variety of boxes asynchronously moving through certain sub-sets of stages.
 
@@ -24,16 +24,16 @@ No matter the specific design/complexity of your given smart contract protocol, 
 2. Ergs/tokens/data to go from one stage in the protocol to another stage (or exiting the protocol).
 3. Ergs/tokens/data to leave the protocol.
 
-Each of these actions is made up of two key parts in the context of off-chain code:
+Each of these actions is made up of two key parts in the context of your headless dApp:
 1. Acquiring inputs (UTXOs/user input/external data from the outside world)
 2. Creating output UTXOs with the result of the state transition
 
-As such your dApp may either be a single or multi-stage smart contract protocol. Each stage in your dApp's protocol may have one or more actions. These actions are then defined by you the developer via specifying the required inputs required for a given action, and encoding the required state transition logic in order to create output UTXOs which are embedded within a newly created `UnsignedTx`.
+Thus to restate the above, your dApp may either be a single or multi-stage smart contract protocol. Each stage in your dApp's protocol may have one or more actions. These actions are then defined by you the developer via specifying the required inputs required for a given action, and encoding the required state transition logic in order to create output UTXOs which are embedded within a newly created `UnsignedTx`.
 
-The EPF provides you with the required tools to specify each of these building blocks in order to build your dApp from the ground-up. In the sections below, we will go through further details about how the EPF is built, and how you yourself can get started using it today.
+The HDF provides you with the required tools to specify each of these building blocks in order to build your headless dApp from the ground-up. In the sections below, we will go through further details about how the HDF is built, and how you yourself can get started using it today.
 
 
-## Modules Of The Ergo Protocol Framework
+## Modules Of The Ergo Headless dApp Framework
 
 ### Box Spec
 This module exposes the `BoxSpec` struct, which allows you to create a specification of a UTXO. This is used for defining the boxes which are required for the actions of your protocol.
@@ -120,16 +120,16 @@ pub fn serialize_p2s_from_ergo_tree(ergo_tree: ErgoTree) -> P2SAddressString;
 
 ## Getting Started
 
-To learn how to use the EPF a tutorial series has been created which takes you step-by-step from writing the portable off-chain library to implement a basic CLI frontend.
+To learn how to use the HDF a tutorial series has been created which takes you step-by-step in developing your own headless dApp.
 
 Currently available parts:
-1. [Math Bounty dApp - Getting Started Writing Your First Action](tutorials/Math_Bounty/1-math-bounty-dApp-getting-started.md)
+1. [Math Bounty Headless dApp - Getting Started Writing Your First Action](tutorials/Math_Bounty/1-math-bounty-dApp-getting-started.md)
 
 
 
 # Documentation
 
-To read the documentation for the EPF run the command below:
+To read the documentation for the HDF run the command below:
 
 ```
 cargo doc --open

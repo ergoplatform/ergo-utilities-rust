@@ -281,13 +281,13 @@ impl MathBountyProtocol {
 ```
 
 ## Conclusion
-As can be seen, writing your off-chain dApp library using the Ergo Protocol Framework is actually not that complicated. There are indeed a few novel moving parts which you will have to learn and get use to using over time, but the benefits of doing so are palpable.
+As can be seen, writing your off-chain dApp library using the Ergo Headless dApp Framework is actually not that complicated. There are indeed a few novel moving parts which you will have to learn and get use to using over time, but the benefits of doing so are palpable.
 
-The Ergo Protocol Framework currently provides the best UTXO-based dApp development experience available on any blockchain to date, both from the core dApp developer's perspective, as well as a front-end implementors perspective. The reason for this is that we have divided these two concerns, the core logic of the dApp & the front end implementation, completely and as such have gained the advantage of having readable code that is entirely pure.
+The Ergo Headless dApp Framework currently provides the best UTXO-based dApp development experience available on any blockchain to date, both from the core dApp developer's perspective, as well as a front-end implementors perspective. The reason for this is that we have divided these two concerns, the core logic of the dApp & the front end implementation, completely and as such have gained the advantage of having readable code that is entirely pure.
 
-Furthermore, we are using Rust, which is an extremely safe, efficient, and most importantly, portable language. This means that any off-chain dApp library that you write using the EPF can target desktop Operating Systems, browsers, and mobile with little to no extra code required.
+Furthermore, we are using Rust, which is an extremely safe, efficient, and most importantly, portable language. This means that any off-chain dApp library that you write using the HDF can target desktop Operating Systems, browsers, and mobile with little to no extra code required.
 
 This opens up the horizon for dApp projects to allow anyone and everyone to build custom dApp front-ends. This encourages enhanced decentralization of the ecosystem while also providing a potentially whole new business model for front-end devs to capitalize on. (Or for new apps/scripts/bots to be developed that interact seamlessly between dApps to enhance liquidity between protocols for example)
 
-As we will see in the next tutorial, using the EPF provides front-end implementors an extremely simplified interface for interacting with your dApp without having to understand the nitty-gritty details. This is a consequence of the way we've designed your library with as many protocol details as possible abstracted away from the front-end implementors, and thus they can just focus on what they are good at doing, developing front-ends that end-users enjoy using.
+As we will see in the next tutorial, using the HDF provides front-end implementors an extremely simplified interface for interacting with your dApp without having to understand the nitty-gritty details. This is a consequence of the way we've designed your library with as many protocol details as possible abstracted away from the front-end implementors, and thus they can just focus on what they are good at doing, developing front-ends that end-users enjoy using.
 
