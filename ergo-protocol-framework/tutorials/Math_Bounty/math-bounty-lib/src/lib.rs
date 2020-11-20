@@ -32,6 +32,25 @@ impl MathBountyBox {
 pub struct MathBountyProtocol {}
 
 impl MathBountyProtocol {
+    /// An action to solve the math problem inside of a `MathBountyBox`
+    /// and thus to withdraw the bounty nanoErgs inside as a reward.
+    pub fn action_solve_math_problem(
+        math_problem_answer: u64,
+        math_bounty_box: MathBountyBox,
+        current_height: u64,
+        transaction_fee: u64,
+        ergs_box_for_fee: ErgsBox,
+        user_address: String,
+    ) -> UnsignedTransaction {
+        let tx_inputs = vec![
+            math_bounty_box.as_unsigned_input(),
+            ergs_box_for_fee.as_unsigned_input(),
+        ];
+        let output_candidates = vec![];
+
+        UnsignedTransaction::new(tx_inputs, vec![], output_candidates)
+    }
+
     /// A bootstrap action which allows a user to create a `MathBountyBox`
     /// with funds locked inside as a bounty for solving the math problem.
     pub fn action_bootstrap_math_bounty_box(
