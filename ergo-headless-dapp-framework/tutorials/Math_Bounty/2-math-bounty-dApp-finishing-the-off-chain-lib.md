@@ -1,6 +1,6 @@
 # 2. Math Bounty dApp - Finishing The Off-Chain Library
 
-In the first tutorial we went from 0 to having a fully functioning dApp off-chain library. Granted, this library only implemented half of our dApp (creating a Math Bounty box), and as such today we are going to fix this glaring hole by implementing the second half.
+In the first tutorial we went from 0 to having a functioning headless with a single action implemented. Granted, we only implemented half of our smart contract protocol (bootstrapping a Math Bounty box), and as such today we are going to fix this glaring hole by implementing the second half of our headless dApp.
 
 ## Recap
 
@@ -86,7 +86,7 @@ Next we will be filling in the `tx_inputs` vector. Because our smart contract di
 
 ## Implementing The "Solve Math Problem" Action Logic
 
-Now comes the fun part. We are going to be implementing the "Solve Math Problem" logic. As you may recall, this is the smart contract of our dApp:
+Now comes the fun part. We are going to be implementing the "Solve Math Problem" logic. As you may recall, this is the smart contract our headless dApp is using:
 
 ```scala
 {
@@ -147,7 +147,7 @@ let output_candidates = vec![withdrawn_bounty_candidate, transaction_fee_candida
 
 Remember, because our smart contract checks for the `math_problem_answer` to be in R4 of Output 0, this mean that we **must** place our `withdrawn_bounty_candidate` as the first element in the `output_candidates` list. If we put it in a different spot in the list of outputs the transaction will fail even if the user provides the correct `math_problem_answer`.
 
-With all of that said and done, we have now finished implementing our "Solve Math Problem" action, and as such, finished writing our pure & portable off-chain dApp library. Here is the resulting code up to this point:
+With all of that said and done, we have now finished implementing our "Solve Math Problem" action, and as such, finished writing our pure & portable headless dApp. Here is the resulting code up to this point:
 
 
 ```rust
@@ -281,13 +281,11 @@ impl MathBountyProtocol {
 ```
 
 ## Conclusion
-As can be seen, writing your off-chain dApp library using the Ergo Headless dApp Framework is actually not that complicated. There are indeed a few novel moving parts which you will have to learn and get use to using over time, but the benefits of doing so are palpable.
+As can be seen, writing your headless dApp using the Ergo Headless dApp Framework is actually not that complicated. There are indeed a few novel moving parts which you will have to learn and get use to using over time, but the benefits of doing so are palpable.
 
-The Ergo Headless dApp Framework currently provides the best UTXO-based dApp development experience available on any blockchain to date, both from the core dApp developer's perspective, as well as a front-end implementors perspective. The reason for this is that we have divided these two concerns, the core logic of the dApp & the front end implementation, completely and as such have gained the advantage of having readable code that is entirely pure.
+The Ergo Headless dApp Framework currently provides the best UTXO-based dApp development experience available on any blockchain to date, both from the core dApp developer's perspective, as well as a front-end implementors perspective. The reason for this is that thanks to the headless dApp design pattern, we have divided the smart contract protocol concerns from the front end implementation completely. This provides us with the advantage of having much more clean & portable code together with a brand new business model opened wide for all new dApps developed.
 
-Furthermore, we are using Rust, which is an extremely safe, efficient, and most importantly, portable language. This means that any off-chain dApp library that you write using the HDF can target desktop Operating Systems, browsers, and mobile with little to no extra code required.
+This opens up the horizon for dApp projects to allow anyone and everyone to build custom front-ends on top of their headless dApps. This creates a new income stream and business model for front-end developers, while encouraging enhanced decentralization of the entire ecosystem. This is a key novel opportunity that for the future of the entire dApp ecosystem on all blockchains.
 
-This opens up the horizon for dApp projects to allow anyone and everyone to build custom dApp front-ends. This encourages enhanced decentralization of the ecosystem while also providing a potentially whole new business model for front-end devs to capitalize on. (Or for new apps/scripts/bots to be developed that interact seamlessly between dApps to enhance liquidity between protocols for example)
-
-As we will see in the next tutorial, using the HDF provides front-end implementors an extremely simplified interface for interacting with your dApp without having to understand the nitty-gritty details. This is a consequence of the way we've designed your library with as many protocol details as possible abstracted away from the front-end implementors, and thus they can just focus on what they are good at doing, developing front-ends that end-users enjoy using.
+Furthermore, as we will see in the next tutorial, using the HDF provides front-end implementors an extremely simplified interface for interacting with your headless dApp without having to understand the nitty-gritty details. This is a consequence of the way we've designed your library with as many protocol details as possible abstracted away from the front-end implementors. Thus they can just focus on what they are good at doing, developing front-ends that end-users enjoy using.
 
