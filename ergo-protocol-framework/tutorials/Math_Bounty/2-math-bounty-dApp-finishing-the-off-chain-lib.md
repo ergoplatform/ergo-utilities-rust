@@ -151,7 +151,7 @@ With all of that said and done, we have now finished implementing our "Solve Mat
 
 
 ```rust
-use ergo_protocol_framework::*;
+use ergo_headless_dapp_framework::*;
 
 #[derive(Debug, Clone, WrapBox)]
 pub struct MathBountyBox {

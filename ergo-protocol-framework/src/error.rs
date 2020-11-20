@@ -2,10 +2,10 @@ use crate::encoding::EncodingError;
 use crate::{NanoErg, P2PKAddressString, P2SAddressString};
 use thiserror::Error;
 
-pub type Result<T> = std::result::Result<T, ProtocolFrameworkError>;
+pub type Result<T> = std::result::Result<T, HeadlessDappError>;
 
 #[derive(Error, Debug)]
-pub enum ProtocolFrameworkError {
+pub enum HeadlessDappError {
     #[error("The address of the box being verified does not match the `BoxSpec`.")]
     InvalidSpecAddress,
     #[error(

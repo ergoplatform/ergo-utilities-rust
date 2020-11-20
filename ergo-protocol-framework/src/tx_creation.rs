@@ -1,6 +1,6 @@
 // This file holds a number of functions which aid in tx creation.
 use crate::encoding::address_string_to_ergo_tree;
-use crate::error::{ProtocolFrameworkError, Result};
+use crate::error::{HeadlessDappError, Result};
 use crate::{BlockHeight, ErgoAddressString, NanoErg};
 use ergo_lib::ast::constant::Constant;
 use ergo_lib::chain::ergo_box::{BoxValue, ErgoBox, ErgoBoxCandidate, NonMandatoryRegisters};
@@ -15,13 +15,12 @@ pub fn create_candidate(
     registers: &Vec<Constant>,
     current_height: BlockHeight,
 ) -> Result<ErgoBoxCandidate> {
-    let obb_value =
-        BoxValue::new(value).map_err(|_| ProtocolFrameworkError::InvalidBoxValue(value))?;
+    let obb_value = BoxValue::new(value).map_err(|_| HeadlessDappError::InvalidBoxValue(value))?;
     let obb_registers = NonMandatoryRegisters::from_ordered_values(registers.clone())
-        .map_err(|_| ProtocolFrameworkError::InvalidRegisterValues())?;
+        .map_err(|_| HeadlessDappError::InvalidRegisterValues())?;
     // Obtain ErgoTree of the output_address
     let obb_ergo_tree = address_string_to_ergo_tree(output_address)
-        .map_err(|_| ProtocolFrameworkError::InvalidP2PKAddress(output_address.clone()))?;
+        .map_err(|_| HeadlessDappError::InvalidP2PKAddress(output_address.clone()))?;
     // Create the output Bank box candidate
     let output_bank_candidate = ErgoBoxCandidate {
         value: obb_value,

@@ -1,6 +1,6 @@
 # Ergo Headless dApp Framework
 
-A Rust framework that provides a streamlined experience for developing Ergo headless dApps. This library is completely pure thus providing developers with the very first portable UTXO-based headless dApp development framework on any blockchain.
+The premier Rust framework for developing Ergo Headless dApps easily via a streamlined interface. The Ergo Headless dApp Framework provides developers with the very first portable UTXO-based headless dApp development framework on any blockchain.
 
 ## Project Goals
 1. Enable developers to write their off-chain logic once using the HDF to create their own headless dApps, thereby targeting all platforms (desktop, web, mobile).

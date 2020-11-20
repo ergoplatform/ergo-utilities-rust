@@ -40,7 +40,7 @@ fn impl_specified_box(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
     let gen = quote! {
         impl #name {
-            pub fn new(b: &ErgoBox) -> std::result::Result<#name, ProtocolFrameworkError> {
+            pub fn new(b: &ErgoBox) -> std::result::Result<#name, HeadlessDappError> {
                 Self::box_spec().verify_box(&b)?;
                 return Ok(#name {
                     ergo_box: b.clone(),

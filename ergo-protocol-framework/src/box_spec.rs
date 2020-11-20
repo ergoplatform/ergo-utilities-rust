@@ -1,5 +1,5 @@
 use crate::encoding::address_string_to_ergo_tree;
-use crate::error::{ProtocolFrameworkError, Result};
+use crate::error::{HeadlessDappError, Result};
 use crate::{ErgoAddressString, NanoErg};
 use ergo_lib::ast::constant::Constant;
 use ergo_lib::chain::ergo_box::ErgoBox;
@@ -151,9 +151,9 @@ impl BoxSpec {
     pub fn ergo_tree(&self) -> Result<ErgoTree> {
         if let Some(address) = self.address.clone() {
             return address_string_to_ergo_tree(&address)
-                .map_err(|_| ProtocolFrameworkError::InvalidSpecAddress);
+                .map_err(|_| HeadlessDappError::InvalidSpecAddress);
         }
-        Err(ProtocolFrameworkError::InvalidSpecAddress)
+        Err(HeadlessDappError::InvalidSpecAddress)
     }
 
     /// Verify that a provided `ErgoBox` matches the spec
@@ -164,7 +164,7 @@ impl BoxSpec {
         if let Ok(tree) = self.ergo_tree() {
             match tree == ergo_box.ergo_tree {
                 true => Ok(()),
-                false => Err(ProtocolFrameworkError::InvalidAddress(
+                false => Err(HeadlessDappError::InvalidAddress(
                     self.address.clone().unwrap_or_default(),
                 )),
             }?;
@@ -173,7 +173,7 @@ impl BoxSpec {
         if let Some(value_range) = self.value_range.clone() {
             match value_range.contains(&ergo_box.value.as_u64()) {
                 true => Ok(()),
-                false => Err(ProtocolFrameworkError::InvalidSpecErgsValue),
+                false => Err(HeadlessDappError::InvalidSpecErgsValue),
             }?;
         }
 
@@ -181,7 +181,7 @@ impl BoxSpec {
         if self.registers.len() > 0 {
             // Error if more registers specified than exist in box.
             if self.registers.len() > ergo_box_regs.len() {
-                return Err(ProtocolFrameworkError::FailedRegisterSpec);
+                return Err(HeadlessDappError::FailedRegisterSpec);
             }
             for i in 0..(self.registers.len()) {
                 let rspec = self.registers[i].clone();
@@ -190,7 +190,7 @@ impl BoxSpec {
                 if let Some(reg_type) = rspec.value_type {
                     match reg_type == ergo_box_regs[i].tpe {
                         true => (),
-                        false => return Err(ProtocolFrameworkError::FailedRegisterSpec),
+                        false => return Err(HeadlessDappError::FailedRegisterSpec),
                     }
                 }
 
@@ -198,7 +198,7 @@ impl BoxSpec {
                 if let Some(constant) = rspec.value {
                     match constant == ergo_box_regs[i] {
                         true => (),
-                        false => return Err(ProtocolFrameworkError::FailedRegisterSpec),
+                        false => return Err(HeadlessDappError::FailedRegisterSpec),
                     }
                 }
             }
@@ -217,7 +217,7 @@ impl BoxSpec {
 
                     // If either check fails then return error
                     if !id_check || !range_check {
-                        return Err(ProtocolFrameworkError::FailedTokenSpec);
+                        return Err(HeadlessDappError::FailedTokenSpec);
                     }
                 }
             }
@@ -226,7 +226,7 @@ impl BoxSpec {
         // Verify the predicate
         if let Some(predicate) = self.predicate {
             if !(predicate)(&ergo_box) {
-                return Err(ProtocolFrameworkError::FailedSpecPredicate);
+                return Err(HeadlessDappError::FailedSpecPredicate);
             }
         }
 
@@ -244,7 +244,7 @@ impl BoxSpec {
     pub fn explorer_endpoint(&self, explorer_api_url: &str) -> Result<String> {
         // Verify an address exists
         if self.address.is_none() {
-            return Err(ProtocolFrameworkError::Other("Using the Ergo Explorer API currently requires defining an address for your `BoxStruct`.".to_string()));
+            return Err(HeadlessDappError::Other("Using the Ergo Explorer API currently requires defining an address for your `BoxStruct`.".to_string()));
         }
 
         let url = explorer_api_url.to_string()
@@ -261,7 +261,7 @@ impl BoxSpec {
     pub fn process_explorer_response(&self, explorer_response_body: &str) -> Result<Vec<ErgoBox>> {
         // Get the `JsonValue`
         let json = json::parse(explorer_response_body).map_err(|_| {
-            ProtocolFrameworkError::Other(
+            HeadlessDappError::Other(
                 "Failed to extract text from Ergo Explorer Backend API Response".to_string(),
             )
         })?;
@@ -277,7 +277,7 @@ impl BoxSpec {
                     box_list.push(ergo_box);
                 } else if let Err(e) = res_ergo_box {
                     let mess = format!("Box Json: {}\nError: {:?}", box_json.to_string(), e);
-                    return Err(ProtocolFrameworkError::Other(mess));
+                    return Err(HeadlessDappError::Other(mess));
                 }
             }
         }
@@ -362,7 +362,7 @@ mod tests {
 
         let client = reqwest::blocking::Client::new().get(&url);
         let resp = client.send().map_err(|_| {
-            ProtocolFrameworkError::Other(
+            HeadlessDappError::Other(
                 "Failed to make GET response to the Ergo Explorer Backend API.".to_string(),
             )
         });

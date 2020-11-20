@@ -1,5 +1,5 @@
 [package]
-name = "math-bounty-lib"
+name = "math-bounty-headless"
 version = "0.1.0"
 authors = ["Robert Kornacki <11645932+robkorn@users.noreply.github.com>"]
 edition = "2018"
@@ -7,6 +7,6 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-ergo-protocol-framework      = { git = "https://github.com/robkorn/ergo-utilities-rust", branch = "HDF-v0.2"}
+ergo-headless-dapp-framework      = { git = "https://github.com/robkorn/ergo-utilities-rust", branch = "HDF-v0.2"}
 ergo-lib                     = "0.4.1"
 # ergo-lib                         = { git = "https://github.com/ergoplatform/sigma-rust/", branch = "develop", features = ["json"] }

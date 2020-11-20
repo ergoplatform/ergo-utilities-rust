@@ -1,14 +1,14 @@
-# 1. Math Bounty dApp - Getting Started Writing Your First Action
+# 1. Math Bounty Headless dApp - Getting Started Writing Your First Action
 
-In this tutorial series we will be building a simple "Math Bounty" dApp using the Ergo Headless dApp Framework. In short, this dApp allows individuals to lock Ergs up under a contract which requires a person to solve the math problem encoded in the contract in order to withdraw the funds inside. The idea for this dApp originally came from [this Ergo Forum Thread](https://www.ergoforum.org/t/mathematical-fun-with-ergoscript/76).
+In this tutorial series we will be building a simple "Math Bounty" headless dApp using the Ergo Headless dApp Framework. In short, this dApp allows individuals to lock Ergs up under a contract which requires a person to solve the math problem encoded in the contract in order to withdraw the funds inside. The idea for this dApp originally came from [this Ergo Forum Thread](https://www.ergoforum.org/t/mathematical-fun-with-ergoscript/76).
 
-In our case we'll be using a simpler problem/contract to make it easy to follow along. Do note that this dApp isn't 100% secure because bad actors/bots can front-run your answer submission by watching the mempool. Nonetheless, this is an instructive example that you will be able to run live on testnet/mainnet for educational purposes. (Refer to the above linked thread for more details about how to make a more complicated, but secure Math Bounty smart contract)
+In our case we'll be using a simpler problem/contract to make it easy to follow along. Do note that this simplistic smart contract isn't intended for real world usage (because bad actors/bots can front-run your answer submission by watching the mempool). Nonetheless, this is an instructive example that you will be able to run live on testnet/mainnet for educational purposes. (Refer to the above linked thread for more details about how to make a more complicated, but secure Math Bounty smart contract)
 
-In this first tutorial of the series, we will be covering the basics of how to get begin writing your dApp's off-chain library all the way to writing your first protocol action.
+In this first tutorial of the series, we will be covering the basics of how to get begin writing your headless dApp, from creating the project all the way to writing your first protocol action.
 
 ## The Smart Contract
 
-Before we dive into building the off-chain portion of our dApp, let's take a look at the contract we'll be using.
+Before we dive into building the headless dApp itself, let's take a look at the contract we'll be using.
 
 ```scala
 {
@@ -23,24 +23,24 @@ Compiling this contract into a P2S address results in the address: `94hWSMqgxHtR
 ([Click here to try compiling it for yourself on the PlutoMonkey Playground](https://wallet.plutomonkey.com/p2s/?source=ewogSU5QVVRTKDApLlI0W0xvbmddLmdldCAqIDIgPT0gNAp9))
 
 
-In the rest of this tutorial we will begin writing the off-chain library for our dApp which performs all of the transaction creation logic.
+In the rest of this tutorial we will begin writing the headless dApp which performs all of the transaction creation logic.
 
 
 ## Preparing Your Project
 
 We are going to be coding in Rust so ensure that you have the tooling installed on your machine: [Install Rust](https://www.rust-lang.org/tools/install)
 
-Once installed you will have access to the `cargo` command in your terminal. We are going to be creating a new library called `math-bounty-lib` which will hold all of your protocol's off-chain code.
+Once installed you will have access to the `cargo` command in your terminal. We are going to be creating a new project called `math-bounty-headless`.
 
 ```rust
-cargo new math-bounty-lib --lib
+cargo new math-bounty-headless --lib
 ```
 
-Cargo will create a new project folder for you called `math-bounty-lib`. Within the newly created `Cargo.toml` file inside of the project folder we will need to add a couple dependencies to get started using the HDF. In the `[dependencies]` section add:
+Cargo will create a new project folder for you called `math-bounty-headless`. Within the newly created `Cargo.toml` file inside of the project folder we will need to add a couple dependencies to get started using the HDF. In the `[dependencies]` section add:
 
 ```rust
-ergo-protocol-framework      = "0.1.0"
-ergo-lib                     = "0.4.0"
+ergo-headless-dapp-framework      = "0.1.0"
+ergo-lib                          = "0.4.0"
 ```
 
 You may have noticed that we included `ergo-lib` as a dependency as well. This is the go-to rust library for all of the core types/structs/functionality. The HDF exposes everything we'll need in our current project, but if your dApp gets sufficiently advanced you may eventually need to use the `ergo-lib` directly yourself.
@@ -53,12 +53,12 @@ Now we can jump over to the `src/lib.rs` file and get started coding.
 First we're going to import all of the Ergo-related types and the Ergo Headless dApp Framework structs/functions/macros for use in our project:
 
 ```rust
-pub use ergo_protocol_framework::*;
+pub use ergo_headless_dapp_framework::*;
 ```
 
-At this point we will begin crafting the components of our off-chain code by starting off with the stages of our protocol. In our case we have a simple single-stage smart contract protocol for our dApp. This means we need to only create a single Rust stage-representing struct for our dApp.
+At this point we will begin crafting the components of headless dApp by starting off with the stages of our protocol. In our case we have a simple single-stage smart contract protocol. This means we need to only create a single Rust stage-representing struct for our headless dApp.
 
-This stage in our dApp will be called the `Math Bounty` stage. As such, we will name the struct which will wrap an `ErgoBox` at this stage the `MathBountyBox`.
+This stage in will be called the `Math Bounty` stage. As such, we will name the struct which will wrap an `ErgoBox` at this stage the `MathBountyBox`.
 
 ```rust
 pub struct MathBountyBox {
@@ -66,7 +66,7 @@ pub struct MathBountyBox {
 }
 ```
 
-Now that we've defined the `MathBountyBox`, we can also use derive a few traits and helper methods automatically:
+Now that we've defined the `MathBountyBox`, we can also derive a few traits and helper methods automatically:
 
 ```rust
 #[derive(Debug, Clone, WrapBox, SpecBox)]
@@ -75,7 +75,7 @@ pub struct MathBountyBox {
 }
 ```
 
-To the Rust-initiated, `Debug` and `Clone` are typical, but `WrapBox` and `SpecBox` are novel. These are procedural macros which automatically implements the `WrappedBox` trait and a `new` method tied to the `SpecifiedBox` trait for our `MathBountyBox`. In other words, we have access to new helper methods without writing any extra code ourselves thanks to these macros. (Note: You must import `ProtocolFrameworkError` if you ever derive `SpecBox`. We do this automatically by importing * in this project.)
+To the Rust-initiated, `Debug` and `Clone` are typical, but `WrapBox` and `SpecBox` are novel. These are procedural macros which automatically implements the `WrappedBox` trait and a `new` method tied to the `SpecifiedBox` trait for our `MathBountyBox`. In other words, we have access to new helper methods without writing any extra code ourselves thanks to these macros. (Note: You must import `HeadlessDappError` if you ever derive `SpecBox`. We do this automatically by importing * in this project.)
 
 Next we are going to implement the `SpecifiedBox` trait on our `MathBountyBox`, in order to take advantage of the `SpecBox` derive.
 
@@ -91,7 +91,7 @@ Now this is where things get interesting. This trait requires us to implement a 
 
 A `BoxSpec` is a specification in the form of a Rust struct which specifies parameters of an `ErgoBox`. This spec struct is used as a "source of truth" to both verify and find `ErgoBox`es which match the spec.
 
-As such, we are going to create a `BoxSpec` for the Math Bounty stage, which will be used by our `MathBountyBox` struct. We will be doing this using the `BoxSpec::new()` function which allows us to specify the address, value range, registers, and tokens for our specification. In our case we will only be using the address due to the simplicity of our dApp.
+As such, we are going to create a `BoxSpec` for the Math Bounty stage, which will be used by our `MathBountyBox` struct. We will be doing this using the `BoxSpec::new()` function which allows us to specify the address, value range, registers, and tokens for our specification. In our case we will only be using the address due to the simplicity of our smart contract.
 
 
 ```rust
@@ -129,14 +129,14 @@ As can be seen above, we use the `verify_box` method to ensure that the `ErgoBox
 
 ## Defining The Smart Contract Protocol
 
-Going forward, we are going to begin defining the actions of our protocol. Before we get there, first we must create an empty struct which represents our dApp protocol. In our case, we are just going to call it `MathBountyProtocol`.
+Going forward, we are going to begin defining the actions of our smart contract protocol for our headless dApp. Before we get there, first we must create an empty struct which represents our protocol. In our case, we are just going to call it `MathBountyProtocol`.
 
 
 ```rust
 pub struct MathBountyProtocol {}
 ```
 
-With a struct that represents our smart contract protocol we can implement protocol actions as methods on said struct. Thus when we expose this `MathBountyProtocol` publicly, it will be easy for front-ends to be implemented for our dApp.
+With a struct that represents our smart contract protocol we can implement protocol actions as methods on said struct. Thus as we expose this `MathBountyProtocol` publicly it will be easy for front-ends to be implemented on top of our headless dApp.
 
 We will now begin to write our first action, `Bootstrap Math Bounty Box`, by making it a method.
 
@@ -167,9 +167,9 @@ What this means is that all of our transaction creation logic within our actions
 
 The current height is required for tx building, the transaction fee is to be decided by the front-end implementor when the action method is used, the `ergs_box_for_fee` is a wrapped `ErgoBox` which is used to pay for the fee for the transaction, and the user's address is required to send change back to the user. These are the minimum arguments required for the majority of actions you will ever write.
 
-Furthermore, in our current scenario, we also have the `ergs_box_for_bounty` and `bounty_amount_in_nano_ergs` input arguments. In the front-end the user will provide the amount of nanoErgs they want to submit as a bounty to the dApp, and the front-end implementation must find an input `ErgsBox` with sufficient nanoErgs to cover the bounty amount which is owned by the user.
+Furthermore, in our current scenario, we also have the `ergs_box_for_bounty` and `bounty_amount_in_nano_ergs` input arguments. In the front-end the user will provide the amount of nanoErgs they want to submit as a bounty, and the front-end implementation for our headless dApp must find an input `ErgsBox` with sufficient nanoErgs to cover the bounty amount which is owned by the user.
 
-This is actually a lot simpler than it all may sound thanks to the HDF implementing a number of key helper methods on top of `SpecifiedBox`s (an `ErgsBox` being one of the already implemented `SpecifiedBox`es by the HDF) for acquiring UTXOs easily. This will all be tackled in a future tutorial once we are working on building a front-end for our dApp.
+This is actually a lot simpler than it all may sound thanks to the HDF implementing a number of key helper methods on top of `SpecifiedBox`s (an `ErgsBox` being one of the already implemented `SpecifiedBox`es by the HDF) for acquiring UTXOs easily. This will all be tackled in a future tutorial once we are working on building a front-end for our headless dApp.
 
 Next let's write the basic scaffolding for creating our `UnsignedTransaction` that we are returning in our method:
 
@@ -283,12 +283,12 @@ let output_candidates = vec![
 ];
 ```
 
-And with that we have implemented the `Bootstrap Math Bounty Box` action for our protocol.
+And with that we have implemented the `Bootstrap Math Bounty Box` action for our headless dApp's smart contract protocol.
 
 This is the final code from everything we've accomplished in this tutorial:
 
 ```rust
-use ergo_protocol_framework::*;
+use ergo_headless_dapp_framework::*;
 
 #[derive(Debug, Clone, WrapBox)]
 pub struct MathBountyBox {
@@ -376,13 +376,13 @@ impl MathBountyProtocol {
 
 ## Conclusion
 
-Congratulations, you've finished the first tutorial and currently have a pure & portable Rust-based off-chain library for your Math Bounty dApp.
+Congratulations, you've finished the first tutorial and currently have a working headless Math Bounty dApp!
 
-At this point in time you have all the logic implemented to create a real `UnsignedTransaction` which you can submit to an Ergo node in order to lock a bounty in this dApp. This library can be used programmatically in scripts/bots, or have a front-end built out which accepts user input. It is in essence a self-contained library which contains all the logic required to perform the actions of the dApp protocol that are implemented.
+At this point in time you have all the logic implemented to create a real `UnsignedTransaction` which you can submit to an Ergo node in order to lock a bounty under the Math Bounty smart contract. This headless dApp can be used programmatically in scripts/bots, or have a front-end built out which accepts user input. It is truly self-contained in such that it contains all the logic required to perform the actions of the smart contract protocol headlessly.
 
 In the following tutorials we will be working on finishing this dApp by adding:
-1. Support for the "Solve Math Problem" action.
-2. Implementing a CLI front-end to make this dApp usable without coding.
-3. Adding WASM support to make this dApp off-chain library truly portable.
+1. Support for the "Solve Math Problem" action to finish off our headless dApp.
+2. Building a CLI front-end to out headless dApp.
+3. Adding WASM support to make this headless dApp truly portable.
 
 If you have any questions/comments/ideas, feel free to drop by the [Ergo Discord](https://discord.gg/kj7s7nb) and chat with the rest of the community.

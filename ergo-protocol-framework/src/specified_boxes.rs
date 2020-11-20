@@ -4,11 +4,11 @@
 /// for implementing Actions of your protocols.
 use crate::box_spec::BoxSpec;
 use crate::box_traits::{SpecifiedBox, WrappedBox};
-use crate::error::{ProtocolFrameworkError, Result};
+use crate::error::{HeadlessDappError, Result};
+use ergo_headless_dapp_framework_derive::{SpecBox, WrapBox};
 use ergo_lib::chain::ergo_box::ErgoBox;
 use ergo_lib_wasm::box_coll::ErgoBoxes;
 use ergo_lib_wasm::ergo_box::ErgoBox as WErgoBox;
-use ergo_protocol_framework_derive::{SpecBox, WrapBox};
 use wasm_bindgen::prelude::*;
 
 /// A specified box which is intended to be spent for the Ergs inside.

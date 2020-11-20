@@ -1,4 +1,4 @@
-pub use ergo_protocol_framework::*;
+pub use ergo_headless_dapp_framework::*;
 
 #[derive(Debug, Clone, WrapBox)]
 pub struct MathBountyBox {

@@ -13,11 +13,11 @@ We will create a new rust project (best to keep it in the same folder as your li
 cargo new math-bounty-cli
 ```
 
-In your new project folder edit the `Cargo.toml` and add your `math-bounty-lib` as a dependency, as well as the `ergo-node-interface` lib and `nano-get`.
+In your new project folder edit the `Cargo.toml` and add your `math-bounty-headless` as a dependency, as well as the `ergo-node-interface` lib and `nano-get`.
 
 ```rust
 [dependencies]
-math-bounty-lib     = {path = "../math-bounty-lib"}
+math-bounty-headless     = {path = "../math-bounty-headless"}
 ergo-node-interface = "0.2.2"
 nano-get = { version = "0.2.4", features = ["https"] }
 ```
@@ -29,7 +29,7 @@ The `nano-get` library is just a lightweight library for issuing GET requests. F
 
 ## Setting Up And Using The `NodeInterface`
 
-Continuing to your `main.rs` we will start coding by importing everything from your `math-bounty-lib` and the `ergo-node-interface` lib.
+Continuing to your `main.rs` we will start coding by importing everything from your `math-bounty-headless` and the `ergo-node-interface` lib.
 
 ```rust
 use math_bounty_lib::*;
