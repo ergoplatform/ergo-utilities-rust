@@ -85,7 +85,68 @@ Next we will be filling in the `tx_inputs` vector. Because our smart contract di
 }
 ```
 
+## Implementing The "Solve Math Problem" Action Logic
 
+Now comes the fun part. We are going to be implementing the "Solve Math Problem" logic. As you may recall, this is the smart contract of our dApp:
+
+```scala
+{
+ OUTPUTS(0).R4[Long].get * 2 == 4
+}
+```
+
+As such, inside of our "Solve Math Problem" action, we must create an `UnsignedTransaction` which:
+- Has at least one output (Output 0)
+- Output 0 has a Long integer inside of Register 4
+- This Long integer inside of R4 will be the `math_problem_answer`
+
+To move towards this, let's first calculate how many nanoErgs of bounty are left after we cover the transaction fee.
+
+```rust
+// Calculating the leftover bounty after paying for the tx fee
+let bounty_after_fee = math_bounty_box.nano_ergs() - transaction_fee;
+```
+
+Now we can define the value of R4 of our output box.
+
+```rust
+// Converting our `math_problem_answer` from a `u64` to a `Constant`.
+// This is the datatype that registers are encoded as inside of
+// `ErgoBox`es. Note: register integers are signed, which is why
+// we converted first to an `i64`, and then into a `Constant`.
+let r4 = Constant::from(math_problem_answer as i64);
+```
+
+As mentioned in the above comment, registers inside of `ErgoBox`es are of the `Constant` datatype. Thus we must convert our `math_problem_answer` into a `Constant` using its `from` method.
+
+With that out of the way, we can now create our output candidate which will fulfill the mathematical check encoded within our smart contract.
+
+```rust
+// An output candidate with the withdrawn bounty funds +  the answer to the
+// math problem being held in R4.
+let withdrawn_bounty_candidate = create_candidate(
+    bounty_after_fee,
+    &user_address,
+    &vec![],
+    &vec![r4],
+    current_height,
+).unwrap();
+```
+
+The above output candidate holds the resulting nanoErgs from the bounty after we have paid off the transaction fee, sent to the user's address, and holds the answer to the math problem in R4 as a Long integer (`i64` in rust as a `Constant`). This implements the logic for allowing user's to submit answers to the math problem according to the design of the smart contract.
+
+Note: The list of registers as a part of `create_candidate` is an ordered list. This means that whatever `Constant` you put as the first element will be treated as R4, the second as R5, and so on up until R9.
+
+With the majority of the logic implemented, all we have to do is create the transaction fee output candidate and insert the output candidates into the list in the correct order.
+
+```rust
+let transaction_fee_candidate =
+    TxFeeBox::output_candidate(transaction_fee, current_height).unwrap();
+
+let output_candidates = vec![withdrawn_bounty_candidate, transaction_fee_candidate];
+```
+
+Remember, because our smart contract checks for the `math_problem_answer` to be in R4 of Output 0, this mean that we **must** place our `withdrawn_bounty_candidate` as the first element in the `output_candidates` list. If we put it in a different spot in the list of outputs the transaction will fail even if the user provides the correct `math_problem_answer`.
 
 
 

@@ -46,7 +46,32 @@ impl MathBountyProtocol {
             math_bounty_box.as_unsigned_input(),
             ergs_box_for_fee.as_unsigned_input(),
         ];
-        let output_candidates = vec![];
+
+        // Calculating the leftover bounty after paying for the tx fee
+        let bounty_after_fee = math_bounty_box.nano_ergs() - transaction_fee;
+
+        // Converting our `math_problem_answer` from a `u64` to a `Constant`.
+        // This is the datatype that registers are encoded as inside of
+        // `ErgoBox`es. Note: register integers are signed, which is why
+        // we converted first to an `i64`, and then into a `Constant`.
+        let r4 = Constant::from(math_problem_answer as i64);
+
+        // A candidate with the withdrawn bounty funds +  the answer to the
+        // math problem being held in R4.
+        let withdrawn_bounty_candidate = create_candidate(
+            bounty_after_fee,
+            &user_address,
+            &vec![],
+            &vec![r4],
+            current_height,
+        )
+        .unwrap();
+
+        // Create the Transaction Fee box candidate
+        let transaction_fee_candidate =
+            TxFeeBox::output_candidate(transaction_fee, current_height).unwrap();
+
+        let output_candidates = vec![withdrawn_bounty_candidate, transaction_fee_candidate];
 
         UnsignedTransaction::new(tx_inputs, vec![], output_candidates)
     }
