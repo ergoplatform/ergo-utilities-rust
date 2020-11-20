@@ -1,10 +1,10 @@
 use crate::error::{ProtocolFrameworkError, Result};
-pub use ergo_lib::ast::constant::Constant;
-pub use ergo_lib::chain::ergo_box::ErgoBox;
-pub use ergo_lib::ergo_tree::ErgoTree;
-pub use ergo_lib::types::stype::SType;
-pub use ergo_lib_wasm::box_coll::ErgoBoxes;
-pub use ergo_lib_wasm::ergo_box::ErgoBox as WErgoBox;
+use ergo_lib::ast::constant::Constant;
+use ergo_lib::chain::ergo_box::ErgoBox;
+use ergo_lib::ergo_tree::ErgoTree;
+use ergo_lib::types::stype::SType;
+use ergo_lib_wasm::box_coll::ErgoBoxes;
+use ergo_lib_wasm::ergo_box::ErgoBox as WErgoBox;
 use ergo_offchain_utilities::encoding::address_string_to_ergo_tree;
 use ergo_offchain_utilities::{ErgoAddressString, NanoErg};
 use serde_json::from_str;
@@ -13,6 +13,8 @@ use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
 #[derive(Clone)]
+/// A struct which allows a developer to create a specification of a
+/// token in a box. This `TokenSpec` is used in a `BoxSpec.
 pub struct TokenSpec {
     value_range: Range<u64>,
     token_id: String,
@@ -26,22 +28,17 @@ impl TokenSpec {
     }
 }
 
-// Implement `RegisterSpec` in the future.
+/// A struct which allows a developer to create a specification of a
+/// Register in a box. This `RegisterSpec` is used in a `BoxSpec.
 // Offers both fields as `Option`s, thus allowing a developer to specify
 // how many Registers are expected, potentially the types of each register,
 // and potentially the specific value of a register.
-// #[wasm_bindgen]
-// #[derive(Clone)]
-// pub struct RegisterSpec {
-//     value: Option<Constant>,
-//     value_type: Option<SType>,
-// }
-
-// pub enum RegisterSpec {
-//     Type(SType),
-//     Value(Constant),
-//     None,
-// }
+#[wasm_bindgen]
+#[derive(Clone)]
+pub struct RegisterSpec {
+    value: Option<Constant>,
+    value_type: Option<SType>,
+}
 
 /// A specification which specifies parameters of an `ErgoBox`.
 /// This spec is used as a "source of truth" to both verify and find
@@ -57,10 +54,12 @@ pub struct BoxSpec {
     address: Option<ErgoAddressString>,
     /// The allowed range of nanoErgs
     value_range: Option<Range<NanoErg>>,
-    /// A sorted list of `Constant`s which define registers
+    /// A sorted list of `RegisterSpec`s which define registers
     /// of an `ErgoBox`.
     /// First element is treated as R4, second as R5, and so on.
-    registers: Vec<Option<Constant>>,
+    /// The fields of a `RegisterSpec` are Options, thus
+    /// removing the need for an Option on the field type.
+    registers: Vec<RegisterSpec>,
     /// A sorted list of `TokenSpec`s which define tokens
     /// of an `ErgoBox`.
     tokens: Vec<Option<TokenSpec>>,
@@ -116,7 +115,7 @@ impl BoxSpec {
     pub fn new(
         address: Option<ErgoAddressString>,
         value_range: Option<Range<NanoErg>>,
-        registers: Vec<Option<Constant>>,
+        registers: Vec<RegisterSpec>,
         tokens: Vec<Option<TokenSpec>>,
     ) -> BoxSpec {
         BoxSpec::new_predicated(address, value_range, registers, tokens, None)
@@ -126,7 +125,7 @@ impl BoxSpec {
     pub fn new_predicated(
         address: Option<ErgoAddressString>,
         value_range: Option<Range<NanoErg>>,
-        registers: Vec<Option<Constant>>,
+        registers: Vec<RegisterSpec>,
         tokens: Vec<Option<TokenSpec>>,
         predicate: Option<fn(&ErgoBox) -> bool>,
     ) -> BoxSpec {
@@ -170,19 +169,34 @@ impl BoxSpec {
             }?;
         }
 
-        // Verify all of the Registers
+        // Verify all of the RegisterSpecs
         if self.registers.len() > 0 {
+            // Error if more registers specified than exist in box.
+            if self.registers.len() > ergo_box_regs.len() {
+                return Err(ProtocolFrameworkError::FailedRegisterSpec);
+            }
             for i in 0..(self.registers.len()) {
-                if let Some(constant) = self.registers[i].clone() {
+                let rspec = self.registers[i].clone();
+
+                // Verify that the register's type matches the spec
+                if let Some(reg_type) = rspec.value_type {
+                    match reg_type == ergo_box_regs[i].tpe {
+                        true => (),
+                        false => return Err(ProtocolFrameworkError::FailedRegisterSpec),
+                    }
+                }
+
+                // Verify that the register's value matches the spec
+                if let Some(constant) = rspec.value {
                     match constant == ergo_box_regs[i] {
-                        true => continue,
+                        true => (),
                         false => return Err(ProtocolFrameworkError::FailedRegisterSpec),
                     }
                 }
             }
         }
 
-        // Verify all of the Tokens
+        // Verify all of the TokensSpecs
         if self.tokens.len() > 0 {
             for i in 0..(self.tokens.len()) {
                 if let Some(spec) = self.tokens[i].clone() {
@@ -282,7 +296,7 @@ impl BoxSpec {
     }
     /// Returns a new `BoxSpec` with all fields exactly the same
     /// except the registers are set to the registers provided as input.
-    pub fn modified_registers(&self, registers: Vec<Option<Constant>>) -> BoxSpec {
+    pub fn modified_registers(&self, registers: Vec<RegisterSpec>) -> BoxSpec {
         BoxSpec {
             registers: registers,
             ..self.clone()
