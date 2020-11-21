@@ -51,7 +51,17 @@ fn impl_specified_box(ast: &syn::DeriveInput) -> TokenStream {
                 }
                 Ok(specified_boxes)
             }
+
+            fn process_explorer_response_custom(&self, explorer_response_body: &str, box_spec: BoxSpec) -> std::result::Result<Vec<#name>, HeadlessDappError> {
+                let boxes = box_spec.process_explorer_response(explorer_response_body)?;
+                let mut specified_boxes = vec![];
+                for b in boxes {
+                    specified_boxes.push(Self::new(&b)?);
+                }
+                Ok(specified_boxes)
+            }
         }
+
     };
     gen.into()
 }

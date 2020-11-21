@@ -105,15 +105,6 @@ impl BoxSpec {
     pub fn w_verify_box(&self, ergo_box: WErgoBox) -> bool {
         todo!()
     }
-
-    #[wasm_bindgen]
-    pub fn w_find_boxes_in_explorer(&self, explorer_api_url: &str) -> ErgoBoxes {
-        // Look into these pages to figure out requests:
-        // - https://www.fpcomplete.com/blog/serverless-rust-wasm-cloudflare/
-        // - https://rustwasm.github.io/docs/wasm-bindgen/examples/fetch.html
-
-        todo!()
-    }
 }
 
 /// Method definitions for `BoxSpec` that are intended to be used in
