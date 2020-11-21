@@ -108,7 +108,16 @@ The CLI should allow a user to use the `bounty` command and provide an integer i
 
 From the argument checking code block above, we will be filling out the logic for the `bounty` command in this section.
 
-If you can recall, these are the inputs that are required for the "Bootstrap Math Bounty Box" action:
+The first thing we will do is allow the user to submit a number of Ergs, rather than nanoErgs. This makes it much easier for our average user to understand how much they are spending. This is simple with the HDF:
+
+```rust
+// Taking user input as Ergs and converting to nanoErgs
+let bounty_amount_in_nano_ergs = erg_to_nano_erg(args[2].parse::<f64>().unwrap());
+```
+
+As such, a user can now utilize our `bounty` command via: `./math-bounty-cli bounty 1.5`, and the 1.5 Ergs will be properly converted to nanoErgs. The reverse operation is also supported by the EDF via the `nano_erg_to_erg` function.
+
+Continuing forward we will look at implementing the action itself. If you recall, these are the inputs that are required for the "Bootstrap Math Bounty Box" action:
 
 ```rust
 bounty_amount_in_nano_ergs: u64,

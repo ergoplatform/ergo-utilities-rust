@@ -17,7 +17,8 @@ fn main() {
     if args.len() == 3 {
         // User wishes to submit Ergs to create a new `MathBountyBox`
         if args[1] == "bounty" {
-            let bounty_amount_in_nano_ergs = args[2].parse::<u64>().unwrap();
+            // Taking user input as Ergs and converting to nanoErgs
+            let bounty_amount_in_nano_ergs = erg_to_nano_erg(args[2].parse::<f64>().unwrap());
 
             // Acquire the ergs_box_for_bounty
             let ergs_box_for_bounty =
@@ -31,8 +32,6 @@ fn main() {
             let math_problem_answer = args[2].parse::<u64>().unwrap();
         }
     }
-
-    println!("Args: {:?}", args);
 }
 
 pub fn get_ergs_box_for_bounty(user_address: String, bounty_amount_in_nano_ergs: u64) -> ErgsBox {
