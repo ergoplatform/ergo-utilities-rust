@@ -7,7 +7,7 @@ pub mod specified_boxes;
 pub mod tx_creation;
 
 pub use box_spec::{BoxSpec, RegisterSpec, TokenSpec};
-pub use box_traits::{SpecifiedBox, WrappedBox};
+pub use box_traits::{ExplorerFindable, SpecifiedBox, WrappedBox};
 pub use ergo_headless_dapp_framework_derive::{SpecBox, WrapBox};
 pub use ergo_lib::ast::constant::Constant;
 pub use ergo_lib::chain::ergo_box::ErgoBox;

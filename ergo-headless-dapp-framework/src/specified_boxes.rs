@@ -3,7 +3,7 @@
 /// specification and provide you with a simple interface
 /// for implementing Actions of your protocols.
 use crate::box_spec::BoxSpec;
-use crate::box_traits::{SpecifiedBox, WrappedBox};
+use crate::box_traits::{ExplorerFindable, SpecifiedBox, WrappedBox};
 use crate::error::{HeadlessDappError, Result};
 use ergo_headless_dapp_framework_derive::{SpecBox, WrapBox};
 use ergo_lib::chain::ergo_box::ErgoBox;
