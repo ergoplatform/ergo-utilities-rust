@@ -1,13 +1,13 @@
 # 3. Math Bounty dApp - Writing A CLI Frontend
 
-In the last two tutorials we created the Math Bounty dApp off-chain library which provided us with a pure interface for interacting with our dApp. In this tutorial we are going to use this off-chain library and create a textual front-end for it as a CLI app.
+In the last two tutorials we created the Math Bounty headless dApp which provides us with a pure interface for interacting with our smart contract protocol. In this tutorial we are going to use our headless dApp to create a textual front-end for it as a CLI app.
 
-All of the design patterns and code we write will be equally as applicable to GUI-based front-ends as well, however to keep this tutorial concise we are going to be focused on creating a CLI interface instead.
+The vast majority of the design patterns and code we write will be equally as applicable to GUI-based front-ends as well, however to keep this tutorial concise we are going to be focused on creating a CLI interface instead.
 
 
 ## Creating The Project
 
-We will create a new rust project (best to keep it in the same folder as your library) for our Math Bounty CLI app:
+We will create a new rust project (best to keep it in the same outer folder as your headless dApp) for our Math Bounty CLI app:
 
 ```
 cargo new math-bounty-cli
@@ -18,8 +18,8 @@ In your new project folder edit the `Cargo.toml` and add your `math-bounty-headl
 ```rust
 [dependencies]
 math-bounty-headless     = {path = "../math-bounty-headless"}
-ergo-node-interface = "0.2.2"
-nano-get = { version = "0.2.4", features = ["https"] }
+ergo-node-interface      = "0.2.2"
+nano-get                 = { version = "0.2.4", features = ["https"] }
 ```
 
 The `ergo-node-interface` is a Rust crate(library) which provides with all the functions you will need to interface with an Ergo node wallet so that you can do things such as acquiring the user's address, or asking the node wallet to sign and submit a generated `UnsignedTransaction`.
@@ -29,15 +29,15 @@ The `nano-get` library is just a lightweight library for issuing GET requests. F
 
 ## Setting Up And Using The `NodeInterface`
 
-Continuing to your `main.rs` we will start coding by importing everything from your `math-bounty-headless` and the `ergo-node-interface` lib.
+Continuing to your `main.rs` we will start by importing everything from your `math-bounty-headless` and the `ergo-node-interface` lib (plus the `get` function from `nano_get`).
 
 ```rust
-use math_bounty_lib::*;
+use math_bounty_headless::*;
 use ergo_node_interface::*;
 use nano_get::get;
 ```
 
-Next we will create a new Ergo `NodeInterface` instance. This will allow us to interact with an Ergo Node via Rust. Do note, a user of the CLI dApp will need to have an unlocked Ergo Node wallet in order for the CLI dApp to function.
+Next we will create a new Ergo `NodeInterface` instance. This will allow us to interact with an Ergo Node via Rust. Do note, a user of the CLI app will need to have an unlocked Ergo Node wallet available in order for the CLI dApp to function.
 
 We will be using `acquire_node_interface_from_local_config` from the Ergo Node Interface library to simplify the process of creating an `NodeInterface`. In short from the documentation:
 ```rust
@@ -77,7 +77,7 @@ And just like that we have all the information we need from the user's node wall
 
 ### Implement Argument Checking
 
-Next we are going to implement argument checking for our CLI application. In our `main` function we will simply add this line to acquire the arguments that were submit by the user who was running our application.
+Next we are going to implement argument checking for our CLI application. In our `main` function we will simply add this line to acquire the arguments that were submit by the user who ran our application.
 
 ```rust
     // Acquire CLI arguments
@@ -104,7 +104,7 @@ if args.len() == 2 {
 
 ### Implementing The Submit Bounty CLI Logic
 
-The CLI should allow a user to use the `bounty` command and provide an integer in order to issue the "Bootstrap Math Bounty Box" Action from our off-chain dApp library.
+The CLI should allow a user to use the `bounty` command and provide an integer in order to build the "Bootstrap Math Bounty Box" Action using our headless dApp.
 
 From the argument checking code block above, we will be filling out the logic for the `bounty` command in this section.
 
