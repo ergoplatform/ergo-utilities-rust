@@ -43,11 +43,11 @@ fn impl_specified_box(ast: &syn::DeriveInput) -> TokenStream {
         }
 
         impl ExplorerFindable for #name {
-            fn process_explorer_response(&self, explorer_response_body: &str) -> std::result::Result<Vec<#name>, HeadlessDappError> {
-                self.process_explorer_response_custom(explorer_response_body, #name::box_spec())
+            fn process_explorer_response(explorer_response_body: &str) -> std::result::Result<Vec<#name>, HeadlessDappError> {
+                Self::process_explorer_response_custom(explorer_response_body, #name::box_spec())
             }
 
-            fn process_explorer_response_custom(&self, explorer_response_body: &str, box_spec: BoxSpec) -> std::result::Result<Vec<#name>, HeadlessDappError> {
+            fn process_explorer_response_custom(explorer_response_body: &str, box_spec: BoxSpec) -> std::result::Result<Vec<#name>, HeadlessDappError> {
                 let boxes = box_spec.process_explorer_response(explorer_response_body)?;
                 let mut specified_boxes = vec![];
                 for b in boxes {
