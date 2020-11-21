@@ -87,7 +87,7 @@ Next we are going to implement argument checking for our CLI application. In our
 Next we will do some basic checks to ensure that the user is either trying submit a bounty (create/bootstrap a new `MathBountyBox`), or is trying to solve the math problem and be awarded the bounty held in an existing `MathBountyBox`.
 
 ```rust
-if args.len() == 2 {
+if args.len() == 3 {
     // User wishes to submit nanoErgs to create a new `MathBountyBox`
     if args[1] == "bounty" {
         let bounty_amount_in_nano_ergs = args[2].parse::<u64>().unwrap();
