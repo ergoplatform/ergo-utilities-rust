@@ -250,12 +250,31 @@ impl BoxSpec {
     /// filter all returned `ErgoBox`es against the `BoxSpec`
     /// using the `verify_box()` method.
     pub fn process_explorer_response(&self, explorer_response_body: &str) -> Result<Vec<ErgoBox>> {
-        // Get the `JsonValue`
-        let json = json::parse(explorer_response_body).map_err(|_| {
+        // Get the `JsonValue` from the explorer respone body
+        let mut json_res = json::parse(explorer_response_body).map_err(|_| {
             HeadlessDappError::Other(
-                "Failed to extract text from Ergo Explorer Backend API Response".to_string(),
+                "Failed to extract json from Ergo Explorer Backend API Response".to_string(),
             )
-        })?;
+        });
+
+        // Check if `json_res` is an `Err`, and if so, try to cleanup the
+        // explorer response text and try again.
+        if let Err(_) = json_res {
+            println!("In cleaning");
+            if let Some(front_i) = explorer_response_body.find('[') {
+                let cleaned_up_body = &explorer_response_body[front_i..];
+                println!("Cleaned: {}", cleaned_up_body);
+            }
+            json_res = json::parse(explorer_response_body).map_err(|_| {
+                HeadlessDappError::Other(
+                    "Failed to extract json from Ergo Explorer Backend API Response".to_string(),
+                )
+            });
+        }
+
+        // Unwrap the `JsonValue`
+        let json = json_res?;
+
         // Parse the json into `Vec<ErgoBox>`
         let mut box_list: Vec<ErgoBox> = vec![];
         for i in 0.. {

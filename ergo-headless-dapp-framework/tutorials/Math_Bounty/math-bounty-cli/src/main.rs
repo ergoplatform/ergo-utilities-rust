@@ -50,7 +50,6 @@ pub fn get_ergs_box_for_bounty(user_address: String, bounty_amount_in_nano_ergs:
         .unwrap();
     // Make a get request to the Ergo Explorer API endpoint
     let get_response = get(ergs_box_for_bounty_url);
-    println!("Resp: {:?}", get_response);
     // Process the `get_response` into `ErgsBox`es which match our
     // `ergs_box_for_bounty_spec`
     let list_of_ergs_boxes =
