@@ -1,5 +1,5 @@
 use ergo_node_interface::*;
-use math_bounty_lib::*;
+use math_bounty_headless::*;
 use nano_get::get;
 
 fn main() {
@@ -17,9 +17,13 @@ fn main() {
     if args.len() == 2 {
         // User wishes to submit nanoErgs to create a new `MathBountyBox`
         if args[1] == "bounty" {
-            let bounty_amount_in_nano_ergs = args[2].parse::<u64>().unwrap();
+            let bounty_amount_in_ergs = args[2].parse::<u64>().unwrap();
 
-            let ergs_box_for_bounty = ErgsBox::
+            let ergs_box_for_bounty_spec = ErgsBox::box_spec()
+            .modified_address(user_address)
+            .modified_value_range(value_range)
+
+            // let ergs_box_for_bounty = ErgsBox::
         }
         // User wishes to solve the math problem to be rewarded with the
         // bounty.
