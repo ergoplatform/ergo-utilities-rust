@@ -13,28 +13,28 @@ We will create a new rust project (best to keep it in the same outer folder as y
 cargo new math-bounty-cli
 ```
 
-In your new project folder edit the `Cargo.toml` and add your `math-bounty-headless` as a dependency, as well as the `ergo-node-interface` lib and `nano-get`.
+In your new project folder edit the `Cargo.toml` and add your `math-bounty-headless` as a dependency, as well as the `ergo-node-interface` lib and `reqwest`.
 
 ```rust
 [dependencies]
 math-bounty-headless     = {path = "../math-bounty-headless"}
 ergo-node-interface      = "0.2.2"
-nano-get                 = { version = "0.2.4", features = ["https"] }
+reqwest                 = {version ="0.10.9", features = ["blocking"]}
 ```
 
 The `ergo-node-interface` is a Rust crate(library) which provides with all the functions you will need to interface with an Ergo node wallet so that you can do things such as acquiring the user's address, or asking the node wallet to sign and submit a generated `UnsignedTransaction`.
 
-The `nano-get` library is just a lightweight library for issuing GET requests. Feel free to use any other Rust library that fulfills this task.
+The `reqwest` library is a library we will be using for issuing GET requests. Feel free to use any other Rust library that fulfills said task.
 
 
 ## Setting Up And Using The `NodeInterface`
 
-Continuing to your `main.rs` we will start by importing everything from your `math-bounty-headless` and the `ergo-node-interface` lib (plus the `get` function from `nano_get`).
+Continuing to your `main.rs` we will start by importing everything from your `math-bounty-headless` and the `ergo-node-interface` lib (plus the `get` function from `reqwest`).
 
 ```rust
 use math_bounty_headless::*;
 use ergo_node_interface::*;
-use nano_get::get;
+use reqwest::blocking::get;
 ```
 
 Next we will create a new Ergo `NodeInterface` instance. This will allow us to interact with an Ergo Node via Rust. Do note, a user of the CLI app will need to have an unlocked Ergo Node wallet available in order for the CLI dApp to function.
