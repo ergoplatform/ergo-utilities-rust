@@ -88,7 +88,7 @@ pub trait ExplorerFindable: SpecifiedBox {
     /// filter all returned `ErgoBox`es against the default `BoxSpec`
     /// of the `SpecifiedBox` using the `verify_box()` method and creating
     /// new instances of your `SpecifiedBox` struct.
-    fn process_explorer_response(&self, explorer_response_body: &str) -> Result<Vec<Self>>
+    fn process_explorer_response(explorer_response_body: &str) -> Result<Vec<Self>>
     where
         Self: Sized;
 
@@ -98,7 +98,6 @@ pub trait ExplorerFindable: SpecifiedBox {
     /// using the `verify_box()` method and creating new instances
     /// of your `SpecifiedBox` struct.
     fn process_explorer_response_custom(
-        &self,
         explorer_response_body: &str,
         box_spec: BoxSpec,
     ) -> Result<Vec<Self>>
