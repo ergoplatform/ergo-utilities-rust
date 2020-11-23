@@ -15,7 +15,7 @@ use wasm_bindgen::prelude::*;
 /// The spec simply requires the box to simply have at least `1000000`
 /// nanoErgs inside.
 #[wasm_bindgen]
-#[derive(Clone, Debug, WrapBox, SpecBox)]
+#[derive(Clone, Debug, WrapBox, SpecBox, Eq, PartialEq)]
 pub struct ErgsBox {
     ergo_box: ErgoBox,
 }
