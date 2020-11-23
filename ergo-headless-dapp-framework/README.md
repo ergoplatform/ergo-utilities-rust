@@ -1,6 +1,20 @@
 # Ergo Headless dApp Framework
 
-The premier Rust framework for developing Ergo Headless dApps easily. The Ergo Headless dApp Framework provides developers with the very first portable UTXO-based headless dApp development framework on any blockchain.
+The premier Rust framework for developing Ergo Headless dApps. The Ergo HDF provides developers with the very first portable UTXO-based headless dApp development framework on any blockchain.
+
+## What Are Headless dApps?
+
+Headless dApps are a brand new technical and business model for developing dApps that is just beginning to take hold in the wider Blockchain sphere. In short, headless dApps are the pure and portable self-contained logic for reading and participating in on-chain smart contract protocols.
+
+In other words, headless dApps are a piece of software which expose the complex on-chain protocols to the off-chain world with a streamlined interface that anyone can build on top of. What is key here is that headless dApps, as their name suggests, have no frontend built on top of them (thus "headless").
+
+What headless dApps do provide is the freedom for an entire decentralized ecosystem to be built on top of them. Because headless dApps by default are pure and portable, they can be compiled to any desktop OS, mobile OS, or browser. Because they have a streamlined interface, they can be integrated into scripts and bots trivially. Because they are composable, they can be used together in applications enabling arbitrage between different protocols trivially, or entire new user experiences to be developed without having to understand how each and every supported headless dApp works at it's core.
+
+Headless dApps are the future for enabling newer devs who have limited experience in developing smart contract protocols to still have a real impact on the dApp sphere. The separation of concerns allows building on top of headless dApps without requiring the substantial time sink in understanding the nitty gritty details that made the dApp possible.
+
+Furthermore, headless dApps open up the ecosystem for a whole new business model. Rather than the smart contact protocol creators sucking up all potential profit/value from the success of the protocol, headless dApps uncover an as-of-yet untapped revenue stream for front-end devs. By decentralizing the potential profit from solely the protocol creators to now encompass each and every frontend that is developed, we take a step back from the centralizing effect that we have today with popular dApps with a single hosted frontend. Instead we can incentivize a robust ecosystem of numerous independent frontends built by various devs/companies which all can profit from improving the ecosystem as a whole.
+
+Headless dApps enable all of this, while further enhancing the developer experience at the exact same time.
 
 ## Project Goals
 1. Enable developers to write their off-chain logic once using the HDF to create their own headless dApps, thereby targeting all platforms (desktop, web, mobile).
