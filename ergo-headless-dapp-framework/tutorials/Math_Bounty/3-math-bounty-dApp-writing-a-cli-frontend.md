@@ -141,6 +141,9 @@ let tx_fee = 1000000;
 
 Now we can begin working on the two `ErgsBox`es. Let's address the `ergs_box_for_bounty` first.
 
+One of the great features of the HDF for front-end developers is that you have a streamlined method of acquiring boxes via `BoxSpec`s. This means that instead of having to manually figure our how to find these boxes as inputs for the headless dApp, you just focus on building valid `BoxSpec` structs, and then the HDF provides you with all of the methods you need to find said box(es).
+
+Furthermore, the HDF provides a very effective modifiable `BoxSpec` interface. As we will see in this next code section below, we will modify the default `ErgsBox` `BoxSpec` so that it specifies the user's address & has at least `bounty_amount_in_nano_ergs`.
 
 ```rust
 // Take the generalized `BoxSpec` from an `ErgsBox` and modify it
@@ -152,7 +155,11 @@ let ergs_box_for_bounty_spec = ErgsBox::box_spec()
     .modified_value_range(Some(bounty_amount_in_nano_ergs..u64::MAX));
 ```
 
-...
+This specifies exactly what we require for our Action. We need a valid `ErgsBox` for our action which our user can spend and has enough Ergs inside of it to pay for the bounty amount.
+
+Now that we've modified the `BoxSpec` to meet our current requirements, we can trivially acquire a list of boxes from an Ergo Explorer API that match said spec. To do this we will first use the `.explorer_endpoint` method together with a link to a public instance of the Ergo Explorer API. (Optimally you would deploy your own Ergo Explorer Backend/API to support your own dApp to ensure uptime/increase decentralization, but for our example we will use the public API for testing)
+
+This method will then return a new url as a String, however with the correct endpoint in order to find boxes which match out spec. Thus once we have the new endpoint-appended url, we will issue a GET request and save the response body as a String in `get_response`.
 
 ```rust
 let ergs_box_for_bounty_url = ergs_box_for_bounty_spec
@@ -162,7 +169,7 @@ let ergs_box_for_bounty_url = ergs_box_for_bounty_spec
 let get_response = get(&ergs_box_for_bounty_url).unwrap().text().unwrap();
 ```
 
-...
+This response will be a list of boxes as a json String which may or may not match our spec entirely. As such, we need to process this explorer response using the HDF to acquire the `ErgsBox`es which specifically match our modified spec. This is done easily enough via `ErgsBox::process_explorer_response_custom`. (Note, `process_explorer_response` is also available, however that would use the default `BoxSpec` of an `ErgsBox`. Because we modified the `BoxSpec` to match our requirements, we must use the `_custom` version of the method.)
 
 ```rust
     // Process the `get_response` into `ErgsBox`es which match our
@@ -174,6 +181,8 @@ let get_response = get(&ergs_box_for_bounty_url).unwrap().text().unwrap();
     let ergs_box_for_bounty = list_of_ergs_boxes[0].clone();
 
 ```
+
+As can be seen above once the response was processed, a list of `ErgsBox`es which matched our spec were generated for us. We then cloned the first element of the list, as we only need to use a single `ErgsBox` for the bounty.
 
 And lastly, we can move all of this logic into it's own function to keep things clean.
 
@@ -203,7 +212,7 @@ pub fn get_ergs_box_for_bounty(user_address: String, bounty_amount_in_nano_ergs:
 }
 ```
 
-Thus we only need to use the following line inside our `main` function in the `bounty` command branch:
+Thus we only need to use the following line inside our `main` function in the `bounty` command section:
 
 ```rust
 // Acquire the ergs_box_for_bounty
