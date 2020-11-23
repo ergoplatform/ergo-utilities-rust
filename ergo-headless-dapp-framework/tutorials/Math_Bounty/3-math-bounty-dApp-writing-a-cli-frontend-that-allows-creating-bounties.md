@@ -412,7 +412,7 @@ pub fn get_ergs_box_for_fee(
 
 ### Testing And Running The Math Bounty CLI Application
 
-Before we conclude, it would be be uesful to explicitly explain how to test the application yourself with your own Ergo Node wallet.
+Before we conclude, it would be be useful to explicitly explain how to test the application yourself with your own Ergo Node wallet.
 
 Simply build the application via:
 
