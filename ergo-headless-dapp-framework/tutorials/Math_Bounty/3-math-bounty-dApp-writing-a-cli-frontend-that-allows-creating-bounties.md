@@ -1,8 +1,8 @@
-# 3. Math Bounty dApp - Writing A CLI Frontend
+# 3. Math Bounty dApp - Writing A CLI Frontend That Allows Creating Bounties
 
-In the last two tutorials we created the Math Bounty headless dApp which provides us with a pure interface for interacting with our smart contract protocol. In this tutorial we are going to use our headless dApp to create a textual front-end for it as a CLI app.
+In the last two tutorials we created the Math Bounty headless dApp which provides us with a pure interface for interacting with our smart contract protocol. In this tutorial we are going to begin using our headless dApp to create a textual front-end for it as a CLI app.
 
-The vast majority of the design patterns and code we write will be equally as applicable to GUI-based front-ends as well, however to keep this tutorial concise we are going to be focused on creating a CLI interface instead.
+The vast majority of the design patterns and code we write will be equally as applicable to GUI-based front-ends as well, however to keep this tutorial concise we are going to be focused on creating a CLI interface instead. (This tutorial series targets coding everything in Rust, but the Ergo HDF/headless dApps built with it are usable with other languages as well with little to no extra work. This can be done by compiling to WASM using wasm-pack for example, so other languages such as JS can take advantage and utilize these exact same design patterns.)
 
 
 ## Creating The Project
@@ -84,19 +84,13 @@ Next we are going to implement argument checking for our CLI application. In our
     let args: Vec<String> = std::env::args().collect();
 ```
 
-Next we will do some basic checks to ensure that the user is either trying submit a bounty (create/bootstrap a new `MathBountyBox`), or is trying to solve the math problem and be awarded the bounty held in an existing `MathBountyBox`.
+We will do a single basic check that verifies the user is trying to issue the "Bootstrap Math Bounty Box" action, by using the `bounty` command.
 
 ```rust
 if args.len() == 3 {
     // User wishes to submit nanoErgs to create a new `MathBountyBox`
     if args[1] == "bounty" {
         let bounty_amount_in_nano_ergs = args[2].parse::<u64>().unwrap();
-        todo!();
-    }
-    // User wishes to solve the math problem to be rewarded with the
-    // bounty.
-    if args[1] == "solve" {
-        let math_problem_answer = args[2].parse::<u64>().unwrap();
         todo!();
     }
 }
@@ -106,7 +100,7 @@ if args.len() == 3 {
 
 The CLI should allow a user to use the `bounty` command and provide an integer in order to build the "Bootstrap Math Bounty Box" Action using our headless dApp.
 
-From the argument checking code block above, we will be filling out the logic for the `bounty` command in this section.
+From the argument checking code block above, we will now be filling out the logic.
 
 The first thing we will do is allow the user to submit a number of Ergs, rather than nanoErgs. This makes it much easier for our average user to understand how much they are spending. This is simple with the HDF:
 
@@ -267,10 +261,190 @@ pub fn get_ergs_box_for_fee(
 }
 ```
 
-As you may have noticed, there is one key difference. At the end of the function we check that the `ErgsBox` we are returning is not the same `ErgsBox` as our `ergs_box_for_bounty`. This is vital, otherwise the transaction created by the Action may be invalid due to using the same box twice.
+As you may have noticed, there is one key difference. At the end of the function we check that the `ErgsBox` we are returning is not the same `ErgsBox` as our `ergs_box_for_bounty`. This is vital, otherwise the transaction created by the Action may be invalid due to using the same box twice. (Do note this logic requires the user to have at least 2 boxes in their wallet with sufficient number of Ergs inside. We have not performed any error checking in this tutorial series for edge cases such as this, in order to keep things easy to understand.)
 
-And as before, we need to use the function inside our `main` function in the `bounty` command section:
+And as before, we need to use the function inside of the `bounty` command section in our `main`:
 
 ```rust
-
+// Acquire the ergs_box_for_fee
+let ergs_box_for_fee =
+    get_ergs_box_for_fee(user_address.clone(), tx_fee, ergs_box_for_bounty.clone());
 ```
+
+### Creating And Issuing The "Bootstrap Math Bounty Box" Action Transaction
+
+At this point in time, we have all the required inputs to use our `action_bootstrap_math_bounty_box` method that we implemented in our headless dApp. Doing so as below generates an `UnsignedTransaction` using all of the `ErgsBox`es we found and other inputs we acquired.
+
+```rust
+// Create the "Bootstrap Math Bounty Box" action unsigned
+// transaction
+let unsigned_tx = MathBountyProtocol::action_bootstrap_math_bounty_box(
+    bounty_amount_in_nano_ergs,
+    ergs_box_for_bounty,
+    block_height,
+    tx_fee,
+    ergs_box_for_fee,
+    user_address,
+);
+```
+
+As we already have access to an unlocked ergo node/wallet from earlier in this tutorial, signing and submitting this `UnsignedTransaction` to the Ergo Blockchain is extremely trivial using the `ergo-node-interface` library.
+
+```rust
+// Sign and submit the transaction
+let tx_id = node.sign_and_submit_transaction(&unsigned_tx).unwrap();
+
+println!("Bootstrap Math Bounty Box Tx ID: {}", tx_id);
+```
+
+And just like that, we have finished implementing the front-end for the "Bootstrap Math Bounty Box" action from our headless dApp inside of a full-fledged CLI application.
+
+
+Here is the final code from all of the above in the today's tutorial:
+
+```rust
+use ergo_node_interface::*;
+use math_bounty_headless::*;
+use reqwest::blocking::get;
+
+fn main() {
+    // Get a `NodeInterface`
+    let node = acquire_node_interface_from_local_config();
+    // Get the current Ergo Blockchain block height
+    let block_height = node.current_block_height().unwrap();
+    // Get the first address in the user's wallet
+    let user_address = node.wallet_addresses().unwrap()[0].clone();
+
+    // Acquire CLI arguments
+    let args: Vec<String> = std::env::args().collect();
+    let tx_fee = 1000000;
+
+    if args.len() == 3 {
+        // User wishes to submit Ergs to create a new `MathBountyBox`
+        if args[1] == "bounty" {
+            // Taking user input as Ergs and converting to nanoErgs
+            let bounty_amount_in_nano_ergs = erg_to_nano_erg(args[2].parse::<f64>().unwrap());
+
+            // Acquire the ergs_box_for_bounty
+            let ergs_box_for_bounty =
+                get_ergs_box_for_bounty(user_address.clone(), bounty_amount_in_nano_ergs);
+
+            // Acquire the ergs_box_for_fee
+            let ergs_box_for_fee =
+                get_ergs_box_for_fee(user_address.clone(), tx_fee, ergs_box_for_bounty.clone());
+
+            // Create the "Bootstrap Math Bounty Box" action unsigned
+            // transaction
+            let unsigned_tx = MathBountyProtocol::action_bootstrap_math_bounty_box(
+                bounty_amount_in_nano_ergs,
+                ergs_box_for_bounty,
+                block_height,
+                tx_fee,
+                ergs_box_for_fee,
+                user_address,
+            );
+
+            // Sign and submit the transaction
+            let tx_id = node.sign_and_submit_transaction(&unsigned_tx).unwrap();
+
+            println!("Bootstrap Math Bounty Box Tx ID: {}", tx_id);
+        }
+    }
+}
+
+pub fn get_ergs_box_for_bounty(user_address: String, bounty_amount_in_nano_ergs: u64) -> ErgsBox {
+    // Take the generalized `BoxSpec` from an `ErgsBox` and modify it
+    // for our use case. Specifically change the address to be our
+    // user's address, and change the value_range so that the box
+    // has enough to cover the bounty amount.
+    let ergs_box_for_bounty_spec = ErgsBox::box_spec()
+        .modified_address(Some(user_address))
+        .modified_value_range(Some(bounty_amount_in_nano_ergs..u64::MAX));
+    // Acquire the Ergo Explorer API endpoint in order to find
+    // the our `ergs_box_for_bounty`.
+    let ergs_box_for_bounty_url = ergs_box_for_bounty_spec
+        .explorer_endpoint("https://api.ergoplatform.com/api/v0/")
+        .unwrap();
+    // Make a get request to the Ergo Explorer API endpoint
+    let get_response = get(&ergs_box_for_bounty_url).unwrap().text().unwrap();
+    // Process the `get_response` into `ErgsBox`es which match our
+    // `ergs_box_for_bounty_spec`
+    let list_of_ergs_boxes =
+        ErgsBox::process_explorer_response_custom(&get_response, ergs_box_for_bounty_spec).unwrap();
+
+    // Return the first `ErgsBox` from the list
+    list_of_ergs_boxes[0].clone()
+}
+
+pub fn get_ergs_box_for_fee(
+    user_address: String,
+    tx_fee: u64,
+    ergs_box_for_bounty: ErgsBox,
+) -> ErgsBox {
+    // Take the generalized `BoxSpec` from an `ErgsBox` and modify it
+    // for our use case. Specifically change the address to be our
+    // user's address, and change the value_range so that the box
+    // has enough to cover the fee amount.
+    let ergs_box_for_bounty_spec = ErgsBox::box_spec()
+        .modified_address(Some(user_address))
+        .modified_value_range(Some(tx_fee..u64::MAX));
+    // Acquire the Ergo Explorer API endpoint in order to find
+    // the our `ergs_box_for_bounty`.
+    let ergs_box_for_bounty_url = ergs_box_for_bounty_spec
+        .explorer_endpoint("https://api.ergoplatform.com/api/v0/")
+        .unwrap();
+    // Make a get request to the Ergo Explorer API endpoint
+    let get_response = get(&ergs_box_for_bounty_url).unwrap().text().unwrap();
+    // Process the `get_response` into `ErgsBox`es which match our
+    // `ergs_box_for_bounty_spec`
+    let list_of_ergs_boxes =
+        ErgsBox::process_explorer_response_custom(&get_response, ergs_box_for_bounty_spec).unwrap();
+
+    // If the two `ErgsBox`es are not equal, return the first box in the list
+    if list_of_ergs_boxes[0] != ergs_box_for_bounty {
+        return list_of_ergs_boxes[0].clone();
+    } else {
+        // Return the second `ErgsBox` from the list
+        list_of_ergs_boxes[1].clone()
+    }
+}
+```
+
+### Testing And Running The Math Bounty CLI Application
+
+Before we conclude, it would be be uesful to explicitly explain how to test the application yourself with your own Ergo Node wallet.
+
+Simply build the application via:
+
+```rust
+cargo build
+```
+
+Once built, your binary `math-bounty-cli` will be in the `target/debug` folder.
+
+```sh
+cd target/debug
+```
+
+After running your app the first time to generate the `node-interface.yaml` config file, you can test your application to ensure both the headless dApp and the frontend CLI both were implemented correctly by submitting 0.001 Ergs as a bounty.
+
+```rust
+./math-bounty-cli bounty 0.001
+```
+
+If successful, you will be told the transaction id of the "Bootstrap Math Bounty Box" action that was just submit to the Ergo Blockchain:
+
+```rust
+Bootstrap Math Bounty Box Tx ID: "c2c2287d642424ba9f7bb8757cde40cea540fd61c85ad830c46769a56c006ce2"
+```
+
+
+### Conclusion
+
+With all of that said and done, you have finished creating your very first front-end for a headless dApp. The Ergo Headless dApp Framework provided a lot of helper methods/functions which made the experience quite streamlined. Furthermore, once you understand the basic patterns we touched upon in this tutorial, implementing all further actions for any headless dApp is effectively the same.
+
+Some actions may require more/less user input, an extra GET request to some external API to fetch some other off-chain data, or a few more `SpecifiedBox` structs which you need to acquire via the explorer API. That said, the process of creating `UnsignedTransactions` by using these actions is just the same.
+
+This provides significant power for frontend developers, because they only have to learn how to write frontends for headless dApps once, and they will have the power to build on top of each and every headless dApp publicly available, potentially creating new user experiences never thought possible before.
+
+In the following tutorial we will be finishing our Math Bounty CLI application by implementing the textual front-end for our headless dApp's "Solve Math Problem" action. If you are feeling adventurous, I would highly recommend attempting to implement the front-end yourself before going through that tutorial when it releases, because all of the patterns you learned today will be reused to finish off the application.

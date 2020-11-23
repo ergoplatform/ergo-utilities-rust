@@ -24,12 +24,25 @@ fn main() {
             let ergs_box_for_bounty =
                 get_ergs_box_for_bounty(user_address.clone(), bounty_amount_in_nano_ergs);
 
-            println!("Ergs Box For Bounty: {:?}", ergs_box_for_bounty);
-        }
-        // User wishes to solve the math problem to be rewarded with the
-        // bounty.
-        if args[1] == "solve" {
-            let math_problem_answer = args[2].parse::<u64>().unwrap();
+            // Acquire the ergs_box_for_fee
+            let ergs_box_for_fee =
+                get_ergs_box_for_fee(user_address.clone(), tx_fee, ergs_box_for_bounty.clone());
+
+            // Create the "Bootstrap Math Bounty Box" action unsigned
+            // transaction
+            let unsigned_tx = MathBountyProtocol::action_bootstrap_math_bounty_box(
+                bounty_amount_in_nano_ergs,
+                ergs_box_for_bounty,
+                block_height,
+                tx_fee,
+                ergs_box_for_fee,
+                user_address,
+            );
+
+            // Sign and submit the transaction
+            let tx_id = node.sign_and_submit_transaction(&unsigned_tx).unwrap();
+
+            println!("Bootstrap Math Bounty Box Tx ID: {}", tx_id);
         }
     }
 }
