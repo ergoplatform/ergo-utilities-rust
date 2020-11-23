@@ -57,3 +57,36 @@ pub fn get_ergs_box_for_bounty(user_address: String, bounty_amount_in_nano_ergs:
     // Return the first `ErgsBox` from the list
     list_of_ergs_boxes[0].clone()
 }
+
+pub fn get_ergs_box_for_fee(
+    user_address: String,
+    tx_fee: u64,
+    ergs_box_for_bounty: ErgsBox,
+) -> ErgsBox {
+    // Take the generalized `BoxSpec` from an `ErgsBox` and modify it
+    // for our use case. Specifically change the address to be our
+    // user's address, and change the value_range so that the box
+    // has enough to cover the fee amount.
+    let ergs_box_for_bounty_spec = ErgsBox::box_spec()
+        .modified_address(Some(user_address))
+        .modified_value_range(Some(tx_fee..u64::MAX));
+    // Acquire the Ergo Explorer API endpoint in order to find
+    // the our `ergs_box_for_bounty`.
+    let ergs_box_for_bounty_url = ergs_box_for_bounty_spec
+        .explorer_endpoint("https://api.ergoplatform.com/api/v0/")
+        .unwrap();
+    // Make a get request to the Ergo Explorer API endpoint
+    let get_response = get(&ergs_box_for_bounty_url).unwrap().text().unwrap();
+    // Process the `get_response` into `ErgsBox`es which match our
+    // `ergs_box_for_bounty_spec`
+    let list_of_ergs_boxes =
+        ErgsBox::process_explorer_response_custom(&get_response, ergs_box_for_bounty_spec).unwrap();
+
+    // If the two `ErgsBox`es are not equal, return the first box in the list
+    if list_of_ergs_boxes[0] != ergs_box_for_bounty {
+        return list_of_ergs_boxes[0].clone();
+    } else {
+        // Return the second `ErgsBox` from the list
+        list_of_ergs_boxes[1].clone()
+    }
+}

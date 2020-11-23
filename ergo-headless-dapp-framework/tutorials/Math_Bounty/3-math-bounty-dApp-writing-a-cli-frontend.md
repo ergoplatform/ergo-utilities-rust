@@ -219,3 +219,58 @@ Thus we only need to use the following line inside our `main` function in the `b
 let ergs_box_for_bounty =
     get_ergs_box_for_bounty(user_address.clone(), bounty_amount_in_nano_ergs);
 ```
+
+Now we can move forward to acquiring the `ergs_box_for_fee`. First let's define the function from the get-go this time:
+
+```rust
+pub fn get_ergs_box_for_fee(user_address: String, tx_fee: u64, ergs_box_for_bounty: ErgsBox) -> ErgsBox {
+
+}
+```
+
+In this case we will take three inputs, the user's address, the transaction fee amount required, and the `ergs_box_for_bounty` we found previously. The reason we need the final input is because we have to make sure that the `ergs_box_for_fee` is not the same box as `ergs_box_for_bounty`, because we can only provide a single box once as an input within a transaction.
+
+From here forward, the process is nearly identical to the previous function to acquire the `ErgsBox`. The code below is the result:
+
+```rust
+pub fn get_ergs_box_for_fee(
+    user_address: String,
+    tx_fee: u64,
+    ergs_box_for_bounty: ErgsBox,
+) -> ErgsBox {
+    // Take the generalized `BoxSpec` from an `ErgsBox` and modify it
+    // for our use case. Specifically change the address to be our
+    // user's address, and change the value_range so that the box
+    // has enough to cover the fee amount.
+    let ergs_box_for_bounty_spec = ErgsBox::box_spec()
+        .modified_address(Some(user_address))
+        .modified_value_range(Some(tx_fee..u64::MAX));
+    // Acquire the Ergo Explorer API endpoint in order to find
+    // the our `ergs_box_for_bounty`.
+    let ergs_box_for_bounty_url = ergs_box_for_bounty_spec
+        .explorer_endpoint("https://api.ergoplatform.com/api/v0/")
+        .unwrap();
+    // Make a get request to the Ergo Explorer API endpoint
+    let get_response = get(&ergs_box_for_bounty_url).unwrap().text().unwrap();
+    // Process the `get_response` into `ErgsBox`es which match our
+    // `ergs_box_for_bounty_spec`
+    let list_of_ergs_boxes =
+        ErgsBox::process_explorer_response_custom(&get_response, ergs_box_for_bounty_spec).unwrap();
+
+    // If the two `ErgsBox`es are not equal, return the first box in the list
+    if list_of_ergs_boxes[0] != ergs_box_for_bounty {
+        return list_of_ergs_boxes[0].clone();
+    } else {
+        // Return the second `ErgsBox` from the list
+        list_of_ergs_boxes[1].clone()
+    }
+}
+```
+
+As you may have noticed, there is one key difference. At the end of the function we check that the `ErgsBox` we are returning is not the same `ErgsBox` as our `ergs_box_for_bounty`. This is vital, otherwise the transaction created by the Action may be invalid due to using the same box twice.
+
+And as before, we need to use the function inside our `main` function in the `bounty` command section:
+
+```rust
+
+```
