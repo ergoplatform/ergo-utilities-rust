@@ -257,10 +257,19 @@ impl BoxSpec {
             return Ok(explorer_api_url.to_string()
                 + "/v1/boxes/unspent/byTokenId/"
                 + &ot.clone().unwrap().token_id);
-        } else {
+        }
+        // If no token value one, but has address
+        if let Some(address) = self.address.clone() {
             return Ok(explorer_api_url.to_string()
                 + "/v0/transactions/boxes/byAddress/unspent/"
-                + &self.address.clone().unwrap());
+                + &address);
+        }
+        // Else if no token value one and no address. Meaning other tokens
+        // exist with value greater than 1.
+        else {
+            return Ok(explorer_api_url.to_string()
+                + "/v1/boxes/unspent/byTokenId/"
+                + &self.tokens[0].clone().unwrap().token_id);
         }
     }
 
