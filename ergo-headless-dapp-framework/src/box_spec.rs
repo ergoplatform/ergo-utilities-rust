@@ -229,7 +229,7 @@ impl BoxSpec {
     /// to find boxes which may match your `BoxSpec`. This method uses
     /// the `explorer_api_url` you provide as input which
     /// must be formatted as such:
-    /// `https://api.ergoplatform.com/api/v0/`
+    /// `https://api.ergoplatform.com/api`
     /// This method is intended to be used in tandem with
     /// `process_explorer_response()`
     pub fn explorer_endpoint(&self, explorer_api_url: &str) -> Result<String> {

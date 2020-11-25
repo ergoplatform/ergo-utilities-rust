@@ -58,7 +58,7 @@ pub fn get_ergs_box_for_bounty(user_address: String, bounty_amount_in_nano_ergs:
     // Acquire the Ergo Explorer API endpoint in order to find
     // the our `ergs_box_for_bounty`.
     let ergs_box_for_bounty_url = ergs_box_for_bounty_spec
-        .explorer_endpoint("https://api.ergoplatform.com/api/v0/")
+        .explorer_endpoint("https://api.ergoplatform.com/api")
         .unwrap();
     // Make a get request to the Ergo Explorer API endpoint
     let get_response = get(&ergs_box_for_bounty_url).unwrap().text().unwrap();
@@ -86,7 +86,7 @@ pub fn get_ergs_box_for_fee(
     // Acquire the Ergo Explorer API endpoint in order to find
     // the our `ergs_box_for_bounty`.
     let ergs_box_for_bounty_url = ergs_box_for_bounty_spec
-        .explorer_endpoint("https://api.ergoplatform.com/api/v0/")
+        .explorer_endpoint("https://api.ergoplatform.com/api")
         .unwrap();
     // Make a get request to the Ergo Explorer API endpoint
     let get_response = get(&ergs_box_for_bounty_url).unwrap().text().unwrap();
