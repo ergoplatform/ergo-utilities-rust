@@ -1,5 +1,7 @@
+use crate::box_traits::{ExplorerFindable, SpecifiedBox, WrappedBox};
 use crate::encoding::address_string_to_ergo_tree;
 use crate::error::{HeadlessDappError, Result};
+use crate::specified_boxes::ErgUsdOraclePoolBox;
 use crate::{ErgoAddressString, NanoErg};
 use ergo_lib::ast::constant::Constant;
 use ergo_lib::chain::ergo_box::ErgoBox;
@@ -379,14 +381,7 @@ mod tests {
 
     #[test]
     fn produce_explorer_url_using_token() {
-        let address = None;
-        let value_range = Some(1..1000000000000);
-        let registers = vec![];
-        let tokens = vec![Some(TokenSpec::new(
-            1..2,
-            "08b59b14e4fdd60e5952314adbaa8b4e00bc0f0b676872a5224d3bf8591074cd",
-        ))];
-        let box_spec = BoxSpec::new(address, value_range, registers, tokens);
+        let box_spec = ErgUsdOraclePoolBox::box_spec();
 
         let url = box_spec
             .explorer_endpoint("https://api.ergoplatform.com/api")
