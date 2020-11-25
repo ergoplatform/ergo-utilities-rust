@@ -234,15 +234,32 @@ impl BoxSpec {
     /// `process_explorer_response()`
     pub fn explorer_endpoint(&self, explorer_api_url: &str) -> Result<String> {
         // Verify an address exists
-        if self.address.is_none() {
-            return Err(HeadlessDappError::Other("Using the Ergo Explorer API currently requires defining an address for your `BoxStruct`.".to_string()));
+        if self.address.is_none() && self.tokens.len() == 0 {
+            return Err(HeadlessDappError::Other("Your `BoxStruct` must either have an address or tokens defined in order to generate an endpoint url for the explorer API.".to_string()));
         }
 
-        let url = explorer_api_url.to_string()
-            + "transactions/boxes/byAddress/unspent/"
-            + &self.address.clone().unwrap();
-
-        Ok(url)
+        // Check if the spec specifies that one of the tokens has a value of 1
+        // In these cases where one of these tokens have a value of 1, then it
+        // is likely either an NFT, or a protocol participant token, and as
+        // such is better to use to find the correct boxes rathe than the
+        // address.
+        let has_token_value_one = self.tokens.iter().find(|ot| {
+            if let Some(t) = ot {
+                if t.value_range.clone().last() == Some(1) {
+                    return true;
+                }
+            }
+            return false;
+        });
+        if let Some(ot) = has_token_value_one {
+            return Ok(explorer_api_url.to_string()
+                + "/v1/boxes/unspent/byTokenId/"
+                + &ot.clone().unwrap().token_id);
+        } else {
+            return Ok(explorer_api_url.to_string()
+                + "/v0/transactions/boxes/byAddress/unspent/"
+                + &self.address.clone().unwrap());
+        }
     }
 
     /// Using the response JSON (as a String) from the Ergo Explorer API
@@ -342,7 +359,7 @@ mod tests {
         assert!(box_spec_res.tokens.is_empty())
     }
     #[test]
-    fn find_boxes_in_explorer() {
+    fn produce_explorer_url_using_address() {
         let address =
             Some("9aFbqNsmDwSxCdcLDKmSxVTL58ms2A39Rpn2zodVzkBN5MzB8zvW5PFX551W1A5vUdFJ3yxwvwgYTTS4JrPQcb5qxBbRDJkGNikuqHRXhnbniK4ajumEj7ot2o7DbcNFaM674fWufQzSGS1KtgMw95ZojyqhswUNbKpYDV1PhKw62bEMdJL9vAvzea4KwKXGUTdYYkcPdQKFWXfrdo2nTS3ucFNxqyTRB3VtZk7AWE3eeNHFcXZ1kLkfrX1ZBjpQ7qrBemHk4KZgS8fzmm6hPSZThiVVtBfQ2CZhJQdAZjRwGrw5TDcZ4BBDAZxg9h13vZ7tQSPsdAtjMFQT1DxbqAruKxX38ZwaQ3UfWmbBpbJEThAQaS4gsCBBSjswrv8BvupxaHZ4oQmA2LZiz4nYaPr8MJtR4fbM9LErwV4yDVMb873bRE5TBF59NipUyHAir7ysajPjbGc8aRLqsMVjntFSCFYx7822RBrj7RRX11CpiGK6vdfKHe3k14EH6YaNXvGSq8DrfNHEK4SgreknTqCgjL6i3EMZKPCW8Lao3Q5tbJFnFjEyntpUDf5zfGgFURxzobeEY4USqFaxyppHkgLjQuFQtDWbYVu3ztQL6hdWHjZXMK4VVvEDeLd1woebD1CyqS5kJHpGa78wQZ4iKygw4ijYrodZpqqEwTXdqwEB6xaLfkxZCBPrYPST3xz67GGTBUFy6zkXP5vwVVM5gWQJFdWCZniAAzBpzHeVq1yzaBp5GTJgr9bfrrAmuX8ra1m125yfeT9sTWroVu"
                 .to_string());
@@ -352,21 +369,31 @@ mod tests {
         let box_spec = BoxSpec::new(address, value_range, registers, tokens);
 
         let url = box_spec
-            .explorer_endpoint("https://api.ergoplatform.com/api/v0/")
+            .explorer_endpoint("https://api.ergoplatform.com/api")
             .unwrap();
 
-        let client = reqwest::blocking::Client::new().get(&url);
-        let resp = client.send().map_err(|_| {
-            HeadlessDappError::Other(
-                "Failed to make GET response to the Ergo Explorer Backend API.".to_string(),
-            )
-        });
-        let text = resp.unwrap().text().unwrap();
+        println!("{}", url);
 
-        // Currently fails until v0.4 of ergo-lib releases which fixes
-        // the json parsing issue for box_id from explorer
-        let matching_boxes = box_spec.process_explorer_response(&text).unwrap();
+        assert!(url == "https://api.ergoplatform.com/api/v0/transactions/boxes/byAddress/unspent/9aFbqNsmDwSxCdcLDKmSxVTL58ms2A39Rpn2zodVzkBN5MzB8zvW5PFX551W1A5vUdFJ3yxwvwgYTTS4JrPQcb5qxBbRDJkGNikuqHRXhnbniK4ajumEj7ot2o7DbcNFaM674fWufQzSGS1KtgMw95ZojyqhswUNbKpYDV1PhKw62bEMdJL9vAvzea4KwKXGUTdYYkcPdQKFWXfrdo2nTS3ucFNxqyTRB3VtZk7AWE3eeNHFcXZ1kLkfrX1ZBjpQ7qrBemHk4KZgS8fzmm6hPSZThiVVtBfQ2CZhJQdAZjRwGrw5TDcZ4BBDAZxg9h13vZ7tQSPsdAtjMFQT1DxbqAruKxX38ZwaQ3UfWmbBpbJEThAQaS4gsCBBSjswrv8BvupxaHZ4oQmA2LZiz4nYaPr8MJtR4fbM9LErwV4yDVMb873bRE5TBF59NipUyHAir7ysajPjbGc8aRLqsMVjntFSCFYx7822RBrj7RRX11CpiGK6vdfKHe3k14EH6YaNXvGSq8DrfNHEK4SgreknTqCgjL6i3EMZKPCW8Lao3Q5tbJFnFjEyntpUDf5zfGgFURxzobeEY4USqFaxyppHkgLjQuFQtDWbYVu3ztQL6hdWHjZXMK4VVvEDeLd1woebD1CyqS5kJHpGa78wQZ4iKygw4ijYrodZpqqEwTXdqwEB6xaLfkxZCBPrYPST3xz67GGTBUFy6zkXP5vwVVM5gWQJFdWCZniAAzBpzHeVq1yzaBp5GTJgr9bfrrAmuX8ra1m125yfeT9sTWroVu".to_string())
+    }
 
-        assert!(matching_boxes.len() > 0)
+    #[test]
+    fn produce_explorer_url_using_token() {
+        let address = None;
+        let value_range = Some(1..1000000000000);
+        let registers = vec![];
+        let tokens = vec![Some(TokenSpec::new(
+            1..2,
+            "08b59b14e4fdd60e5952314adbaa8b4e00bc0f0b676872a5224d3bf8591074cd",
+        ))];
+        let box_spec = BoxSpec::new(address, value_range, registers, tokens);
+
+        let url = box_spec
+            .explorer_endpoint("https://api.ergoplatform.com/api")
+            .unwrap();
+
+        println!("{}", url);
+
+        assert!(url == "https://api.ergoplatform.com/api/v1/boxes/unspent/byTokenId/08b59b14e4fdd60e5952314adbaa8b4e00bc0f0b676872a5224d3bf8591074cd".to_string())
     }
 }
