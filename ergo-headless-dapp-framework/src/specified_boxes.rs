@@ -4,7 +4,10 @@
 /// for implementing Actions of your protocols.
 use crate::box_spec::BoxSpec;
 use crate::box_traits::{ExplorerFindable, SpecifiedBox, WrappedBox};
+use crate::encoding::unwrap_long;
 use crate::error::{HeadlessDappError, Result};
+use crate::SType::SLong;
+use crate::{RegisterSpec, TokenSpec};
 use ergo_headless_dapp_framework_derive::{SpecBox, WrapBox};
 use ergo_lib::chain::ergo_box::ErgoBox;
 use ergo_lib_wasm::box_coll::ErgoBoxes;
@@ -59,5 +62,41 @@ impl ErgsBox {
         boxes
             .into_iter()
             .fold(0, |acc, pb| pb.get_box().value.as_u64().clone() + acc)
+    }
+}
+
+/// A specified box which is an
+/// Oracle Pool box that stores a `Long` integer datapoint inside of R4.
+#[wasm_bindgen]
+#[derive(Clone, Debug, WrapBox, SpecBox)]
+pub struct ErgUsdOraclePoolBox {
+    ergo_box: ErgoBox,
+}
+/// SpecifiedBox impl
+impl SpecifiedBox for ErgUsdOraclePoolBox {
+    /// A box spec for an Oracle Pool Box with the correct NFT + a Long value
+    /// in R4
+    fn box_spec() -> BoxSpec {
+        let registers = vec![RegisterSpec::new(Some(SLong), None)];
+        let tokens = vec![Some(TokenSpec::new(
+            1..2,
+            "08b59b14e4fdd60e5952314adbaa8b4e00bc0f0b676872a5224d3bf8591074cd",
+        ))];
+        BoxSpec::new(None, None, registers, tokens)
+    }
+}
+/// WASM-compatible ErgUsdOraclePoolBox Methods
+#[wasm_bindgen]
+impl ErgUsdOraclePoolBox {
+    #[wasm_bindgen(constructor)]
+    pub fn w_new(wb: WErgoBox) -> std::result::Result<ErgUsdOraclePoolBox, JsValue> {
+        let b: ErgoBox = wb.into();
+        ErgUsdOraclePoolBox::new(&b).map_err(|e| JsValue::from_str(&format! {"{:?}", e}))
+    }
+
+    #[wasm_bindgen]
+    /// Extracts the Long datapoint out of register R4.
+    pub fn datapoint(&self) -> i64 {
+        return unwrap_long(&self.registers()[0]).unwrap();
     }
 }
