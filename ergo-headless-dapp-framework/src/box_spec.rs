@@ -299,6 +299,7 @@ impl BoxSpec {
         let mut box_list: Vec<ErgoBox> = vec![];
         for i in 0.. {
             let box_json = &json[i];
+            println!("Box Json: {}", box_json.dump());
             if box_json.is_null() {
                 println!("Null box json");
                 break;
