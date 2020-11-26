@@ -197,10 +197,16 @@ impl BoxSpec {
             }
         }
 
-        // Verify all of the TokensSpecs
+        // If `TokenSpec`s are defined
         if self.tokens.len() > 0 {
+            // If there are more `TokenSpec`s than there are tokens
+            // in the ergo_box, return error.
+            if ergo_box.tokens.len() < self.tokens.len() {
+                return Err(HeadlessDappError::FailedTokenSpec);
+            }
+
+            // Verify all of the TokensSpecs
             for i in 0..(self.tokens.len()) {
-                println!("Tok index: {}", i);
                 if let Some(spec) = self.tokens[i].clone() {
                     let tok = ergo_box.tokens[i].clone();
                     let tok_id: String = tok.token_id.0.into();
