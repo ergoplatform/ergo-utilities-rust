@@ -306,6 +306,7 @@ impl BoxSpec {
             } else {
                 let res_ergo_box = from_str(&box_json.to_string());
                 if let Ok(ergo_box) = res_ergo_box {
+                    println!("Pushed parsed ergo_box!!!!");
                     box_list.push(ergo_box);
                 } else if let Err(e) = res_ergo_box {
                     let mess = format!("Box Json: {}\nError: {:?}", box_json.to_string(), e);
