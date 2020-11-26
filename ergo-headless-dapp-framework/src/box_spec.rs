@@ -312,9 +312,14 @@ impl BoxSpec {
             }
         }
 
+        // Filter the boxes based on whether they pass the `BoxSpec`
+        // verificaiton.
         let filtered_boxes = box_list.into_iter().fold(vec![], |mut acc, b| {
             if self.verify_box(&b).is_ok() {
-                acc.push(b);
+                acc.push(b.clone());
+            }
+            if let Err(e) = self.verify_box(&b) {
+                println!("Error: {:?}", e);
             }
             return acc;
         });
