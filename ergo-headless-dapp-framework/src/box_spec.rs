@@ -293,20 +293,15 @@ impl BoxSpec {
         // Unwrap the `JsonValue`
         let json = json_res?;
 
-        println!("Full json: {}", json.dump());
-
         // Parse the json into `Vec<ErgoBox>`
         let mut box_list: Vec<ErgoBox> = vec![];
         for i in 0.. {
             let box_json = &json["items"][i];
-            println!("Box Json: {}", box_json.dump());
             if box_json.is_null() {
-                println!("Null box json");
                 break;
             } else {
                 let res_ergo_box = from_str(&box_json.to_string());
                 if let Ok(ergo_box) = res_ergo_box {
-                    println!("Pushed parsed ergo_box!!!!");
                     box_list.push(ergo_box);
                 } else if let Err(e) = res_ergo_box {
                     let mess = format!("Box Json: {}\nError: {:?}", box_json.to_string(), e);
