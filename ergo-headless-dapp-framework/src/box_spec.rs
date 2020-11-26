@@ -295,6 +295,8 @@ impl BoxSpec {
         // Unwrap the `JsonValue`
         let json = json_res?;
 
+        println!("Full json: {}", json.dump());
+
         // Parse the json into `Vec<ErgoBox>`
         let mut box_list: Vec<ErgoBox> = vec![];
         for i in 0.. {
