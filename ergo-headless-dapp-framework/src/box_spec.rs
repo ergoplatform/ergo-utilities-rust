@@ -267,9 +267,7 @@ impl BoxSpec {
         }
         // If no token value one, but has address
         if let Some(address) = self.address.clone() {
-            return Ok(explorer_api_url.to_string()
-                + "/v0/transactions/boxes/byAddress/unspent/"
-                + &address);
+            return Ok(explorer_api_url.to_string() + "/v1/boxes/unspent/byAddress/" + &address);
         }
         // Else if no token value one and no address. Meaning other tokens
         // exist with value greater than 1.
@@ -300,7 +298,7 @@ impl BoxSpec {
         // Parse the json into `Vec<ErgoBox>`
         let mut box_list: Vec<ErgoBox> = vec![];
         for i in 0.. {
-            let box_json = &json[i];
+            let box_json = &json["items"][i];
             println!("Box Json: {}", box_json.dump());
             if box_json.is_null() {
                 println!("Null box json");
@@ -321,9 +319,6 @@ impl BoxSpec {
         let filtered_boxes = box_list.into_iter().fold(vec![], |mut acc, b| {
             if self.verify_box(&b).is_ok() {
                 acc.push(b.clone());
-            }
-            if let Err(e) = self.verify_box(&b) {
-                println!("Error: {:?}", e);
             }
             return acc;
         });
@@ -399,9 +394,7 @@ mod tests {
             .explorer_endpoint("https://api.ergoplatform.com/api")
             .unwrap();
 
-        println!("{}", url);
-
-        assert!(url == "https://api.ergoplatform.com/api/v0/transactions/boxes/byAddress/unspent/9aFbqNsmDwSxCdcLDKmSxVTL58ms2A39Rpn2zodVzkBN5MzB8zvW5PFX551W1A5vUdFJ3yxwvwgYTTS4JrPQcb5qxBbRDJkGNikuqHRXhnbniK4ajumEj7ot2o7DbcNFaM674fWufQzSGS1KtgMw95ZojyqhswUNbKpYDV1PhKw62bEMdJL9vAvzea4KwKXGUTdYYkcPdQKFWXfrdo2nTS3ucFNxqyTRB3VtZk7AWE3eeNHFcXZ1kLkfrX1ZBjpQ7qrBemHk4KZgS8fzmm6hPSZThiVVtBfQ2CZhJQdAZjRwGrw5TDcZ4BBDAZxg9h13vZ7tQSPsdAtjMFQT1DxbqAruKxX38ZwaQ3UfWmbBpbJEThAQaS4gsCBBSjswrv8BvupxaHZ4oQmA2LZiz4nYaPr8MJtR4fbM9LErwV4yDVMb873bRE5TBF59NipUyHAir7ysajPjbGc8aRLqsMVjntFSCFYx7822RBrj7RRX11CpiGK6vdfKHe3k14EH6YaNXvGSq8DrfNHEK4SgreknTqCgjL6i3EMZKPCW8Lao3Q5tbJFnFjEyntpUDf5zfGgFURxzobeEY4USqFaxyppHkgLjQuFQtDWbYVu3ztQL6hdWHjZXMK4VVvEDeLd1woebD1CyqS5kJHpGa78wQZ4iKygw4ijYrodZpqqEwTXdqwEB6xaLfkxZCBPrYPST3xz67GGTBUFy6zkXP5vwVVM5gWQJFdWCZniAAzBpzHeVq1yzaBp5GTJgr9bfrrAmuX8ra1m125yfeT9sTWroVu".to_string())
+        assert!(url == "https://api.ergoplatform.com/api/v1/boxes/unspent/byAddress/9aFbqNsmDwSxCdcLDKmSxVTL58ms2A39Rpn2zodVzkBN5MzB8zvW5PFX551W1A5vUdFJ3yxwvwgYTTS4JrPQcb5qxBbRDJkGNikuqHRXhnbniK4ajumEj7ot2o7DbcNFaM674fWufQzSGS1KtgMw95ZojyqhswUNbKpYDV1PhKw62bEMdJL9vAvzea4KwKXGUTdYYkcPdQKFWXfrdo2nTS3ucFNxqyTRB3VtZk7AWE3eeNHFcXZ1kLkfrX1ZBjpQ7qrBemHk4KZgS8fzmm6hPSZThiVVtBfQ2CZhJQdAZjRwGrw5TDcZ4BBDAZxg9h13vZ7tQSPsdAtjMFQT1DxbqAruKxX38ZwaQ3UfWmbBpbJEThAQaS4gsCBBSjswrv8BvupxaHZ4oQmA2LZiz4nYaPr8MJtR4fbM9LErwV4yDVMb873bRE5TBF59NipUyHAir7ysajPjbGc8aRLqsMVjntFSCFYx7822RBrj7RRX11CpiGK6vdfKHe3k14EH6YaNXvGSq8DrfNHEK4SgreknTqCgjL6i3EMZKPCW8Lao3Q5tbJFnFjEyntpUDf5zfGgFURxzobeEY4USqFaxyppHkgLjQuFQtDWbYVu3ztQL6hdWHjZXMK4VVvEDeLd1woebD1CyqS5kJHpGa78wQZ4iKygw4ijYrodZpqqEwTXdqwEB6xaLfkxZCBPrYPST3xz67GGTBUFy6zkXP5vwVVM5gWQJFdWCZniAAzBpzHeVq1yzaBp5GTJgr9bfrrAmuX8ra1m125yfeT9sTWroVu".to_string())
     }
 
     #[test]
@@ -411,8 +404,6 @@ mod tests {
         let url = box_spec
             .explorer_endpoint("https://api.ergoplatform.com/api")
             .unwrap();
-
-        println!("{}", url);
 
         assert!(url == "https://api.ergoplatform.com/api/v1/boxes/unspent/byTokenId/08b59b14e4fdd60e5952314adbaa8b4e00bc0f0b676872a5224d3bf8591074cd".to_string())
     }
