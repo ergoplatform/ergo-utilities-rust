@@ -300,6 +300,7 @@ impl BoxSpec {
         for i in 0.. {
             let box_json = &json[i];
             if box_json.is_null() {
+                println!("Null box json");
                 break;
             } else {
                 let res_ergo_box = from_str(&box_json.to_string());
