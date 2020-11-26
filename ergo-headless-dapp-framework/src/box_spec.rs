@@ -200,6 +200,7 @@ impl BoxSpec {
         // Verify all of the TokensSpecs
         if self.tokens.len() > 0 {
             for i in 0..(self.tokens.len()) {
+                println!("Tok index: {}", i);
                 if let Some(spec) = self.tokens[i].clone() {
                     let tok = ergo_box.tokens[i].clone();
                     let tok_id: String = tok.token_id.0.into();
