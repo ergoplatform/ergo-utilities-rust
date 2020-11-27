@@ -47,7 +47,7 @@ impl TokensChangeBox {
     pub fn output_candidate(
         input_boxes: &Vec<ErgoBox>,
         value: NanoErg,
-        user_address: P2PKAddressString,
+        user_address: &P2PKAddressString,
         current_height: u64,
     ) -> Result<ErgoBoxCandidate> {
         // Find the tokens that exist in the inputs which need to be preserved
@@ -62,7 +62,7 @@ impl TokensChangeBox {
         filter_tokens: &Vec<Token>,
         input_boxes: &Vec<ErgoBox>,
         value: NanoErg,
-        user_address: P2PKAddressString,
+        user_address: &P2PKAddressString,
         current_height: u64,
     ) -> Result<ErgoBoxCandidate> {
         TokensChangeBox::output_candidate_with_registers_filtered(
@@ -84,7 +84,7 @@ impl TokensChangeBox {
         input_boxes: &Vec<ErgoBox>,
         value: NanoErg,
         registers: &Vec<Constant>,
-        user_address: P2PKAddressString,
+        user_address: &P2PKAddressString,
         current_height: u64,
     ) -> Result<ErgoBoxCandidate> {
         // Find the tokens that exist in the inputs which need to be preserved
