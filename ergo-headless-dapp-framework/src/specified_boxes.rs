@@ -96,13 +96,13 @@ impl ErgUsdOraclePoolBox {
 
     #[wasm_bindgen]
     /// Extracts the Long datapoint out of register R4.
-    pub fn datapoint(&self) -> i64 {
-        return unwrap_long(&self.registers()[0]).unwrap();
+    pub fn datapoint(&self) -> u64 {
+        return unwrap_long(&self.registers()[0]).unwrap() as u64;
     }
 
     #[wasm_bindgen]
     /// Extracts the Long datapoint out of register R4.
-    pub fn datapoint_in_cents(&self) -> i64 {
-        return self.datapoint() / 100;
+    pub fn datapoint_in_cents(&self) -> u64 {
+        return (self.datapoint() / 100) as u64;
     }
 }
