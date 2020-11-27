@@ -5,6 +5,7 @@
 use crate::error::Result;
 use crate::tx_creation::{create_candidate, find_and_sum_other_tokens};
 use crate::{NanoErg, P2PKAddressString};
+use ergo_lib::ast::constant::Constant;
 use ergo_lib::chain::ergo_box::{ErgoBox, ErgoBoxCandidate};
 use ergo_lib::chain::token::Token;
 
@@ -64,10 +65,32 @@ impl TokensChangeBox {
         user_address: P2PKAddressString,
         current_height: u64,
     ) -> Result<ErgoBoxCandidate> {
+        TokensChangeBox::output_candidate_with_registers_filtered(
+            filter_tokens,
+            input_boxes,
+            value,
+            &vec![],
+            user_address,
+            current_height,
+        )
+    }
+
+    /// Creates an `ErgoBoxCandidate` which holds tokens from the
+    /// the provided inputs excluding the tokens provided in the filter list.
+    /// Holds number of nanoErgs value as provided to method and uses the
+    /// customized registers provided.
+    pub fn output_candidate_with_registers_filtered(
+        filter_tokens: &Vec<Token>,
+        input_boxes: &Vec<ErgoBox>,
+        value: NanoErg,
+        registers: &Vec<Constant>,
+        user_address: P2PKAddressString,
+        current_height: u64,
+    ) -> Result<ErgoBoxCandidate> {
         // Find the tokens that exist in the inputs which need to be preserved
         let tc_tokens = find_and_sum_other_tokens(filter_tokens, input_boxes);
 
-        create_candidate(value, &user_address, &tc_tokens, &vec![], current_height)
+        create_candidate(value, &user_address, &tc_tokens, registers, current_height)
     }
 }
 
