@@ -270,7 +270,7 @@ impl BoxSpec {
             return Ok(explorer_api_url.to_string()
                 + "/v1/boxes/unspent/byAddress/"
                 + &address
-                + "?limit=10000");
+                + "?limit=500");
         }
         // Else if no token value one and no address. Meaning other tokens
         // exist with value greater than 1.
@@ -278,7 +278,7 @@ impl BoxSpec {
             return Ok(explorer_api_url.to_string()
                 + "/v1/boxes/unspent/byTokenId/"
                 + &self.tokens[0].clone().unwrap().token_id
-                + "?limit=10000");
+                + "?limit=500");
         }
     }
 
