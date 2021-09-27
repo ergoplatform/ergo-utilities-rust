@@ -1,13 +1,17 @@
 /// This file holds various functions related to encoding/serialization of values that are relevant
 /// to the oracle core.
-use crate::{ErgoAddressString, P2PKAddressString, P2SAddressString};
+use crate::{ErgoAddressString, P2SAddressString};
 use base16;
 use blake2b_simd::Params;
-use ergo_lib::ast::constant::{Constant, TryExtractFrom};
-use ergo_lib::chain::address::{Address, AddressEncoder, NetworkPrefix};
 use ergo_lib::chain::Base16EncodedBytes;
-use ergo_lib::ergo_tree::ErgoTree;
-use ergo_lib::serialization::SigmaSerializable;
+use ergo_lib::chain::Base16Str;
+use ergo_lib::ergotree_ir::address::Address;
+use ergo_lib::ergotree_ir::address::AddressEncoder;
+use ergo_lib::ergotree_ir::address::NetworkPrefix;
+use ergo_lib::ergotree_ir::ergo_tree::ErgoTree;
+use ergo_lib::ergotree_ir::mir::constant::Constant;
+use ergo_lib::ergotree_ir::mir::constant::TryExtractFrom;
+use ergo_lib::ergotree_ir::serialization::SigmaSerializable;
 use std::fmt::{Debug, Display};
 use std::str;
 use thiserror::Error;
@@ -94,7 +98,7 @@ pub fn deserialize_p2s_to_ergo_tree(p2s_address: P2SAddressString) -> Result<Erg
     let address = encoder
         .parse_address_from_str(&p2s_address)
         .map_err(|_| EncodingError::FailedToDeserialize(p2s_address.clone()))?;
-    ErgoTree::sigma_parse_bytes(address.content_bytes())
+    ErgoTree::sigma_parse_bytes(&address.content_bytes())
         .map_err(|_| EncodingError::FailedToDeserialize(p2s_address.clone()))
 }
 
